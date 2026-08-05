@@ -38,7 +38,7 @@
 </script>
 
 <div class="row">
-	<div class="@if(boolval($userSettings['recipes_show_list_side_by_side']) || $embedded) col-12 col-md-6 @else col @endif d-print-none">
+	<div class="@if(boolval($userSettings['recipes_show_list_side_by_side']) || $embedded) col-12 @else col @endif d-print-none">
 		<div class="title-related-links border-bottom mb-2 py-1">
 			<h2 class="title">@yield('title')</h2>
 			<div class="float-right @if($embedded) pr-5 @endif">
