@@ -506,3 +506,22 @@ body.fixed-nav {
 		text-align: right;
 	}
 }
+
+@media (min-width: 992px) {
+	#mainNav .navbar-brand {
+		width: 225px;
+		min-width: 225px;
+		padding-left: 0.25rem;
+		padding-right: 0.25rem;
+		box-sizing: border-box;
+	}
+
+	body.sidenav-toggled #mainNav .navbar-brand {
+		width: 225px;
+		min-width: 225px;
+		max-width: 225px;
+		padding-left: 0.75rem;
+		padding-right: 0.75rem;
+		overflow: visible;
+	}
+}
