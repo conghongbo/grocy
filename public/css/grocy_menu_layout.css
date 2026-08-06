@@ -439,7 +439,7 @@ body.sidenav-toggled .navbar-sidenav-tooltip.show {
 	}
 
 	.content-wrapper {
-		margin-left: 245px;
+		margin-left: 252px;
 	}
 }
 
@@ -475,6 +475,11 @@ body.fixed-nav {
 
 	#mainNav .navbar-collapse .navbar-sidenav {
 		margin-top: 5px;
+		width: 252px;
+		overflow-y: auto;
+		overflow-x: hidden;
+		box-sizing: border-box;
+		scrollbar-gutter: stable;
 	}
 
 	.navbar-sidenav>li:hover,
