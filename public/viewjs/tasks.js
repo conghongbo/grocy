@@ -68,7 +68,7 @@ $("#clear-filter-button").on("click", function ()
 	$("#search").trigger("keyup");
 	$("#status-filter").trigger("change");
 	$("#category-filter").trigger("change");
-	$("#user-filter").val("all");
+	$("#user-filter").val("all").trigger("change");
 	$("#show-done-tasks").trigger('checked', false);
 });
 
