@@ -35,18 +35,410 @@ See the website for a list of community contributed Add-ons / Tools. &rarr; [htt
 >
 > Directly download the [latest release](https://releases.grocy.info/latest-desktop) (also [available via the Microsoft Store](https://apps.microsoft.com/detail/9NWB1TRNNKSF)) - the installation is nothing more than just clicking 2 times "next".
 
-Grocy is technically a pretty simple PHP application, so the basic notes to get it running are:
 - Unpack the [latest release](https://releases.grocy.info/latest)
-- Copy `config-dist.php` to `data/config.php` + edit to your needs
 - Ensure that the `data` directory is writable
-- The webserver root should point to the `public` directory
 - Include `try_files $uri /index.php$is_args$query_string;` in your location block if you use nginx
   - Or disable URL rewriting (see the option `DISABLE_URL_REWRITING` in `data/config.php`)
-- &rarr; Default login is user `admin` with password `admin`, please change the password immediately (user menu at the top right corner)
 
-Alternatively clone this repository (the `release` branch always references the latest released version) and install Composer and Yarn dependencies manually.
+### Installing from the Git repository
+
+If you clone this repository instead of downloading a release package, additional development dependencies must be installed manually. The `release` branch always references the latest released version.
+
+#### 1. Install PHP and required extensions
+
+Grocy requires PHP 8.5 and the PHP extensions listed in the [Platform support](#platform-support) section below.
+
+Before installing dependencies, verify which `php.ini` is used by the command-line PHP:
+
+```powershell
+php --ini
+```
+
+On Windows, especially when PHP was installed through WinGet, make sure the required extensions are enabled in that exact `php.ini`. Missing extensions can cause Composer or Grocy to fail with messages such as `ext-fileinfo`, `ext-intl`, `ext-gd`, `pdo_sqlite`, or `mbstring` not being installed.
+
+You can verify loaded extensions with:
+
+```powershell
+php -m
+```
+
+#### 2. Install Composer dependencies
+
+Install [Composer](https://getcomposer.org/) and run it from the repository root:
+
+```powershell
+composer install
+```
+
+If Composer is available only as a PHAR file, for example on Windows:
+
+```powershell
+php C:\path\to\composer.phar install
+```
+
+**Important:** Grocy intentionally configures Composer's `vendor-dir` as `packages`, so the PHP dependencies are installed into:
+
+```text
+packages/
+```
+
+After a successful installation, this file must exist:
+
+```text
+packages/autoload.php
+```
+
+On PowerShell you can verify it with:
+
+```powershell
+Test-Path .\packages\autoload.php
+```
+
+The result should be `True`.
+
+If Composer reports that the ZIP extension and `unzip`/`7z` are missing, enable PHP's `zip` extension or install an extraction tool such as 7-Zip, then run `composer install` again.
+
+#### 3. Install Yarn dependencies
+
+Install Yarn and run:
+
+```powershell
+yarn install
+```
+
+Grocy's `.yarnrc` intentionally installs frontend dependencies into:
+
+```text
+public/packages/
+```
+
+This is different from Composer's `packages/` directory. The expected structure is therefore:
+
+```text
+grocy/
+├── packages/              # Composer / PHP dependencies
+│   └── autoload.php
+├── public/
+│   └── packages/          # Yarn / frontend dependencies
+├── data/
+│   └── config.php
+└── ...
+```
+
+Do **not** create a symlink or directory junction between `packages/` and `public/packages/`. They contain different dependency sets and must remain separate.
+
+A frontend dependency can be checked on PowerShell, for example:
+
+```powershell
+Test-Path .\public\packages\bootstrap\dist\css\bootstrap.min.css
+```
+
+The result should be `True`.
+
+#### 4. Configure the data directory
+
+If `data/config.php` does not exist, create it from the distributed configuration:
+
+```powershell
+Copy-Item .\config-dist.php .\data\config.php
+```
+
+Make sure `data/` is writable. Grocy stores its SQLite database and runtime data there.
+
+#### 5. Run Grocy locally
+
+The webserver document root must be `public`, not the repository root. For local development with PHP's built-in server, run this command from the repository root:
+
+```powershell
+php -S localhost:8000 -t public
+```
+
+Then open `http://localhost:8000` in your browser.
+
+Running `php index.php` manually is not the recommended way to serve Grocy. Likewise, starting the PHP server without `-t public` can cause incorrect routing or missing assets.
+
+### Common installation problems
+
+| Error | Likely cause | Fix |
+| --- | --- | --- |
+| `packages/autoload.php not found. Have you run Composer?` | Composer dependencies are missing or `packages/` contains the wrong files | Run `composer install` from the repository root and verify `packages/autoload.php` exists |
+| `config.php in data directory ... not found` | `data/config.php` has not been created | Copy `config-dist.php` to `data/config.php` |
+| `PHP module 'pdo_sqlite' not installed` | SQLite PDO extension is disabled | Enable `pdo_sqlite` in the CLI PHP configuration |
+| `PHP module 'mbstring' not installed` | `mbstring` is disabled | Enable `mbstring` in `php.ini` |
+| Composer reports missing `ext-fileinfo`, `ext-intl`, or `ext-gd` | Required PHP extensions are disabled | Enable the corresponding extensions in the `php.ini` shown by `php --ini` |
+| Composer reports ZIP/unzip/7z missing | No supported archive extraction method is available | Enable PHP `zip` or install 7-Zip/unzip |
+| `404` for `/packages/bootstrap/...`, Font Awesome, Roboto, etc. | Yarn dependencies are missing from `public/packages/` | Run `yarn install` and verify `public/packages/` contains the frontend packages |
+| Login page loads but login/API requests return `401` | Installation/configuration may be incomplete, or credentials/session state are invalid | First verify PHP dependencies, frontend dependencies, `data/config.php`, and the database; the default credentials are `admin` / `admin` for a fresh installation |
+
+For a repository installation on Windows, a useful final check is:
+
+```powershell
+Test-Path .\packages\autoload.php
+Test-Path .\public\packages\bootstrap\dist\css\bootstrap.min.css
+Test-Path .\data\config.php
+Test-Path .\data\grocy.db
+```
+
+Once the application has initialized, these checks should return `True` (the database is created/initialized as part of running Grocy).
 
 See the website for more installation guides and troubleshooting help. &rarr; [https://grocy.info/links](https://grocy.info/links)
+
+
+### macOS (source installation)
+
+The following steps are intended for contributors or developers who want to run Grocy directly from the source repository on macOS.
+
+#### 1. Install PHP, Composer, Node.js and Yarn
+
+Using Homebrew is the simplest approach:
+
+```bash
+brew install php composer node
+corepack enable
+```
+
+Verify the tools:
+
+```bash
+php -v
+composer --version
+node --version
+yarn --version
+```
+
+Check that the PHP extensions required by Grocy are available:
+
+```bash
+php -m | grep -E 'fileinfo|pdo_sqlite|gd|ctype|intl|zlib|mbstring'
+```
+
+Grocy requires `fileinfo`, `pdo_sqlite`, `gd`, `ctype`, `intl`, `zlib` and `mbstring`. If an extension is missing, check which configuration file the CLI PHP installation uses:
+
+```bash
+php --ini
+```
+
+When multiple PHP installations exist, make sure the PHP executable used in the terminal and Composer use the same PHP installation.
+
+#### 2. Clone the repository
+
+```bash
+git clone https://github.com/grocy/grocy.git
+cd grocy
+```
+
+For the latest stable release source:
+
+```bash
+git checkout release
+```
+
+#### 3. Install PHP dependencies
+
+From the Grocy project root:
+
+```bash
+composer install
+```
+
+This project configures Composer's `vendor-dir` as `packages`, so the PHP autoloader should be created at:
+
+```text
+packages/autoload.php
+```
+
+Verify it with:
+
+```bash
+test -f packages/autoload.php && echo "Composer dependencies OK"
+```
+
+#### 4. Install frontend dependencies
+
+```bash
+yarn install
+```
+
+Frontend packages are installed under `public/packages`.
+
+Do not replace `public/packages` with a symlink to the root `packages` directory. They contain different dependency sets:
+
+```text
+packages/         -> PHP / Composer dependencies
+public/packages/  -> JavaScript/CSS / Yarn dependencies
+```
+
+#### 5. Create the configuration file
+
+```bash
+cp config-dist.php data/config.php
+```
+
+Ensure the data directory is writable:
+
+```bash
+chmod -R u+rwX data
+```
+
+#### 6. Start Grocy
+
+From the project root:
+
+```bash
+php -S localhost:8000 -t public
+```
+
+Then open `http://localhost:8000` in your browser.
+
+The default login is:
+
+```text
+Username: admin
+Password: admin
+```
+
+Change the default password immediately after logging in.
+
+---
+
+### Linux (source installation)
+
+The exact package names can vary between distributions. The example below uses Ubuntu/Debian-style package names.
+
+#### 1. Install system dependencies
+
+```bash
+sudo apt update
+sudo apt install git curl unzip php php-cli php-sqlite3 php-gd php-intl php-mbstring php-zip composer nodejs npm
+```
+
+If your distribution provides PHP extensions as version-specific packages, install the packages matching the PHP version used by the CLI.
+
+Verify PHP:
+
+```bash
+php -v
+php --ini
+php -m | grep -E 'fileinfo|pdo_sqlite|gd|ctype|intl|zlib|mbstring'
+```
+
+Install or enable any missing extension before continuing.
+
+#### 2. Install Yarn
+
+If Corepack is available with your Node.js installation:
+
+```bash
+sudo corepack enable
+yarn --version
+```
+
+If `corepack` is unavailable, install Yarn using the method recommended for your Node.js/distribution environment.
+
+#### 3. Clone Grocy
+
+```bash
+git clone https://github.com/grocy/grocy.git
+cd grocy
+git checkout release
+```
+
+#### 4. Install PHP dependencies
+
+```bash
+composer install
+```
+
+Verify the Composer autoloader:
+
+```bash
+test -f packages/autoload.php && echo "Composer dependencies OK"
+```
+
+#### 5. Install frontend dependencies
+
+```bash
+yarn install
+```
+
+Again, keep these directories separate:
+
+```text
+packages/         -> Composer dependencies
+public/packages/  -> Yarn frontend dependencies
+```
+
+#### 6. Configure Grocy
+
+```bash
+cp config-dist.php data/config.php
+chmod -R u+rwX data
+```
+
+For a local development environment, your current user must be able to write to `data`.
+
+For a production Apache/nginx/PHP-FPM installation, grant the webserver/PHP-FPM user the required write access instead of making the directory globally writable.
+
+#### 7. Start the local development server
+
+```bash
+php -S localhost:8000 -t public
+```
+
+Open `http://localhost:8000`.
+
+Default credentials:
+
+```text
+Username: admin
+Password: admin
+```
+
+#### 8. Production webserver note
+
+PHP's built-in server is intended for local development/testing. For a normal Linux deployment, configure Apache or nginx so that the document root points to Grocy's `public` directory.
+
+For nginx, the existing Grocy installation instructions require the following routing rule:
+
+```nginx
+try_files $uri /index.php$is_args$query_string;
+```
+
+Alternatively, URL rewriting can be disabled using `DISABLE_URL_REWRITING` in `data/config.php`.
+
+---
+
+### Cross-platform source installation checklist
+
+After installation on Windows, macOS or Linux, the following items should exist:
+
+```text
+data/config.php
+packages/autoload.php
+public/packages/
+```
+
+Useful checks on macOS/Linux:
+
+```bash
+test -f data/config.php && echo "config.php OK"
+test -f packages/autoload.php && echo "Composer OK"
+test -d public/packages && echo "Frontend packages OK"
+php -m | grep -E 'fileinfo|pdo_sqlite|gd|ctype|intl|zlib|mbstring'
+```
+
+If the application reports:
+
+```text
+Unable to run Grocy: /packages/autoload.php not found. Have you run Composer?
+```
+
+run `composer install` from the project root.
+
+If CSS, Bootstrap, FontAwesome or other frontend resources return `404`, run `yarn install` and verify that `public/packages` contains the frontend dependencies.
+
+If Grocy reports that a PHP module such as `pdo_sqlite`, `gd`, `intl` or `mbstring` is missing, install/enable that module for the same PHP CLI installation shown by `php --ini`.
+
 
 ### Platform support
 
