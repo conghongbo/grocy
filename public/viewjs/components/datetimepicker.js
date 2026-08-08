@@ -321,7 +321,7 @@ $('.datetimepicker').on('hide.datetimepicker', function(e)
 	Grocy.Components.DateTimePicker.GetInputElement().trigger('keypress');
 	Grocy.Components.DateTimePicker.GetInputElement().trigger('keyup');
 });
-
+/*
 $("#datetimepicker-shortcut").on("click", function()
 {
 	if (this.checked)
@@ -341,4 +341,34 @@ $("#datetimepicker-shortcut").on("click", function()
 	Grocy.Components.DateTimePicker.GetInputElement().trigger('input');
 	Grocy.Components.DateTimePicker.GetInputElement().trigger('change');
 	Grocy.Components.DateTimePicker.GetInputElement().trigger('keypress');
+});
+*/
+
+$("#datetimepicker-shortcut").on("click", function()
+{
+	//Personal
+	var wrapper = $(this).closest(".datetimepicker-wrapper");
+	var dateTimePicker = wrapper.find(".datetimepicker");
+	var inputElement = dateTimePicker.find("input").not(".form-check-input");
+
+	if (this.checked)
+	{
+		var value = $(this).data("datetimepicker-shortcut-value");
+		Grocy.Components.DateTimePicker.SetValue(value, inputElement);
+		inputElement.attr("readonly", "");
+		$(inputElement.data('next-input-selector')).focus();
+	}
+	else
+	{
+		alert("Unchecking the shortcut will clear the date/time value. Please set a new value manually.");
+		dateTimePicker.datetimepicker("clear");
+		dateTimePicker.datetimepicker("viewDate", moment());
+
+		inputElement.removeAttr("readonly");
+		inputElement.focus();
+	}
+
+	inputElement.trigger('input');
+	inputElement.trigger('change');
+	inputElement.trigger('keypress');
 });

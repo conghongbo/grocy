@@ -165,17 +165,19 @@ Grocy.Components.DateTimePicker2.GetInputElement().on('keyup', function(e)
 
 			if (lastCharacter == "d")
 			{
-				Grocy.Components.DateTimePicker2.SetValue(moment().add(n, "days").format(format));
+				//Grocy.Components.DateTimePicker2.SetValue(moment().add(n, "days").format(format));
+				//Personal modification
+				Grocy.Components.DateTimePicker2.SetValue(moment().add(n, "days").format(format), inputElement);
 				nextInputElement.focus();
 			}
 			else if (lastCharacter == "m")
 			{
-				Grocy.Components.DateTimePicker2.SetValue(moment().add(n, "months").format(format));
+				Grocy.Components.DateTimePicker2.SetValue(moment().add(n, "months").format(format), inputElement);
 				nextInputElement.focus();
 			}
 			else if (lastCharacter == "y")
 			{
-				Grocy.Components.DateTimePicker2.SetValue(moment().add(n, "years").format(format));
+				Grocy.Components.DateTimePicker2.SetValue(moment().add(n, "years").format(format), inputElement);
 				nextInputElement.focus();
 			}
 		}
