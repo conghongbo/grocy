@@ -131,6 +131,7 @@ $(document).on('click', '.shoppinglist-delete-button', function(e)
 			{
 				Grocy.FrontendHelpers.EndUiBusy();
 				$("#shoppinglistitem-" + shoppingListItemId + "-row").addClass("d-none").remove();
+				UpdateShoppingListTotalValue();
 				OnListItemRemoved();
 			});
 		},
@@ -372,6 +373,24 @@ function OnListItemRemoved()
 	}
 }
 OnListItemRemoved();
+
+function UpdateShoppingListTotalValue()
+{
+	var totalValue = 0;
+	$("#shoppinglist-table tbody tr[id^='shoppinglistitem-']").each(function()
+	{
+		var value = Number.parseFloat($(this).attr("data-last-price-total"));
+		if (Number.isNaN(value))
+		{
+			return;
+		}
+
+		totalValue += value;
+	});
+
+	$("#shopping-list-total-value").removeClass("number-parsing-done").text(totalValue.toString());
+	RefreshLocaleNumberDisplay();
+}
 
 $(document).on("click", "#print-shopping-list-button", function(e)
 {
