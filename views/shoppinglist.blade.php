@@ -26,7 +26,7 @@
 			</h2>
 			@if(GROCY_FEATURE_FLAG_STOCK_PRICE_TRACKING)
 			<h2 class="mb-0 mr-auto order-3 order-md-1 width-xs-sm-100">
-				<span class="text-muted small">{!! $__t('%s total value', '<span class="locale-number locale-number-currency">' . SumArrayValue($listItems, 'last_price_total') . '</span>') !!}</span>
+				<span class="text-muted small">{!! $__t('%s total value', '<span id="shopping-list-total-value" class="locale-number locale-number-currency">' . SumArrayValue($listItems, 'last_price_total') . '</span>') !!}</span>
 			</h2>
 			@endif
 			<div class="float-right @if($embedded) pr-5 @endif">
@@ -219,7 +219,8 @@
 			<tbody class="d-none">
 				@foreach($listItems as $listItem)
 				<tr id="shoppinglistitem-{{ $listItem->id }}-row"
-					class="@if(FindObjectInArrayByPropertyValue($missingProducts, 'id', $listItem->product_id) !== null) table-info @endif @if($listItem->done == 1) text-muted text-strike-through @endif">
+					class="@if(FindObjectInArrayByPropertyValue($missingProducts, 'id', $listItem->product_id) !== null) table-info @endif @if($listItem->done == 1) text-muted text-strike-through @endif"
+					data-last-price-total="{{ $listItem->last_price_total }}">
 					<td class="fit-content border-right">
 						<a class="btn btn-success btn-sm order-listitem-button"
 							href="#"
