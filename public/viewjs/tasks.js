@@ -43,7 +43,7 @@ $("#user-filter").on("change", function ()
 	}
 	else
 	{
-		"^" + $.fn.dataTable.util.escapeRegex(value) + "$"
+		value = "^" + $.fn.dataTable.util.escapeRegex(value) + "$";
 	}
 
 	tasksTable.column(tasksTable.colReorder.transpose(4)).search(value, true, false).draw();
