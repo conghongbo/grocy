@@ -12,7 +12,7 @@ class ReverseProxyAuthMiddleware extends AuthMiddleware
 	{
 		define('GROCY_EXTERNALLY_MANAGED_AUTHENTICATION', true);
 
-		$db = DatabaseService::getInstance()->GetDbConnection();
+		$db = DatabaseService::GetInstance()->GetDbConnection();
 
 		// API key authentication is also ok
 		$auth = new ApiKeyAuthMiddleware($this->AppContainer, $this->ResponseFactory);
@@ -40,7 +40,7 @@ class ReverseProxyAuthMiddleware extends AuthMiddleware
 		else
 		{
 			$username = $request->getHeader(GROCY_REVERSE_PROXY_AUTH_HEADER);
-			if (count($username) !== 1)
+			if (count($username) !== 1 || (count($username) === 1 && strlen($username[0]) === 0))
 			{
 				// Invalid configuration of Proxy
 				throw new \Exception('ReverseProxyAuthMiddleware: ' . GROCY_REVERSE_PROXY_AUTH_HEADER . ' header is missing or invalid');
@@ -51,7 +51,7 @@ class ReverseProxyAuthMiddleware extends AuthMiddleware
 		$user = $db->users()->where('username', $username)->fetch();
 		if ($user == null)
 		{
-			$user = UsersService::getInstance()->CreateUser($username, '', '', '');
+			$user = UsersService::GetInstance()->CreateUser($username, '', '', '');
 		}
 
 		return $user;

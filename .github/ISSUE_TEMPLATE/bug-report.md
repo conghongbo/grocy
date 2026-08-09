@@ -1,7 +1,6 @@
 ---
 name: Bug Report
-about: If you've found something that does not work, please report it to help improve
-  Grocy
+about: If you've found something that does not work, please report it to help improve Grocy
 title: 'Bug: '
 labels: bug
 assignees: ''
@@ -13,8 +12,9 @@ Please make sure to:
 
 - Describe the bug as detailed as possible by providing the exact steps how to reproduce it
 - Attach screenshots where useful
-- Check if the problem was maybe already reported or fixed by searching open and closed issues here
-- Keep it to one topic per issue
+- Check if the problem was maybe already reported or fixed by searching open and also already closed requests here
+- Keep it to one topic per request
+- Exclude any AI generated content and only include what you truly understand yourself
 
 Please also try to reproduce the problem on the pre-release demo: => https://demo-prerelease.grocy.info
 - Use a private demo instance to make your example persistent

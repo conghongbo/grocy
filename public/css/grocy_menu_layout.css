@@ -439,7 +439,7 @@ body.sidenav-toggled .navbar-sidenav-tooltip.show {
 	}
 
 	.content-wrapper {
-		margin-left: 245px;
+		margin-left: 252px;
 	}
 }
 
@@ -475,6 +475,11 @@ body.fixed-nav {
 
 	#mainNav .navbar-collapse .navbar-sidenav {
 		margin-top: 5px;
+		width: 252px;
+		overflow-y: auto;
+		overflow-x: hidden;
+		box-sizing: border-box;
+		scrollbar-gutter: stable;
 	}
 
 	.navbar-sidenav>li:hover,
@@ -499,5 +504,24 @@ body.fixed-nav {
 
 	.navbar-nav .dropdown-item .form-inline>input {
 		text-align: right;
+	}
+}
+
+@media (min-width: 992px) {
+	#mainNav .navbar-brand {
+		width: 225px;
+		min-width: 225px;
+		padding-left: 0.25rem;
+		padding-right: 0.25rem;
+		box-sizing: border-box;
+	}
+
+	body.sidenav-toggled #mainNav .navbar-brand {
+		width: 225px;
+		min-width: 225px;
+		max-width: 225px;
+		padding-left: 0.75rem;
+		padding-right: 0.75rem;
+		overflow: visible;
 	}
 }

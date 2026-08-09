@@ -1,4 +1,3 @@
-# 
 # Translators:
 # Oleksii Filonenko <brightone@protonmail.com>, 2020
 # Aleksey Zaremskiy, 2022
@@ -32,23 +31,6 @@ msgstr "Шафа для солодощів"
 
 msgid "Tinned food cupboard"
 msgstr "Шафа для консервації"
-
-msgid "Fridge"
-msgstr "Холодильник"
-
-msgid "Piece"
-msgid_plural "Pieces"
-msgstr[0] "Одиниця"
-msgstr[1] "Одиниці"
-msgstr[2] "Одиниць"
-msgstr[3] "Одиниць"
-
-msgid "Pack"
-msgid_plural "Packs"
-msgstr[0] "Пакет"
-msgstr[1] "Пакети"
-msgstr[2] "Пакетів"
-msgstr[3] "Пакетів"
 
 msgid "Glass"
 msgid_plural "Glasses"

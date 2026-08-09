@@ -1,4 +1,3 @@
-# 
 # Translators:
 # Bernd Bestel <bernd@berrnd.de>, 2019
 # Ruben Sperre <ruben@rsperre.net>, 2020
@@ -35,19 +34,6 @@ msgstr "Godteriskapet"
 
 msgid "Tinned food cupboard"
 msgstr "Boksematskapet"
-
-msgid "Fridge"
-msgstr "Kjøleskapet"
-
-msgid "Piece"
-msgid_plural "Pieces"
-msgstr[0] "Del"
-msgstr[1] "Deler"
-
-msgid "Pack"
-msgid_plural "Packs"
-msgstr[0] "Pakke"
-msgstr[1] "Pakker"
 
 msgid "Glass"
 msgid_plural "Glasses"

@@ -38,7 +38,7 @@
 </script>
 
 <div class="row">
-	<div class="@if(boolval($userSettings['recipes_show_list_side_by_side']) || $embedded) col-12 col-md-6 @else col @endif d-print-none">
+	<div class="@if(boolval($userSettings['recipes_show_list_side_by_side']) || $embedded) col-12 @else col @endif d-print-none">
 		<div class="title-related-links border-bottom mb-2 py-1">
 			<h2 class="title">@yield('title')</h2>
 			<div class="float-right @if($embedded) pr-5 @endif">
@@ -549,7 +549,7 @@
 										</span>
 										@endif
 										@if(GROCY_FEATURE_FLAG_STOCK_PRICE_TRACKING) <span class="float-right font-italic ml-2 locale-number locale-number-currency">{{ $selectedRecipePosition->costs }}</span> @endif
-										<span class="float-right font-italic"><span class="locale-number locale-number-generic">{{ $selectedRecipePosition->calories }}</span> {{ $__t('Calories') }}</span>
+										<span class="float-right font-italic"><span class="locale-number locale-number-generic">{{ $selectedRecipePosition->calories }}</span> {{ GROCY_ENERGY_UNIT }}</span>
 										@if(!empty($selectedRecipePosition->recipe_variable_amount))
 										<div class="small text-muted font-italic">{{ $__t('Variable amount') }}</div>
 										@endif

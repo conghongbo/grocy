@@ -1,4 +1,3 @@
-# 
 # Translators:
 # Tuğberk Kaan Duman <kaan@dumanmail.com>, 2019
 # Yigit Sever <yigit@ceng.metu.edu.tr>, 2021
@@ -34,19 +33,6 @@ msgstr "Şeker dolabı"
 
 msgid "Tinned food cupboard"
 msgstr "Konserve dolabı"
-
-msgid "Fridge"
-msgstr "Buzdolabı"
-
-msgid "Piece"
-msgid_plural "Pieces"
-msgstr[0] "Tane"
-msgstr[1] "Tane"
-
-msgid "Pack"
-msgid_plural "Packs"
-msgstr[0] "Paket"
-msgstr[1] "Paket"
 
 msgid "Glass"
 msgid_plural "Glasses"

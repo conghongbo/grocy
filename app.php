@@ -1,12 +1,11 @@
 <?php
 
 use Grocy\Controllers\ExceptionController;
+use Grocy\Helpers\SlimBladeView;
 use Grocy\Helpers\UrlManager;
 use Grocy\Middleware\LocaleMiddleware;
-use Grocy\Middleware\CorsMiddleware;
 use Psr\Container\ContainerInterface as Container;
 use Slim\Factory\AppFactory;
-use Slim\Views\Blade;
 
 // Load composer dependencies
 require_once __DIR__ . '/packages/autoload.php';
@@ -14,7 +13,6 @@ require_once __DIR__ . '/packages/autoload.php';
 // Load config files
 require_once GROCY_DATAPATH . '/config.php';
 require_once __DIR__ . '/config-dist.php'; // For not in own config defined values we use the default ones
-require_once __DIR__ . '/helpers/ConfigurationValidator.php';
 
 // Error reporting definitions
 if (GROCY_MODE === 'dev')
@@ -44,9 +42,9 @@ if (GROCY_DISABLE_AUTH === true)
 // Check if any invalid entries in config.php have been made
 try
 {
-	(new ConfigurationValidator())->validateConfig();
+	(new Grocy\Helpers\ConfigurationValidator())->validateConfig();
 }
-catch (EInvalidConfig $ex)
+catch (\Grocy\Helpers\EInvalidConfig $ex)
 {
 	exit('Invalid setting in config.php: ' . $ex->getMessage());
 }
@@ -85,7 +83,7 @@ $app = AppFactory::create();
 $container = $app->getContainer();
 $container->set('view', function (Container $container)
 {
-	return new Blade(__DIR__ . '/views', GROCY_DATAPATH . '/viewcache');
+	return new SlimBladeView(__DIR__ . '/views', GROCY_DATAPATH . '/viewcache');
 });
 
 $container->set('UrlManager', function (Container $container)
@@ -107,25 +105,15 @@ if (!empty(GROCY_BASE_PATH))
 	$app->setBasePath(GROCY_BASE_PATH);
 }
 
-if (GROCY_MODE === 'production' || GROCY_MODE === 'dev')
-{
-	$app->add(new LocaleMiddleware($container));
-}
-else
-{
-	define('GROCY_LOCALE', GROCY_DEFAULT_LOCALE);
-}
-
+$app->add(new LocaleMiddleware($container, $app->getResponseFactory()));
 $authMiddlewareClass = GROCY_AUTH_CLASS;
 $app->add(new $authMiddlewareClass($container, $app->getResponseFactory()));
+
 // Add default middleware
+$app->addBodyParsingMiddleware();
 $app->addRoutingMiddleware();
 $errorMiddleware = $app->addErrorMiddleware(true, false, false);
-$errorMiddleware->setDefaultErrorHandler(
-	new ExceptionController($app, $container)
-);
-
-$app->add(new CorsMiddleware($app->getResponseFactory()));
+$errorMiddleware->setDefaultErrorHandler(new ExceptionController($container, $app->getResponseFactory()));
 
 $app->getRouteCollector()->setCacheFile(GROCY_DATAPATH . '/viewcache/route_cache.php');
 

@@ -1,4 +1,3 @@
-# 
 # Translators:
 # Plamen Stoyanov <fireto@gmail.com>, 2020
 # Mihail Andreev, 2020
@@ -33,19 +32,6 @@ msgstr "Шкаф за бонбони"
 
 msgid "Tinned food cupboard"
 msgstr "Шкаф за консерви"
-
-msgid "Fridge"
-msgstr "Хладилник"
-
-msgid "Piece"
-msgid_plural "Pieces"
-msgstr[0] "Брой"
-msgstr[1] "Броя"
-
-msgid "Pack"
-msgid_plural "Packs"
-msgstr[0] "Опаковка"
-msgstr[1] "Опаковки"
 
 msgid "Glass"
 msgid_plural "Glasses"

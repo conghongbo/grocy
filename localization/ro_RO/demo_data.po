@@ -1,4 +1,3 @@
-# 
 # Translators:
 # Pwnisher <ciprian420@gmail.com>, 2021
 # Gabriel Andreescu <gabone01@gmail.com>, 2022
@@ -34,21 +33,6 @@ msgstr "Bufet dulciuri"
 
 msgid "Tinned food cupboard"
 msgstr "Bufet conserve"
-
-msgid "Fridge"
-msgstr "Frigider"
-
-msgid "Piece"
-msgid_plural "Pieces"
-msgstr[0] "Bucată"
-msgstr[1] "Bucăți"
-msgstr[2] "Bucăți"
-
-msgid "Pack"
-msgid_plural "Packs"
-msgstr[0] "Pachet"
-msgstr[1] "Pachete"
-msgstr[2] "Pachete"
 
 msgid "Glass"
 msgid_plural "Glasses"

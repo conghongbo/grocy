@@ -1,4 +1,3 @@
-# 
 # Translators:
 # Joan Rodas <joanrc93@gmail.com>, 2020
 # gimy16 <gimy16@hotmail.com>, 2021
@@ -34,19 +33,6 @@ msgstr "Armari de les llaminadures"
 
 msgid "Tinned food cupboard"
 msgstr "Armari de les conserves"
-
-msgid "Fridge"
-msgstr "Nevera"
-
-msgid "Piece"
-msgid_plural "Pieces"
-msgstr[0] "Peces"
-msgstr[1] "Trossos"
-
-msgid "Pack"
-msgid_plural "Packs"
-msgstr[0] "Paquet"
-msgstr[1] "Paquets"
 
 msgid "Glass"
 msgid_plural "Glasses"

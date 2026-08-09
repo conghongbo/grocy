@@ -1,7 +1,6 @@
-# 
 # Translators:
 # Mario Loik <mariomobla@gmail.com>, 2020
-# Lauri Lepik, 2023
+# 27c44a6313ba1383accb315c80acc885_50e4575, 2023
 # aylamz, 2023
 # 
 msgid ""
@@ -33,19 +32,6 @@ msgstr "Kommisahtel"
 
 msgid "Tinned food cupboard"
 msgstr "Konservisahtel"
-
-msgid "Fridge"
-msgstr "Külmkapp"
-
-msgid "Piece"
-msgid_plural "Pieces"
-msgstr[0] "Tükk"
-msgstr[1] "Tükki"
-
-msgid "Pack"
-msgid_plural "Packs"
-msgstr[0] "Pakk"
-msgstr[1] "Pakki"
 
 msgid "Glass"
 msgid_plural "Glasses"

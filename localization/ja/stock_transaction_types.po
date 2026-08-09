@@ -1,4 +1,3 @@
-# 
 # Translators:
 # 鳥山 陽平 <kagemomiji@gmail.com>, 2022
 # pigmentblue15, 2025
@@ -34,7 +33,7 @@ msgid "inventory-correction"
 msgstr "ストック増減"
 
 msgid "product-opened"
-msgstr "開封"
+msgstr "開封済"
 
 msgid "stock-edit-old"
 msgstr "編集前"

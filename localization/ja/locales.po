@@ -1,4 +1,3 @@
-# 
 # Translators:
 # KATSUHIKO SHIGEYAMA <kshigeyama@gmail.com>, 2020
 # Takuya Mizuguchi, 2024
@@ -149,4 +148,4 @@ msgstr "エストニア語(エストニア)"
 
 # Bulgarian
 msgid "bg_BG"
-msgstr ""
+msgstr "ブルガリア語(ブルガリア)"
