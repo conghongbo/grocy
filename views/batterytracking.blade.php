@@ -34,6 +34,29 @@
 				<div class="invalid-feedback">{{ $__t('You have to select a battery') }}</div>
 			</div>
 
+			<!-- #2847: Replacement battery -->
+			<div class="form-group d-none"
+    			id="replacement-battery-group">
+
+				<label for="replacement_battery_id">
+					{{ $__t('Replace with') }}
+				</label>
+
+    			<select class="form-control"
+					id="replacement_battery_id"
+					name="replacement_battery_id">
+
+					<option value=""></option>
+		
+					@foreach($batteries as $battery)
+					<option value="{{ $battery->id }}">
+						{{ $battery->name }}
+					</option>
+					@endforeach
+
+    			</select>
+			</div>
+
 			@include('components.datetimepicker', array(
 			'id' => 'tracked_time',
 			'label' => 'Tracked time',
