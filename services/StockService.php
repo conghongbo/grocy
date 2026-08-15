@@ -508,6 +508,11 @@ class StockService extends BaseService
 						'amount' => $restStockAmount
 					]);
 
+                    if ($stockEntry->open == 0 && $this->DB->products($stockEntry->product_id)->disable_open == 0)
+                    {
+                        $this->OpenProduct($stockEntry->product_id, $restStockAmount, $stockEntry->stock_id);
+                    }
+
 					$amount = 0;
 				}
 			}
