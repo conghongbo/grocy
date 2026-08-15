@@ -403,7 +403,7 @@ if (Grocy.EditMode == "create" && GetUriParam("copy-of") != undefined)
 			}
 			if (sourceProduct.description)
 			{
-				$("#description").summernote("pasteHTML", sourceProduct.description);
+				$("#description").summernote("code", sourceProduct.description);
 			}
 			$("#location_id").val(sourceProduct.location_id);
 			if (sourceProduct.shopping_location_id != null)
@@ -417,17 +417,23 @@ if (Grocy.EditMode == "create" && GetUriParam("copy-of") != undefined)
 			}
 			$("#default_best_before_days").val(sourceProduct.default_best_before_days);
 			$("#default_best_before_days_after_open").val(sourceProduct.default_best_before_days_after_open);
+
+			$('input[name="due_type"][value="' + sourceProduct.due_type + '"]').prop("checked", true);
+
 			if (sourceProduct.product_group_id != null)
 			{
 				$("#product_group_id").val(sourceProduct.product_group_id);
 			}
 			$("#qu_id_stock").val(sourceProduct.qu_id_stock);
 			$("#qu_id_purchase").val(sourceProduct.qu_id_purchase);
-			if (BoolVal(sourceProduct.enable_tare_weight_handling))
-			{
-				$("#enable_tare_weight_handling").prop("checked", true);
-			}
+			$("#qu_id_consume").val(sourceProduct.qu_id_consume);
+			$("#qu_id_price").val(sourceProduct.qu_id_price);
+
+			var tareWeightHandlingEnabled = BoolVal(sourceProduct.enable_tare_weight_handling);
+			$("#enable_tare_weight_handling").prop("checked", tareWeightHandlingEnabled);
+			$("#tare_weight").prop("disabled", !tareWeightHandlingEnabled);
 			$("#tare_weight").val(sourceProduct.tare_weight);
+
 			if (BoolVal(sourceProduct.not_check_stock_fulfillment_for_recipes))
 			{
 				$("#not_check_stock_fulfillment_for_recipes").prop("checked", true);
@@ -438,6 +444,9 @@ if (Grocy.EditMode == "create" && GetUriParam("copy-of") != undefined)
 			}
 			$("#default_best_before_days_after_freezing").val(sourceProduct.default_best_before_days_after_freezing);
 			$("#default_best_before_days_after_thawing").val(sourceProduct.default_best_before_days_after_thawing);
+
+			$("#should_not_be_frozen").prop("checked", BoolVal(sourceProduct.should_not_be_frozen));
+
 			$("#quick_consume_amount").val(sourceProduct.quick_consume_amount);
 			$("#quick_open_amount").val(sourceProduct.quick_open_amount);
 			$("#default_consume_location_id").val(sourceProduct.default_consume_location_id);
@@ -454,6 +463,14 @@ if (Grocy.EditMode == "create" && GetUriParam("copy-of") != undefined)
 				$("#auto_reprint_stock_label").prop("checked", true);
 			}
 			$("#default_stock_label_type").val(sourceProduct.default_stock_label_type);
+
+			if (sourceProduct.default_purchase_price_type != null)
+			{
+				$('input[name="default_purchase_price_type"][value="' +
+					sourceProduct.default_purchase_price_type +
+					'"]').prop("checked", true);
+			}
+
 			if (BoolVal(sourceProduct.move_on_open))
 			{
 				$("#move_on_open").prop("checked", true);
@@ -462,6 +479,8 @@ if (Grocy.EditMode == "create" && GetUriParam("copy-of") != undefined)
 			{
 				$("#treat_opened_as_out_of_stock").prop("checked", true);
 			}
+
+			$("#disable_open").prop("checked", BoolVal(sourceProduct.disable_open));
 
 			Grocy.FrontendHelpers.ValidateForm('product-form');
 		},
