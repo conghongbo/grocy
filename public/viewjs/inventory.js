@@ -402,6 +402,11 @@ $('#inventory-form input').keydown(function (event)
 {
 	if (event.keyCode === 13) // Enter
 	{
+		if ($(".combobox-menu-visible").length)
+		{
+			return;
+		}
+
 		event.preventDefault();
 
 		if (!Grocy.FrontendHelpers.ValidateForm('inventory-form'))
