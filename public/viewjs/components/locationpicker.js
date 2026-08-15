@@ -34,7 +34,7 @@ Grocy.Components.LocationPicker.Clear = function ()
 	Grocy.Components.LocationPicker.SetId(null);
 }
 
-$(".location-combobox").combobox(BootstrapComboboxDefaults);
+$(".location-combobox").combobox(Object.assign({}, BootstrapComboboxDefaults, { "clearIfNoMatch": false }));
 
 var prefillByName = Grocy.Components.LocationPicker.GetPicker().parent().data('prefill-by-name').toString();
 if (typeof prefillByName !== "undefined")

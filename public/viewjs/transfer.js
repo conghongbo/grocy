@@ -310,8 +310,8 @@ $("#location_id_from").on('change', function (e)
 	}
 
 	// Hide the same location
-	$("#location_id_to option").removeClass("d-none");
-	$("#location_id_to option[value='" + locationId + "']").addClass("d-none");
+	$("#location_id_to option").prop("disabled", false);
+	$("#location_id_to option[value='" + locationId + "']").prop("disabled", true);
 
 	if (GetUriParam("embedded") !== undefined)
 	{

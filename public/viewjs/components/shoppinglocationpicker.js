@@ -34,7 +34,7 @@ Grocy.Components.ShoppingLocationPicker.Clear = function ()
 	Grocy.Components.ShoppingLocationPicker.SetId(null);
 }
 
-$(".shopping-location-combobox").combobox(BootstrapComboboxDefaults);
+$(".shopping-location-combobox").combobox(Object.assign({}, BootstrapComboboxDefaults, { "clearIfNoMatch": false }));
 
 var prefillByName = Grocy.Components.ShoppingLocationPicker.GetPicker().parent().data('prefill-by-name').toString();
 if (typeof prefillByName !== "undefined")
