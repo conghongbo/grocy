@@ -77,6 +77,8 @@ class CalendarService extends BaseService
 					'title' => $titlePrefix . $chore->name . $assignedToText,
 					'start' => $currentChoreEntry->next_estimated_execution_time,
 					'date_format' => 'datetime',
+					'type' => 'chore',
+					'chore_id' => $currentChoreEntry->chore_id,
 					'link' => $this->UrlManager->ConstructUrl('/choresoverview'),
 					'allDay' => $chore->track_date_only == 1,
 					'color' => $usersService->GetUserSettings(GROCY_USER_ID)['calendar_color_chores']
