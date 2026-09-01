@@ -73,6 +73,50 @@
 					value="@if($mode == 'edit'){{ $battery->used_in }}@endif">
 			</div>
 
+			<div class="form-group">
+				<div class="custom-control custom-checkbox">
+					<input
+						type="checkbox"
+						class="form-check-input custom-control-input"
+						id="rechargeable"
+						name="rechargeable"
+						value="1"
+						@if($mode == 'create' || ($mode == 'edit' && $battery->rechargeable == 1))
+						checked
+						@endif>
+
+					<label class="form-check-label custom-control-label"
+						for="rechargeable">
+						{{ $__t('Rechargeable') }}
+					</label>
+				</div>
+
+				<small class="form-text text-muted">
+					{{ $__t('Defines whether this battery can be recharged and reused') }}
+				</small>
+			</div>
+
+			<div class="form-group"
+				id="battery-charged-group">
+
+				<div class="custom-control custom-checkbox">
+					<input
+						type="checkbox"
+						class="form-check-input custom-control-input"
+						id="is_charged"
+						name="is_charged"
+						value="1"
+						@if($mode == 'create' || ($mode == 'edit' && $battery->is_charged == 1))
+						checked
+						@endif>
+
+					<label class="form-check-label custom-control-label"
+						for="is_charged">
+						{{ $__t('Charged and ready') }}
+					</label>
+				</div>
+			</div>
+
 			@php if($mode == 'edit') { $value = $battery->charge_interval_days; } else { $value = 0; } @endphp
 			@include('components.numberpicker', array(
 			'id' => 'charge_interval_days',

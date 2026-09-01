@@ -49,12 +49,30 @@
 					<option value=""></option>
 		
 					@foreach($batteries as $battery)
-					<option value="{{ $battery->id }}">
-						{{ $battery->name }}
-					</option>
+						@if(
+							empty($battery->used_in)
+							&&
+							(
+								$battery->rechargeable == 0
+								||
+								$battery->is_charged == 1
+							)
+						)
+						<option
+							value="{{ $battery->id }}"
+							data-rechargeable="{{ $battery->rechargeable }}">
+							{{ $battery->name }}
+						</option>
+						@endif
 					@endforeach
 
     			</select>
+
+				<small
+					id="replacement-battery-hint"
+					class="form-text text-muted">
+					{{ $__t('Only charged and available batteries can be selected as a replacement') }}
+				</small>
 			</div>
 
 			@include('components.datetimepicker', array(

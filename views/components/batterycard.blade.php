@@ -34,6 +34,8 @@
 					</div>
 					<div class="card-body">
 						<h3><span id="batterycard-battery-name"></span></h3>
+						<strong>{{ $__t('Type') }}:</strong> <span id="batterycard-battery-type"></span><br>
+						<strong>{{ $__t('State') }}:</strong> <span id="batterycard-battery-state"></span><br>
 						<strong>{{ $__t('Used in') }}:</strong> <span id="batterycard-battery-used_in"></span><br>
 						<strong>{{ $__t('Charge cycles count') }}:</strong> <span id="batterycard-battery-charge-cycles-count"
 							class="locale-number locale-number-generic"></span><br>

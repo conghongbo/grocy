@@ -254,6 +254,7 @@ $app->group('/api', function (RouteCollectorProxy $group)
 	$group->get('/batteries', [BatteriesApiController::class, 'Current']);
 	$group->get('/batteries/{batteryId}', [BatteriesApiController::class, 'BatteryDetails']);
 	$group->post('/batteries/{batteryId}/charge', [BatteriesApiController::class, 'TrackChargeCycle']);
+	$group->post('/batteries/{batteryId}/replace', [BatteriesApiController::class, 'ReplaceBattery']);
 	$group->post('/batteries/charge-cycles/{chargeCycleId}/undo', [BatteriesApiController::class, 'UndoChargeCycle']);
 	$group->get('/batteries/{batteryId}/printlabel', [BatteriesApiController::class, 'BatteryPrintLabel']);
 

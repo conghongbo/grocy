@@ -1,11 +1,20 @@
 Grocy.Components.BatteryCard = {};
 
-Grocy.Components.BatteryCard.Refresh = function(batteryId)
-{
+Grocy.Components.BatteryCard.Refresh = function (batteryId) {
 	Grocy.Api.Get('batteries/' + batteryId,
-		function(batteryDetails)
-		{
+		function (batteryDetails) {
 			$('#batterycard-battery-name').text(batteryDetails.battery.name);
+
+			$('#batterycard-battery-type').text(batteryDetails.battery.rechargeable == 1 ? __t('Rechargeable') : __t('Single-use'));
+
+			var states = {
+				ready: __t('Ready'),
+				in_use: __t('In use'),
+				needs_charging: __t('Needs charging'),
+				inactive: __t('Inactive')
+			};
+			$('#batterycard-battery-state').text(states[batteryDetails.state] || batteryDetails.state);
+
 			$('#batterycard-battery-used_in').text(batteryDetails.battery.used_in);
 			$('#batterycard-battery-last-charged').text((batteryDetails.last_charged || __t('never')));
 			$('#batterycard-battery-last-charged-timeago').attr("datetime", batteryDetails.last_charged || '');
@@ -18,15 +27,13 @@ Grocy.Components.BatteryCard.Refresh = function(batteryId)
 
 			RefreshContextualTimeago(".batterycard");
 		},
-		function(xhr)
-		{
+		function (xhr) {
 			console.error(xhr);
 		}
 	);
 };
 
-$(document).on("click", ".batterycard-trigger", function(e)
-{
+$(document).on("click", ".batterycard-trigger", function (e) {
 	Grocy.Components.BatteryCard.Refresh($(e.currentTarget).attr("data-battery-id"));
 	$("#batterycard-modal").modal("show");
 });

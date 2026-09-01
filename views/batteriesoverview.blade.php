@@ -96,6 +96,8 @@
 							href="#"><i class="fa-solid fa-eye"></i></a>
 					</th>
 					<th>{{ $__t('Battery') }}</th>
+					<th>{{ $__t('Type') }}</th>
+					<th>{{ $__t('State') }}</th>
 					<th class="allow-grouping">{{ $__t('Used in') }}</th>
 					<th>{{ $__t('Last charged') }}</th>
 					<th>{{ $__t('Next planned charge cycle') }}</th>
@@ -109,18 +111,28 @@
 			</thead>
 			<tbody class="d-none">
 				@foreach($current as $currentBatteryEntry)
+				@php
+        			$battery = FindObjectInArrayByPropertyValue(
+						$batteries,
+						'id',
+						$currentBatteryEntry->battery_id
+					);
+				@endphp
+
 				<tr id="battery-{{ $currentBatteryEntry->battery_id }}-row"
 					class="@if($currentBatteryEntry->due_type == 'overdue') table-danger @elseif($currentBatteryEntry->due_type == 'duetoday') table-info @elseif($currentBatteryEntry->due_type == 'duesoon') table-warning @endif">
 					<td class="fit-content border-right">
-						<a class="btn btn-success btn-sm track-charge-cycle-button permission-BATTERIES_TRACK_CHARGE_CYCLE"
-							href="#"
-							data-toggle="tooltip"
-							data-placement="left"
-							title="{{ $__t('Track charge cycle') }}"
-							data-battery-id="{{ $currentBatteryEntry->battery_id }}"
-							data-battery-name="{{ FindObjectInArrayByPropertyValue($batteries, 'id', $currentBatteryEntry->battery_id)->name }}">
-							<i class="fa-solid fa-car-battery"></i>
-						</a>
+						@if($battery->rechargeable == 1)
+							<a class="btn btn-success btn-sm track-charge-cycle-button permission-BATTERIES_TRACK_CHARGE_CYCLE"
+								href="#"
+								data-toggle="tooltip"
+								data-placement="left"
+								title="{{ $__t('Track charge cycle') }}"
+								data-battery-id="{{ $currentBatteryEntry->battery_id }}"
+								data-battery-name="{{ $battery->name }}">
+								<i class="fa-solid fa-car-battery"></i>
+							</a>
+						@endif
 						<div class="dropdown d-inline-block">
 							<button class="btn btn-sm btn-light text-secondary"
 								type="button"
@@ -164,10 +176,40 @@
 					</td>
 					<td class="batterycard-trigger cursor-link"
 						data-battery-id="{{ $currentBatteryEntry->battery_id }}">
-						{{ FindObjectInArrayByPropertyValue($batteries, 'id', $currentBatteryEntry->battery_id)->name }}
+						{{ $battery->name }}
 					</td>
 					<td class="fit-content">
-						{{ FindObjectInArrayByPropertyValue($batteries, 'id', $currentBatteryEntry->battery_id)->used_in }}
+						@if($battery->rechargeable == 1)
+							<span class="badge badge-success">
+								{{ $__t('Rechargeable') }}
+							</span>
+						@else
+							<span class="badge badge-secondary">
+								{{ $__t('Single-use') }}
+							</span>
+						@endif
+					</td>
+					<td class="fit-content">
+						@if($battery->active == 0)
+							<span id="battery-{{ $currentBatteryEntry->battery_id }}-state" class="badge badge-secondary">
+								{{ $__t('Inactive') }}
+							</span>
+						@elseif(!empty($battery->used_in))
+							<span id="battery-{{ $currentBatteryEntry->battery_id }}-state" class="badge badge-primary">
+								{{ $__t('In use') }}
+							</span>
+						@elseif($battery->rechargeable == 1 && $battery->is_charged == 0)
+							<span id="battery-{{ $currentBatteryEntry->battery_id }}-state" class="badge badge-warning">
+								{{ $__t('Needs charging') }}
+							</span>
+						@else
+							<span id="battery-{{ $currentBatteryEntry->battery_id }}-state" class="badge badge-success">
+								{{ $__t('Ready') }}
+							</span>
+						@endif
+					</td>
+					<td class="fit-content">
+						{{ $battery->used_in }}
 					</td>
 					<td>
 						<span id="battery-{{ $currentBatteryEntry->battery_id }}-last-tracked-time">{{ $currentBatteryEntry->last_tracked_time }}</span>
@@ -176,7 +218,7 @@
 							datetime="{{ $currentBatteryEntry->last_tracked_time }}"></time>
 					</td>
 					<td>
-						@if(FindObjectInArrayByPropertyValue($batteries, 'id', $currentBatteryEntry->battery_id)->charge_interval_days > 0)
+						@if($battery->charge_interval_days > 0)
 						<span id="battery-{{ $currentBatteryEntry->battery_id }}-next-charge-time">{{ $currentBatteryEntry->next_estimated_charge_time }}</span>
 						<time id="battery-{{ $currentBatteryEntry->battery_id }}-next-charge-time-timeago"
 							class="timeago timeago-contextual"

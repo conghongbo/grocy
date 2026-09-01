@@ -52,6 +52,29 @@ class BatteriesApiController extends BaseApiController
 		}
 	}
 
+	public function ReplaceBattery(Request $request, Response $response, array $args)
+	{
+		User::CheckPermission($request, User::PERMISSION_BATTERIES_TRACK_CHARGE_CYCLE);
+
+		$requestBody = $this->GetParsedAndFilteredRequestBody($request);
+
+		try
+		{
+			if (!array_key_exists('replacement_battery_id', $requestBody))
+			{
+				throw new \Exception('Replacement battery is required');
+			}
+
+			$result = BatteriesService::GetInstance()->ReplaceBattery($args['batteryId'], $requestBody['replacement_battery_id']);
+
+			return $this->ApiResponse($response, $result);
+		}
+		catch (\Exception $ex)
+		{
+			return $this->GenericErrorResponse($response, $ex->getMessage());
+		}
+	}
+
 	public function UndoChargeCycle(Request $request, Response $response, array $args)
 	{
 		User::CheckPermission($request, User::PERMISSION_BATTERIES_UNDO_CHARGE_CYCLE);

@@ -1,64 +1,58 @@
-﻿$('#save-battery-button').on('click', function(e)
-{
+﻿$('#save-battery-button').on('click', function (e) {
 	e.preventDefault();
 
-	if (!Grocy.FrontendHelpers.ValidateForm("battery-form", true))
-	{
+	if (!Grocy.FrontendHelpers.ValidateForm("battery-form", true)) {
 		return;
 	}
 
-	if ($(".combobox-menu-visible").length)
-	{
+	if ($(".combobox-menu-visible").length) {
 		return;
 	}
 
 	var jsonData = $('#battery-form').serializeJSON();
+
+	jsonData.rechargeable = $('#rechargeable').is(':checked') ? 1 : 0;
+	jsonData.is_charged = $('#is_charged').is(':checked') ? 1 : 0;
+
+	if (jsonData.rechargeable === 0) {
+		jsonData.is_charged = 1;
+		jsonData.charge_interval_days = 0;
+	}
+
 	Grocy.FrontendHelpers.BeginUiBusy("battery-form");
 
-	if (Grocy.EditMode === 'create')
-	{
+	if (Grocy.EditMode === 'create') {
 		Grocy.Api.Post('objects/batteries', jsonData,
-			function(result)
-			{
+			function (result) {
 				Grocy.EditObjectId = result.created_object_id;
-				Grocy.Components.UserfieldsForm.Save(function()
-				{
-					if (GetUriParam("embedded") !== undefined)
-					{
+				Grocy.Components.UserfieldsForm.Save(function () {
+					if (GetUriParam("embedded") !== undefined) {
 						window.parent.postMessage(WindowMessageBag("Reload"), Grocy.BaseUrl);
 					}
-					else
-					{
+					else {
 						window.location.href = U('/batteries');
 					}
 				});
 			},
-			function(xhr)
-			{
+			function (xhr) {
 				Grocy.FrontendHelpers.EndUiBusy("battery-form");
 				Grocy.FrontendHelpers.ShowGenericError('Error while saving, probably this item already exists', xhr.response);
 			}
 		);
 	}
-	else
-	{
+	else {
 		Grocy.Api.Put('objects/batteries/' + Grocy.EditObjectId, jsonData,
-			function(result)
-			{
-				Grocy.Components.UserfieldsForm.Save(function()
-				{
-					if (GetUriParam("embedded") !== undefined)
-					{
+			function (result) {
+				Grocy.Components.UserfieldsForm.Save(function () {
+					if (GetUriParam("embedded") !== undefined) {
 						window.parent.postMessage(WindowMessageBag("Reload"), Grocy.BaseUrl);
 					}
-					else
-					{
+					else {
 						window.location.href = U('/batteries');
 					}
 				});
 			},
-			function(xhr)
-			{
+			function (xhr) {
 				Grocy.FrontendHelpers.EndUiBusy("battery-form");
 				Grocy.FrontendHelpers.ShowGenericError('Error while saving, probably this item already exists', xhr.response);
 			}
@@ -66,45 +60,58 @@
 	}
 });
 
-$('#battery-form input').keyup(function(event)
-{
+$('#battery-form input').keyup(function (event) {
 	Grocy.FrontendHelpers.ValidateForm('battery-form');
 });
 
-$('#battery-form input').keydown(function(event)
-{
+$('#battery-form input').keydown(function (event) {
 	if (event.keyCode === 13) // Enter
 	{
 		event.preventDefault();
 
-		if (!Grocy.FrontendHelpers.ValidateForm('battery-form'))
-		{
+		if (!Grocy.FrontendHelpers.ValidateForm('battery-form')) {
 			return false;
 		}
-		else
-		{
+		else {
 			$('#save-battery-button').click();
 		}
 	}
 });
 
-$(document).on('click', '.battery-grocycode-label-print', function(e)
-{
+$(document).on('click', '.battery-grocycode-label-print', function (e) {
 	e.preventDefault();
 
 	var batteryId = $(e.currentTarget).attr('data-battery-id');
-	Grocy.Api.Get('batteries/' + batteryId + '/printlabel', function(labelData)
-	{
-		if (Grocy.Webhooks.labelprinter !== undefined)
-		{
+	Grocy.Api.Get('batteries/' + batteryId + '/printlabel', function (labelData) {
+		if (Grocy.Webhooks.labelprinter !== undefined) {
 			Grocy.FrontendHelpers.RunWebhook(Grocy.Webhooks.labelprinter, labelData);
 		}
 	});
 });
 
+function RefreshRechargeableState() {
+	var rechargeable = $('#rechargeable').is(':checked');
+	if (rechargeable) {
+		$('#battery-charged-group').removeClass('d-none');
+		$('#charge_interval_days').prop('disabled', false);
+	}
+	else {
+		$('#battery-charged-group').addClass('d-none');
+		$('#is_charged').prop('checked', true);
+		$('#charge_interval_days')
+			.val(0)
+			.prop('disabled', true);
+	}
+}
+
+$('#rechargeable').on('change', function () {
+	RefreshRechargeableState();
+});
+
+RefreshRechargeableState();
+
 Grocy.Components.UserfieldsForm.Load();
-setTimeout(function()
-{
+setTimeout(function () {
 	$('#name').focus();
 }, Grocy.FormFocusDelay);
 Grocy.FrontendHelpers.ValidateForm('battery-form');
