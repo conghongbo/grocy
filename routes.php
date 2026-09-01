@@ -230,6 +230,7 @@ $app->group('/api', function (RouteCollectorProxy $group)
 	$group->post('/stock/shoppinglist/remove-product', [StockApiController::class, 'RemoveProductFromShoppingList']);
 
 	// Recipes
+	$group->post('/recipes/mealplan/add-shopping-requirements', [RecipesApiController::class, 'AddMealPlanShoppingRequirementsToShoppingList']);
 	$group->post('/recipes/{recipeId}/add-not-fulfilled-products-to-shoppinglist', [RecipesApiController::class, 'AddNotFulfilledProductsToShoppingList']);
 	$group->get('/recipes/{recipeId}/fulfillment', [RecipesApiController::class, 'GetRecipeFulfillment']);
 	$group->post('/recipes/{recipeId}/consume', [RecipesApiController::class, 'ConsumeRecipe']);

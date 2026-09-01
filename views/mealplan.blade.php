@@ -92,6 +92,16 @@
 			</div>
 			<div class="related-links collapse d-md-flex order-2 width-xs-sm-100 d-print-none"
 				id="related-links">
+				
+				@if(GROCY_FEATURE_FLAG_SHOPPINGLIST)
+					<a id="open-mealplan-shopping-requirements-modal"
+						class="btn btn-outline-primary m-1 mt-md-0 mb-md-0 float-right"
+						href="#">
+						<i class="fa-solid fa-cart-plus"></i>
+						{{ $__t('Add shopping requirements') }}
+					</a>
+				@endif
+
 				<a id="print-meal-plan-button"
 					class="btn btn-outline-dark m-1 mt-md-0 mb-md-0 float-right">
 					{{ $__t('Print') }}
@@ -122,6 +132,91 @@
 	</div>
 </div>
 @endforeach
+
+@if(GROCY_FEATURE_FLAG_SHOPPINGLIST)
+<div class="modal fade"
+    id="mealplan-shopping-requirements-modal"
+    tabindex="-1">
+
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h4 class="modal-title">
+                    {{ $__t('Add shopping requirements') }}
+                </h4>
+
+                <button type="button"
+                    class="close"
+                    data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <form id="mealplan-shopping-requirements-form"
+                    novalidate>
+
+                    <div class="form-group">
+                        <label for="mealplan-shopping-from">
+                            {{ $__t('From') }}
+                        </label>
+
+                        <input type="date"
+                            class="form-control"
+                            id="mealplan-shopping-from"
+                            required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="mealplan-shopping-to">
+                            {{ $__t('To') }}
+                        </label>
+
+                        <input type="date"
+                            class="form-control"
+                            id="mealplan-shopping-to"
+                            required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="mealplan-shopping-list-id">
+                            {{ $__t('Shopping list') }}
+                        </label>
+
+                        <select class="form-control"
+                            id="mealplan-shopping-list-id">
+
+                            @foreach($shoppingLists as $shoppingList)
+                            <option value="{{ $shoppingList->id }}">
+                                {{ $shoppingList->name }}
+                            </option>
+                            @endforeach
+
+                        </select>
+                    </div>
+
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button"
+                    class="btn btn-secondary"
+                    data-dismiss="modal">
+                    {{ $__t('Cancel') }}
+                </button>
+
+                <button type="button"
+                    id="add-mealplan-shopping-requirements-button"
+                    class="btn btn-primary">
+                    {{ $__t('Add') }}
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+@endif
 
 {{-- Default empty calendar/section when no single meal plan entry is in the given date range --}}
 @if($usedMealplanSections->count() === 0)
