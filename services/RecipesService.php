@@ -137,6 +137,301 @@ class RecipesService extends BaseService
 		return DatabaseService::GetInstance()->ExecuteDbQuery($sql)->fetchAll(\PDO::FETCH_OBJ);
 	}
 
+	// TODO: Confirm that recipe_amount is normalized to the product stock QU
+	// before aggregating products with ingredient units different from stock QU.
+	public function GetMealPlanShoppingRequirements($from, $to){
+		$sql = "
+			SELECT rpr.* 
+			FROM recipes_pos_resolved rpr 
+			JOIN recipes r
+            	ON r.id = rpr.recipe_id
+        	JOIN meal_plan_internal_recipe_relation mpir
+            	ON mpir.recipe_id = r.id
+       		WHERE r.type = 'mealplan-shadow'
+          		AND mpir.day BETWEEN :from_date AND :to_date
+		";
+
+		$db = DatabaseService::GetInstance()->GetDbConnectionRaw();
+		$stmt = $db->prepare($sql);
+		$stmt->execute([
+			'from_date' => $from,
+			'to_date' => $to,
+		]);
+
+		$recipePositions = $stmt->fetchAll(\PDO::FETCH_OBJ);
+		$requirementsByProduct = [];
+
+		foreach($recipePositions as $recipePosition){
+			$productId = (int)$recipePosition->product_id_effective;
+			if(!isset($requirementsByProduct[$productId])){
+				$product = $this->DB->products($productId);
+				$requirementsByProduct[$productId] = [
+					'product_id' => $productId,
+					'stock_qu_id' => (int)$product->qu_id_stock,
+					'purchase_qu_id' => (int)$product->qu_id_purchase,
+					'required_amount_stock' => 0.0,
+					'stock_amount' => (float)$recipePosition->stock_amount,
+					'missing_amount_stock' => 0.0,
+
+					'shopping_list_amount_stock' => 0.0,
+					'still_need_to_buy_stock' => 0.0,
+					'still_need_to_buy_purchase' => 0.0
+        		];
+			}
+			$requirementsByProduct[$productId]['required_amount_stock']
+        		+= (float)$recipePosition->recipe_amount;
+		}
+
+		foreach ($requirementsByProduct as &$requirement)
+		{
+			$requirement['required_amount_stock'] =
+				round($requirement['required_amount_stock'], 2);
+
+			$requirement['stock_amount'] =
+				round($requirement['stock_amount'], 2);
+
+			$requirement['missing_amount_stock'] = round(
+				max(
+					$requirement['required_amount_stock']
+					- $requirement['stock_amount'],
+					0
+				),
+				2
+			);
+
+			$shoppingListAmountStock = 0.0;
+
+			$shoppingListEntries = $this->DB
+				->shopping_list()
+				->where('product_id', $requirement['product_id']);
+
+			foreach ($shoppingListEntries as $shoppingListEntry)
+			{
+				$amount = (float)$shoppingListEntry->amount;
+				$fromQuId = (int)$shoppingListEntry->qu_id;
+				$stockQuId = (int)$requirement['stock_qu_id'];
+
+				if ($fromQuId == $stockQuId){
+					$shoppingListAmountStock += $amount;
+				}else{
+					$conversion = $this->DB
+						->cache__quantity_unit_conversions_resolved()
+						->where(
+							'product_id = :1 AND from_qu_id = :2 AND to_qu_id = :3',
+							$requirement['product_id'],
+							$fromQuId,
+							$stockQuId
+						)
+						->fetch();
+
+					if ($conversion == null)
+					{
+						throw new \RuntimeException(
+							'No quantity unit conversion found for product '
+							. $requirement['product_id']
+							. ' from QU '
+							. $fromQuId
+							. ' to stock QU '
+							. $stockQuId
+						);
+					}
+
+					$shoppingListAmountStock +=
+						$amount * (float)$conversion->factor;
+				}
+			}
+
+			$requirement['shopping_list_amount_stock'] =
+				round($shoppingListAmountStock, 2);
+
+			$requirement['still_need_to_buy_stock'] = round(
+				max(
+					$requirement['missing_amount_stock']
+					- $requirement['shopping_list_amount_stock'],
+					0
+				),
+				2
+			);
+
+			$stockQuId = (int)$requirement['stock_qu_id'];
+			$purchaseQuId = (int)$requirement['purchase_qu_id'];
+
+			if ($stockQuId == $purchaseQuId)
+			{
+				$requirement['still_need_to_buy_purchase'] =
+					$requirement['still_need_to_buy_stock'];
+			}
+			else
+			{
+				$conversion = $this->DB
+					->cache__quantity_unit_conversions_resolved()
+					->where(
+						'product_id = :1 AND from_qu_id = :2 AND to_qu_id = :3',
+						$requirement['product_id'],
+						$stockQuId,
+						$purchaseQuId
+					)
+					->fetch();
+
+				if ($conversion == null)
+				{
+					throw new \RuntimeException(
+						'No quantity unit conversion found for product '
+						. $requirement['product_id']
+						. ' from stock QU '
+						. $stockQuId
+						. ' to purchase QU '
+						. $purchaseQuId
+					);
+				}
+
+				$requirement['still_need_to_buy_purchase'] = round(
+					$requirement['still_need_to_buy_stock']
+					* (float)$conversion->factor,
+					2
+				);
+			}
+		}
+		unset($requirement);
+
+		return array_values($requirementsByProduct);
+	}
+
+	public function AddMealPlanShoppingRequirementsToShoppingList(
+		$from,
+		$to,
+		$listId = 1
+	){
+		$shoppingList = $this->DB
+			->shopping_lists()
+			->where('id', $listId)
+			->fetch();
+
+		if ($shoppingList == null)
+		{
+			throw new \RuntimeException(
+				'Shopping list does not exist: ' . $listId
+			);
+		}
+
+		$requirements = $this->GetMealPlanShoppingRequirements(
+			$from,
+			$to
+		);
+
+		$writtenItems = [];
+
+		$db = DatabaseService::GetInstance()->GetDbConnectionRaw();
+		$db->beginTransaction();
+
+		try
+		{
+			foreach ($requirements as $requirement)
+			{
+				$amountToAddPurchase =
+					(float)$requirement['still_need_to_buy_purchase'];
+
+				if ($amountToAddPurchase <= 0)
+				{
+					continue;
+				}
+
+				$productId = (int)$requirement['product_id'];
+				$purchaseQuId =
+					(int)$requirement['purchase_qu_id'];
+
+				$existingEntry = $this->DB
+					->shopping_list()
+					->where(
+						'product_id = :1 AND shopping_list_id = :2',
+						$productId,
+						$listId
+					)
+					->fetch();
+
+				if ($existingEntry == null)
+				{
+					$newEntry = $this->DB
+						->shopping_list()
+						->createRow([
+							'product_id' => $productId,
+							'amount' => $amountToAddPurchase,
+							'qu_id' => $purchaseQuId,
+							'shopping_list_id' => $listId
+						]);
+
+					$newEntry->save();
+
+					$writtenItems[] = [
+						'product_id' => $productId,
+						'action' => 'insert',
+						'amount_added' => $amountToAddPurchase,
+						'qu_id' => $purchaseQuId
+					];
+				}
+				else
+				{
+					$existingQuId = (int)$existingEntry->qu_id;
+					$amountToAddExistingQu = $amountToAddPurchase;
+
+					if ($existingQuId != $purchaseQuId)
+					{
+						$conversion = $this->DB
+							->cache__quantity_unit_conversions_resolved()
+							->where(
+								'product_id = :1 AND from_qu_id = :2 AND to_qu_id = :3',
+								$productId,
+								$purchaseQuId,
+								$existingQuId
+							)
+							->fetch();
+
+						if ($conversion == null)
+						{
+							throw new \RuntimeException(
+								'No quantity unit conversion found for product '
+								. $productId
+								. ' from purchase QU '
+								. $purchaseQuId
+								. ' to existing Shopping List QU '
+								. $existingQuId
+							);
+						}
+
+						$amountToAddExistingQu =
+							$amountToAddPurchase
+							* (float)$conversion->factor;
+					}
+
+					$amountToAddExistingQu =
+						round($amountToAddExistingQu, 2);
+
+					$existingEntry->update([
+						'amount' =>
+							(float)$existingEntry->amount
+							+ $amountToAddExistingQu
+					]);
+
+					$writtenItems[] = [
+						'product_id' => $productId,
+						'action' => 'update',
+						'amount_added' => $amountToAddExistingQu,
+						'qu_id' => $existingQuId
+					];
+				}
+			}
+
+			$db->commit();
+		}
+		catch (\Throwable $ex)
+		{
+			$db->rollBack();
+			throw $ex;
+		}
+
+		return $writtenItems;
+	}
+
 	public function GetRecipesResolved($customWhere = null): Result
 	{
 		if ($customWhere == null)

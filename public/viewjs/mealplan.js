@@ -1055,6 +1055,143 @@ Grocy.Components.RecipePicker.GetPicker().on('change', function(e)
 	}
 });
 
+$(document).on(
+    'click',
+    '#open-mealplan-shopping-requirements-modal',
+    function(e)
+    {
+        e.preventDefault();
+
+        var calendar = $(
+            ".calendar[data-primary-section='true']"
+        );
+
+        var view = calendar.fullCalendar('getView');
+
+        var from = view.start.format('YYYY-MM-DD');
+
+        var to = view.end
+            .clone()
+            .subtract(1, 'day')
+            .format('YYYY-MM-DD');
+
+        $("#mealplan-shopping-from").val(from);
+        $("#mealplan-shopping-to").val(to);
+
+        $("#mealplan-shopping-requirements-modal")
+            .modal('show');
+    }
+);
+
+$(document).on(
+    'click',
+    '#add-mealplan-shopping-requirements-button',
+    function()
+    {
+        var from =
+            $("#mealplan-shopping-from").val();
+
+        var to =
+            $("#mealplan-shopping-to").val();
+
+        var shoppingListId =
+            Number.parseInt(
+                $("#mealplan-shopping-list-id").val()
+            );
+
+        if (!from || !to)
+        {
+            toastr.error(
+                __t('A valid date range is required')
+            );
+
+            return;
+        }
+
+        if (from > to)
+        {
+            toastr.error(
+                __t(
+                    'The from date must not be after the to date'
+                )
+            );
+
+            return;
+        }
+
+        var button = $(this);
+
+        button.prop('disabled', true);
+        Grocy.FrontendHelpers.BeginUiBusy();
+
+        Grocy.Api.Post(
+            'recipes/mealplan/add-shopping-requirements',
+            {
+                from: from,
+                to: to,
+                shopping_list_id: shoppingListId
+            },
+            function(result)
+            {
+                button.prop('disabled', false);
+                Grocy.FrontendHelpers.EndUiBusy();
+
+                $("#mealplan-shopping-requirements-modal")
+                    .modal('hide');
+
+                var writtenCount =
+                    result.written_items.length;
+
+                if (writtenCount === 0)
+                {
+                    toastr.success(
+                        __t(
+                            'All existing shopping lists already cover the requirements'
+                        )
+                    );
+                }
+                else
+                {
+                    toastr.success(
+                        __n(
+                            writtenCount,
+                            '%s product was added to the shopping list',
+                            '%s products were added to the shopping list'
+                        )
+                    );
+                }
+            },
+            function(xhr)
+            {
+                button.prop('disabled', false);
+                Grocy.FrontendHelpers.EndUiBusy();
+
+                var message =
+                    __t('An error occurred');
+
+                try
+                {
+                    var errorResult =
+                        JSON.parse(xhr.responseText);
+
+                    if (errorResult.error_message)
+                    {
+                        message =
+                            errorResult.error_message;
+                    }
+                }
+                catch (ex)
+                {
+                    console.error(ex);
+                }
+
+                toastr.error(message);
+                console.error(xhr.responseText);
+            }
+        );
+    }
+);
+
 $("#print-meal-plan-button").on("click", function(e)
 {
 	window.print();

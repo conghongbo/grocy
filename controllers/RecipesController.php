@@ -76,6 +76,7 @@ class RecipesController extends BaseController
 			'quantityUnitConversionsResolved' => $this->DB->cache__quantity_unit_conversions_resolved(),
 			'mealplanSections' => $this->DB->meal_plan_sections()->orderBy('sort_number'),
 			'usedMealplanSections' => $this->DB->meal_plan_sections()->where("id IN (SELECT section_id FROM meal_plan WHERE $mealPlanWhereTimespan)")->orderBy('sort_number'),
+			'shoppingLists' => $this->DB->shopping_lists()->orderBy('name', 'COLLATE NOCASE'),
 			'weekRecipe' => $weekRecipe
 		]);
 	}

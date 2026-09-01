@@ -106,4 +106,109 @@ class RecipesApiController extends BaseApiController
 			return $this->GenericErrorResponse($response, $ex->getMessage());
 		}
 	}
+
+	public function AddMealPlanShoppingRequirementsToShoppingList(
+		Request $request,
+		Response $response,
+		array $args
+	){
+		User::CheckPermission(
+			$request,
+			User::PERMISSION_SHOPPINGLIST_ITEMS_ADD
+		);
+
+		try
+		{
+			$requestBody =
+				$this->GetParsedAndFilteredRequestBody($request);
+
+			if ($requestBody === null)
+			{
+				throw new \Exception(
+					'Request body could not be parsed '
+					. '(probably invalid JSON format or '
+					. 'missing/wrong Content-Type header)'
+				);
+			}
+
+			if (
+				!array_key_exists('from', $requestBody)
+				|| !IsIsoDate($requestBody['from'])
+			)
+			{
+				throw new \Exception(
+					'A valid from date is required'
+				);
+			}
+
+			if (
+				!array_key_exists('to', $requestBody)
+				|| !IsIsoDate($requestBody['to'])
+			)
+			{
+				throw new \Exception(
+					'A valid to date is required'
+				);
+			}
+
+			$from = $requestBody['from'];
+			$to = $requestBody['to'];
+
+			if ($from > $to)
+			{
+				throw new \Exception(
+					'The from date must not be after the to date'
+				);
+			}
+
+			$listId = 1;
+
+			if (
+				array_key_exists(
+					'shopping_list_id',
+					$requestBody
+				)
+			)
+			{
+				if (
+					!is_numeric(
+						$requestBody['shopping_list_id']
+					)
+					|| (int)$requestBody['shopping_list_id'] <= 0
+				)
+				{
+					throw new \Exception(
+						'A valid shopping_list_id is required'
+					);
+				}
+
+				$listId =
+					(int)$requestBody['shopping_list_id'];
+			}
+
+			$writtenItems = RecipesService::GetInstance()
+				->AddMealPlanShoppingRequirementsToShoppingList(
+					$from,
+					$to,
+					$listId
+				);
+
+			return $this->ApiResponse(
+				$response,
+				[
+					'from' => $from,
+					'to' => $to,
+					'shopping_list_id' => $listId,
+					'written_items' => $writtenItems
+				]
+			);
+		}
+		catch (\Exception $ex)
+		{
+			return $this->GenericErrorResponse(
+				$response,
+				$ex->getMessage()
+			);
+		}
+	}
 }
