@@ -265,6 +265,8 @@ $app->group('/api', function (RouteCollectorProxy $group)
 	// Calendar
 	$group->get('/calendar/ical', [CalendarApiController::class, 'Ical'])->setName('calendar-ical');
 	$group->get('/calendar/ical/sharing-link', [CalendarApiController::class, 'IcalSharingLink']);
+	$group->get('/calendar/ical/chores/{choreId}/mark-as-done', [CalendarApiController::class, 'IcalChoreMarkAsDone'])->setName('calendar-ical-chore-mark-as-done');
+	$group->get('/calendar/ical/chores/{choreId}/skip', [CalendarApiController::class, 'IcalChoreSkip'])->setName('calendar-ical-chore-skip');
 })->add(new CorsMiddleware($container, $app->getResponseFactory()))->add(new JsonMiddleware($container, $app->getResponseFactory()));
 
 

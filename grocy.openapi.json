@@ -4347,6 +4347,94 @@
 				}
 			}
 		},
+		"/calendar/ical/chores/{choreId}/mark-as-done": {
+			"get": {
+				"summary": "Tracks the given chore as done from an iCal action link",
+				"tags": [
+					"Calendar",
+					"Chores"
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "choreId",
+						"required": true,
+						"description": "A valid chore id",
+						"schema": {
+							"type": "integer"
+						}
+					},
+					{
+						"in": "query",
+						"name": "secret",
+						"required": true,
+						"description": "A valid special-purpose calendar iCal API key",
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "The operation was successful"
+					},
+					"400": {
+						"description": "The operation was not successful",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error400"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/calendar/ical/chores/{choreId}/skip": {
+			"get": {
+				"summary": "Skips the given chore from an iCal action link",
+				"tags": [
+					"Calendar",
+					"Chores"
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "choreId",
+						"required": true,
+						"description": "A valid chore id",
+						"schema": {
+							"type": "integer"
+						}
+					},
+					{
+						"in": "query",
+						"name": "secret",
+						"required": true,
+						"description": "A valid special-purpose calendar iCal API key",
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "The operation was successful"
+					},
+					"400": {
+						"description": "The operation was not successful",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Error400"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
 		"/print/shoppinglist/thermal": {
 			"get": {
 				"summary": "Prints the shoppinglist with a thermal printer",
