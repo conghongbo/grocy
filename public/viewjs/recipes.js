@@ -387,21 +387,36 @@ $(".recipe-print").on('click', function(e)
 	window.print();
 });
 
-$('#servings-scale').keyup(function(event)
+$('#servings-scale').on('change', function()
 {
-	var data = {};
-	data.desired_servings = $(this).val();
+    var input = $(this);
+    var value = input.val();
 
-	Grocy.Api.Put('objects/recipes/' + $(this).data("recipe-id"), data,
-		function(result)
-		{
-			window.location.reload();
-		},
-		function(xhr)
-		{
-			console.error(xhr);
-		}
-	);
+    if (
+        value === ''
+        || !input[0].checkValidity()
+    )
+    {
+        return;
+    }
+
+    var data = {
+        desired_servings: Number.parseFloat(value)
+    };
+
+    Grocy.Api.Put(
+        'objects/recipes/'
+            + input.data('recipe-id'),
+        data,
+        function(result)
+        {
+            window.location.reload();
+        },
+        function(xhr)
+        {
+            console.error(xhr.responseText);
+        }
+    );
 });
 
 $(document).on("click", ".missing-recipe-pos-select-button", function(e)
