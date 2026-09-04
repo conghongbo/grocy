@@ -194,7 +194,7 @@
 			<tbody class="d-none">
 				@foreach($currentStock as $currentStockEntry)
 				<tr id="product-{{ $currentStockEntry->product_id }}-row"
-					class="@if(GROCY_FEATURE_FLAG_STOCK_BEST_BEFORE_DATE_TRACKING && $currentStockEntry->best_before_date < date('Y-m-d 23:59:59', strtotime('-1 days')) && $currentStockEntry->amount > 0) @if($currentStockEntry->due_type == 1) table-secondary @else table-danger @endif @elseif(GROCY_FEATURE_FLAG_STOCK_BEST_BEFORE_DATE_TRACKING && $currentStockEntry->best_before_date < date('Y-m-d 23:59:59', strtotime('+' . $nextXDays . ' days')) && $currentStockEntry->amount > 0) table-warning @elseif ($currentStockEntry->product_missing) table-info @endif">
+					class="@if(GROCY_FEATURE_FLAG_STOCK_BEST_BEFORE_DATE_TRACKING && $currentStockEntry->best_before_date < date('Y-m-d 23:59:59', strtotime('-1 days')) && $currentStockEntry->amount > 0) @if($currentStockEntry->due_type == 1) table-secondary @else table-danger @endif @elseif(GROCY_FEATURE_FLAG_STOCK_BEST_BEFORE_DATE_TRACKING && $currentStockEntry->best_before_date < date('Y-m-d 23:59:59', strtotime('+' . $nextXDays . ' days')) && $currentStockEntry->amount > 0) table-warning @elseif ($currentStockEntry->product_missing) table-warning @endif">
 					<td class="fit-content border-right">
 						<a class="permission-STOCK_CONSUME btn btn-success btn-sm product-consume-button @if($currentStockEntry->amount_aggregated < $currentStockEntry->quick_consume_amount || $currentStockEntry->enable_tare_weight_handling == 1) disabled @endif"
 							href="#"
@@ -335,13 +335,37 @@
 						@if($currentStockEntry->product_group_name !== null){{ $currentStockEntry->product_group_name }}@endif
 					</td>
 					<td>
-						<span class="custom-sort d-none">@if($currentStockEntry->product_no_own_stock == 1){{ $currentStockEntry->amount_aggregated }}@else{{ $currentStockEntry->amount }}@endif</span>
-						<span class="@if($currentStockEntry->product_no_own_stock == 1) d-none @endif">
-							<span id="product-{{ $currentStockEntry->product_id }}-amount"
-								class="locale-number locale-number-quantity-amount">{{ $currentStockEntry->amount }}</span> <span id="product-{{ $currentStockEntry->product_id }}-qu-name">{{ $__n($currentStockEntry->amount, $currentStockEntry->qu_stock_name, $currentStockEntry->qu_stock_name_plural) }}</span>
-							<span id="product-{{ $currentStockEntry->product_id }}-opened-amount"
-								class="small font-italic">@if($currentStockEntry->amount_opened > 0){{ $__t('%s opened', $currentStockEntry->amount_opened) }}@endif</span>
-						</span>
+					<span class="custom-sort d-none">
+                        @if($currentStockEntry->product_no_own_stock == 1)
+                            {{ $currentStockEntry->amount_aggregated }}
+                        @else
+                            {{ $currentStockEntry->amount }}
+                        @endif
+                    </span>
+
+                    <span class="@if($currentStockEntry->product_no_own_stock == 1) d-none @endif">
+                        <span id="product-{{ $currentStockEntry->product_id }}-amount"
+                              class="locale-number locale-number-quantity-amount">
+                            {{ $currentStockEntry->amount }}
+                        </span>
+
+                        <span id="product-{{ $currentStockEntry->product_id }}-qu-name">
+                            {{ $__n($currentStockEntry->amount, $currentStockEntry->qu_stock_name, $currentStockEntry->qu_stock_name_plural) }}
+                        </span>
+
+                        <span id="product-{{ $currentStockEntry->product_id }}-opened-amount"
+                              class="small font-italic">
+                            @if($currentStockEntry->amount_opened > 0)
+                                {{ $__t('%s opened', $currentStockEntry->amount_opened) }}
+                            @endif
+                        </span>
+
+                        @if($currentStockEntry->product_missing)
+                            <span class="badge badge-warning ml-1">
+                                {{ $__t('Low stock') }}
+                            </span>
+                        @endif
+                    </span>
 						@if($currentStockEntry->is_aggregated_amount == 1)
 						<span class="@if($currentStockEntry->product_no_own_stock == 0) pl-1 @endif text-secondary">
 							<i class="fa-solid fa-custom-sigma-sign"></i> <span id="product-{{ $currentStockEntry->product_id }}-amount-aggregated"
