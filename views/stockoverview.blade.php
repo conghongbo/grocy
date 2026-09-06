@@ -360,10 +360,15 @@
                             @endif
                         </span>
 
-                        @if($currentStockEntry->product_missing)
-                            <span class="badge badge-warning ml-1">
-                                {{ $__t('Low stock') }}
-                            </span>
+                       <span id="product-{{ $currentStockEntry->product_id }}-low-stock-badge"
+                             class="badge badge-warning ml-1 @if(!$currentStockEntry->product_missing) d-none @endif">
+                           {{ $__t('Low stock') }}
+                           <span id="product-{{ $currentStockEntry->product_id }}-low-stock-needed"
+                                 class="locale-number locale-number-quantity-amount">
+                               {{ max(0, $currentStockEntry->min_stock_amount - $currentStockEntry->amount_aggregated) }}
+                           </span>
+                           {{ $__t('needed') }}
+                       </span>
                         @endif
                     </span>
 						@if($currentStockEntry->is_aggregated_amount == 1)
@@ -422,7 +427,9 @@
 								&&
 								$currentStockEntry->amount > 0) duesoon @endif
 								@if($currentStockEntry->amount_aggregated > 0) instockX @endif
-								@if ($currentStockEntry->product_missing) belowminstockamount @endif
+								<span id="product-{{ $currentStockEntry->product_id }}-low-stock-status">
+                                    @if($currentStockEntry->product_missing) belowminstockamount @endif
+                                </span>
 					</td>
 					<td class="d-none">
 						xx{{ $currentStockEntry->product_group_name }}xx
