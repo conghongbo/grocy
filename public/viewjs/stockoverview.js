@@ -290,6 +290,12 @@ function RefreshProductRow(productId)
 			var dueSoonThreshold = moment().add($("#info-duesoon-products").data("next-x-days"), "days");
 			var now = moment();
 			var nextDueDate = moment(result.next_due_date);
+			var isLowStock = result.product.min_stock_amount > 0
+				&& result.stock_amount_aggregated < result.product.min_stock_amount;
+			var missingAmount = Math.max(
+				0,
+				result.product.min_stock_amount - result.stock_amount_aggregated
+			);
 
 			productRow.removeClass("table-warning");
 			productRow.removeClass("table-danger");
@@ -312,10 +318,17 @@ function RefreshProductRow(productId)
 			{
 				productRow.addClass("table-warning");
 			}
-			else if (result.product.min_stock_amount > 0 && result.stock_amount_aggregated < result.product.min_stock_amount)
+			else if (isLowStock)
 			{
-				productRow.addClass("table-info");
+				productRow.addClass("table-warning");
 			}
+
+			$('#product-' + productId + '-low-stock-badge')
+				.toggleClass('d-none', !isLowStock);
+			$('#product-' + productId + '-low-stock-needed')
+				.text(missingAmount);
+			$('#product-' + productId + '-low-stock-status')
+				.text(isLowStock ? 'belowminstockamount' : '');
 
 			if (!BoolVal(Grocy.UserSettings.stock_overview_show_all_out_of_stock_products) && result.stock_amount == 0 && result.stock_amount_aggregated == 0 && result.product.min_stock_amount == 0)
 			{
@@ -387,6 +400,8 @@ function RefreshProductRow(productId)
 					$('#product-' + productId + '-opened-amount-aggregated').text("");
 				}
 			}
+
+			stockOverviewTable.row(productRow).invalidate('dom').draw(false);
 
 			// Needs to be delayed because of the animation above the date-text would be wrong if fired immediately...
 			setTimeout(function ()
