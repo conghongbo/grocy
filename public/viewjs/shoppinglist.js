@@ -394,7 +394,6 @@ function UpdateShoppingListTotalValue()
 }
 
 $(document).on("click", "#print-shopping-list-button", function(e)
-$(document).on("click", "#print-shopping-list-button", function (e)
 {
 	var checkedPrintShowHeader = "";
 	if (BoolVal(Grocy.UserSettings.shopping_list_print_show_header))
