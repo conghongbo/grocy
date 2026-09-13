@@ -393,7 +393,6 @@ function UpdateShoppingListTotalValue()
 	RefreshLocaleNumberDisplay();
 }
 
-$(document).on("click", "#print-shopping-list-button", function(e)
 $(document).on("click", "#print-shopping-list-button", function (e)
 {
 	var checkedPrintShowHeader = "";
@@ -659,3 +658,20 @@ if ($(window).width() < 768 || !Grocy.FeatureFlags.GROCY_FEATURE_FLAG_STOCK)
 {
 	$("#filter-container").removeClass("border-bottom");
 }
+
+if (window.ShowLowStockReminder)
+{
+	var reminderKey = "shopping-list-low-stock-reminder-" + $("#selected-shopping-list").val();
+
+	if (sessionStorage.getItem(reminderKey) !== "shown")
+	{
+		$("#low-stock-reminder-modal").modal("show");
+		sessionStorage.setItem(reminderKey, "shown");
+	}
+}
+
+$(document).on("click", "#low-stock-reminder-add-button", function ()
+{
+	$("#low-stock-reminder-modal").modal("hide");
+	$("#add-products-below-min-stock-amount").trigger("click");
+});
