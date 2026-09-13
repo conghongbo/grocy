@@ -17,6 +17,12 @@
 <script src="{{ $U('/viewjs/purchase.js?v=', true) }}{{ $version }}"></script>
 @endpush
 
+<script>
+    window.LowStockReminderCount = {{ count($missingProducts) }};
+    window.ShowLowStockReminder =
+        {{ count($missingProducts) > 0 && !boolval($userSettings['shopping_list_auto_add_below_min_stock_amount']) ? 'true' : 'false' }};
+</script>
+
 @section('content')
 <div class="row d-print-none hide-on-fullscreen-card">
 	<div class="col">
@@ -346,6 +352,54 @@
 </div>
 
 <div class="modal fade"
+     id="low-stock-reminder-modal"
+     tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    {{ $__t('Low stock reminder') }}
+                </h5>
+                <button type="button"
+                        class="close"
+                        data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <p>
+                   <strong>
+                       {{ count($missingProducts) }}
+                   </strong>
+                   {{ $__t('products are below the defined minimum stock amount.') }}
+                </p>
+
+                <p class="mb-0">
+                    {{ $__t('Would you like to add them now?') }}
+                </p>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button"
+                        class="btn btn-secondary"
+                        data-dismiss="modal">
+                    {{ $__t('Not now') }}
+                </button>
+
+                <button type="button"
+                        id="low-stock-reminder-add-button"
+                        class="btn btn-primary">
+                    {{ $__t('Add products') }}
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div class="modalmodal fade"
 	id="shopping-list-stock-add-workflow-modal"
 	tabindex="-1">
 	<div class="modal-dialog">
