@@ -1055,6 +1055,98 @@ Grocy.Components.RecipePicker.GetPicker().on('change', function(e)
 	}
 });
 
+function RenderMealPlanShoppingRequirements(requirements)
+{
+    var container =
+        $("#mealplan-shopping-requirements-result-content");
+
+	var renderedCount = 0;
+
+    container.empty();
+
+    requirements.forEach(function(requirement)
+    {
+        if (requirement.missing_amount_stock <= 0)
+        {
+            return;
+        }
+
+		renderedCount++;
+
+        var card = $("<div>")
+            .addClass("card mb-2");
+
+        var body = $("<div>")
+            .addClass("card-body p-3");
+
+        $("<h6>")
+            .addClass("card-title")
+            .text(requirement.product_name)
+            .appendTo(body);
+
+        $("<div>")
+            .text(
+                __t("Required") + ": "
+                + requirement.required_amount_stock
+            )
+            .appendTo(body);
+
+        $("<div>")
+            .text(
+                __t("In stock") + ": "
+                + requirement.stock_amount
+            )
+            .appendTo(body);
+
+        $("<div>")
+            .text(
+                __t("Already on shopping list") + ": "
+                + requirement.shopping_list_amount_stock
+            )
+            .appendTo(body);
+
+        $("<div>")
+            .addClass("font-weight-bold")
+            .text(
+                __t("Still need to buy") + ": "
+                + requirement.still_need_to_buy_stock
+            )
+            .appendTo(body);
+
+        var sourceList = $("<ul>")
+            .addClass("mb-0 mt-2");
+
+        requirement.sources.forEach(function(source)
+        {
+            $("<li>")
+                .text(
+                    source.day
+                    + " — "
+                    + source.recipe_name
+                    + ": "
+                    + source.required_amount_stock
+                )
+                .appendTo(sourceList);
+        });
+
+        sourceList.appendTo(body);
+        body.appendTo(card);
+        card.appendTo(container);
+    });
+
+    if (renderedCount > 0)
+	{
+		$("#mealplan-shopping-requirements-result")
+			.removeClass("d-none");
+	}
+	else
+	{
+		$("#mealplan-shopping-requirements-result")
+			.addClass("d-none");
+	}
+
+}
+
 $(document).on(
     'click',
     '#open-mealplan-shopping-requirements-modal',
@@ -1077,6 +1169,18 @@ $(document).on(
 
         $("#mealplan-shopping-from").val(from);
         $("#mealplan-shopping-to").val(to);
+
+		$("#mealplan-shopping-requirements-result")
+			.addClass("d-none");
+
+		$("#mealplan-shopping-requirements-result-content")
+			.empty();
+
+		$("#add-mealplan-shopping-requirements-button")
+			.removeClass("d-none");
+
+		$("#mealplan-shopping-requirements-modal .btn-secondary")
+			.text(__t("Cancel"));
 
         $("#mealplan-shopping-requirements-modal")
             .modal('show');
@@ -1136,8 +1240,14 @@ $(document).on(
                 button.prop('disabled', false);
                 Grocy.FrontendHelpers.EndUiBusy();
 
-                $("#mealplan-shopping-requirements-modal")
-                    .modal('hide');
+				RenderMealPlanShoppingRequirements(
+					result.requirements
+				);
+
+				button.addClass("d-none");
+
+				$("#mealplan-shopping-requirements-modal .btn-secondary")
+					.text(__t("Close"));
 
                 var writtenCount =
                     result.written_items.length;
