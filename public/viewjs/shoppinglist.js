@@ -393,7 +393,9 @@ function UpdateShoppingListTotalValue()
 	RefreshLocaleNumberDisplay();
 }
 
-$(document).on("click", "#print-shopping-list-button", function (e)
+ feature/shopping-list-low-stock-reminder
+
+$(document).on("click", "#print-shopping-list-button", function(e)
 {
 	var checkedPrintShowHeader = "";
 	if (BoolVal(Grocy.UserSettings.shopping_list_print_show_header))

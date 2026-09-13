@@ -52,6 +52,138 @@
 	</div>
 </div>
 
+@php
+	$totalBatteries = 0;
+	$readyBatteries = 0;
+	$inUseBatteries = 0;
+	$needsChargingBatteries = 0;
+
+	foreach ($current as $currentBatteryEntry) {
+		$battery = FindObjectInArrayByPropertyValue(
+			$batteries,
+			'id',
+			$currentBatteryEntry->battery_id
+		);
+
+		if (!$battery) {
+			continue;
+		}
+
+		$totalBatteries++;
+
+		if ($battery->active == 0) {
+			continue;
+		}
+
+		if (!empty($battery->used_in)) {
+			$inUseBatteries++;
+		}
+		elseif ($battery->rechargeable == 1 && $battery->is_charged == 0) {
+			$needsChargingBatteries++;
+		}
+		else {
+			$readyBatteries++;
+		}
+	}
+@endphp
+
+<div class="row mt-3 mb-3">
+	<div class="col-6 col-lg-3 mb-2">
+		<div
+			class="card h-100 battery-summary-card"
+			data-battery-state="all"
+			role="button"
+			style="cursor: pointer;">
+			<div class="card-body py-3">
+				<div class="d-flex align-items-center justify-content-between">
+					<div>
+						<div class="text-muted small">
+							{{ $__t('Total batteries') }}
+						</div>
+						<div 
+							id="battery-summary-total"
+							class="h3 mb-0">
+							{{ $totalBatteries }}
+						</div>
+					</div>
+					<i class="fa-solid fa-battery-full fa-2x text-muted"></i>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="col-6 col-lg-3 mb-2">
+		<div
+			class="card h-100 battery-summary-card"
+			data-battery-state="ready"
+			role="button"
+			style="cursor: pointer;">
+			<div class="card-body py-3">
+				<div class="d-flex align-items-center justify-content-between">
+					<div>
+						<div class="text-muted small">
+							{{ $__t('Ready') }}
+						</div>
+						<div 
+							id="battery-summary-ready"
+							class="h3 mb-0 text-success">
+							{{ $readyBatteries }}
+						</div>
+					</div>
+					<i class="fa-solid fa-circle-check fa-2x text-success"></i>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="col-6 col-lg-3 mb-2">
+		<div
+			class="card h-100 battery-summary-card"
+			data-battery-state="in_use"
+			role="button"
+			style="cursor: pointer;">
+			<div class="card-body py-3">
+				<div class="d-flex align-items-center justify-content-between">
+					<div>
+						<div class="text-muted small">
+							{{ $__t('In use') }}
+						</div>
+						<div 
+							id="battery-summary-in-use"
+							class="h3 mb-0 text-primary">
+							{{ $inUseBatteries }}
+						</div>
+					</div>
+					<i class="fa-solid fa-plug fa-2x text-primary"></i>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="col-6 col-lg-3 mb-2">
+		<div
+			class="card h-100 battery-summary-card"
+			data-battery-state="needs_charging"
+			role="button"
+			style="cursor: pointer;">
+			<div class="card-body py-3">
+				<div class="d-flex align-items-center justify-content-between">
+					<div>
+						<div class="text-muted small">
+							{{ $__t('Needs charging') }}
+						</div>
+
+						<div 
+							id="battery-summary-needs-charging"
+							class="h3 mb-0 text-warning">
+							{{ $needsChargingBatteries }}
+						</div>
+					</div>
+
+					<i class="fa-solid fa-bolt fa-2x text-warning"></i>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
 <div class="row collapse d-md-flex"
 	id="table-filter-row">
 	<div class="col-12 col-md-6 col-xl-3">
@@ -180,30 +312,44 @@
 					</td>
 					<td class="fit-content">
 						@if($battery->rechargeable == 1)
-							<span class="badge badge-success">
+							<span class="badge badge-info px-2 py-1">
+								<i class="fa-solid fa-rotate mr-1"></i>
 								{{ $__t('Rechargeable') }}
 							</span>
 						@else
-							<span class="badge badge-secondary">
+							<span class="badge badge-light border px-2 py-1">
+								<i class="fa-solid fa-battery-full mr-1"></i>
 								{{ $__t('Single-use') }}
 							</span>
 						@endif
 					</td>
 					<td class="fit-content">
 						@if($battery->active == 0)
-							<span id="battery-{{ $currentBatteryEntry->battery_id }}-state" class="badge badge-secondary">
+							<span
+								id="battery-{{ $currentBatteryEntry->battery_id }}-state"
+								class="badge badge-secondary px-2 py-1">
+								<i class="fa-solid fa-circle-minus mr-1"></i>
 								{{ $__t('Inactive') }}
 							</span>
 						@elseif(!empty($battery->used_in))
-							<span id="battery-{{ $currentBatteryEntry->battery_id }}-state" class="badge badge-primary">
+							<span
+								id="battery-{{ $currentBatteryEntry->battery_id }}-state"
+								class="badge badge-primary px-2 py-1">
+								<i class="fa-solid fa-plug mr-1"></i>
 								{{ $__t('In use') }}
 							</span>
 						@elseif($battery->rechargeable == 1 && $battery->is_charged == 0)
-							<span id="battery-{{ $currentBatteryEntry->battery_id }}-state" class="badge badge-warning">
+							<span
+								id="battery-{{ $currentBatteryEntry->battery_id }}-state"
+								class="badge badge-warning px-2 py-1">
+								<i class="fa-solid fa-bolt mr-1"></i>
 								{{ $__t('Needs charging') }}
 							</span>
 						@else
-							<span id="battery-{{ $currentBatteryEntry->battery_id }}-state" class="badge badge-success">
+							<span
+								id="battery-{{ $currentBatteryEntry->battery_id }}-state"
+								class="badge badge-success px-2 py-1">
+								<i class="fa-solid fa-circle-check mr-1"></i>
 								{{ $__t('Ready') }}
 							</span>
 						@endif

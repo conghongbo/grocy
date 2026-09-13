@@ -22,6 +22,10 @@ $("#search").on("keyup", Delay(function () {
 $("#clear-filter-button").on("click", function () {
 	$("#search").val("");
 	$("#status-filter").val("all");
+
+	batteriesOverviewTable.column(batteriesOverviewTable.colReorder.transpose(3)).search("");
+	$(".battery-summary-card").removeClass("border-primary");
+
 	batteriesOverviewTable.column(batteriesOverviewTable.colReorder.transpose(5)).search("").draw();
 	batteriesOverviewTable.search("").draw();
 });
@@ -42,6 +46,30 @@ $(".status-filter-message").on("click", function () {
 	var value = $(this).data("status-filter");
 	$("#status-filter").val(value);
 	$("#status-filter").trigger("change");
+});
+
+$(".battery-summary-card").on("click", function () {
+	var state = $(this).data("battery-state");
+
+	$(".battery-summary-card").removeClass("border-primary");
+	$(this).addClass("border-primary");
+
+	var stateColumn = batteriesOverviewTable.column(
+		batteriesOverviewTable.colReorder.transpose(3)
+	);
+
+	if (state === "all") {
+		stateColumn.search("").draw();
+	}
+	else if (state === "ready") {
+		stateColumn.search(__t("Ready")).draw();
+	}
+	else if (state === "in_use") {
+		stateColumn.search(__t("In use")).draw();
+	}
+	else if (state === "needs_charging") {
+		stateColumn.search(__t("Needs charging")).draw();
+	}
 });
 
 $(document).on('click', '.track-charge-cycle-button', function (e) {
@@ -69,23 +97,37 @@ $(document).on('click', '.track-charge-cycle-button', function (e) {
 					if (result.state === 'in_use') {
 						batteryState
 							.addClass('badge-primary')
-							.text(__t('In use'));
+							.html(
+								'<i class="fa-solid fa-plug mr-1"></i>' +
+								__t('In use')
+							);
 					}
 					else if (result.state === 'needs_charging') {
 						batteryState
 							.addClass('badge-warning')
-							.text(__t('Needs charging'));
+							.html(
+								'<i class="fa-solid fa-bolt mr-1"></i>' +
+								__t('Needs charging')
+							);
 					}
 					else if (result.state === 'inactive') {
 						batteryState
 							.addClass('badge-secondary')
-							.text(__t('Inactive'));
+							.html(
+								'<i class="fa-solid fa-circle-minus mr-1"></i>' +
+								__t('Inactive')
+							);
 					}
 					else {
 						batteryState
 							.addClass('badge-success')
-							.text(__t('Ready'));
+							.html(
+								'<i class="fa-solid fa-circle-check mr-1"></i>' +
+								__t('Ready')
+							);
 					}
+
+					updateBatterySummary();
 
 					var nextXDaysThreshold = moment().add($("#info-due-soon-batteries").data("next-x-days"), "days");
 					var now = moment();
@@ -175,3 +217,37 @@ function RefreshStatistics() {
 }
 
 RefreshStatistics();
+
+function updateBatterySummary() {
+	var total = 0;
+	var ready = 0;
+	var inUse = 0;
+	var needsCharging = 0;
+
+	$("#batteries-overview-table tbody tr").each(function () {
+		var stateBadge = $(this).find("[id$='-state']");
+
+		if (stateBadge.length === 0) {
+			return;
+		}
+
+		total++;
+
+		var stateText = stateBadge.text().trim();
+
+		if (stateText === __t("Ready")) {
+			ready++;
+		}
+		else if (stateText === __t("In use")) {
+			inUse++;
+		}
+		else if (stateText === __t("Needs charging")) {
+			needsCharging++;
+		}
+	});
+
+	$("#battery-summary-total").text(total);
+	$("#battery-summary-ready").text(ready);
+	$("#battery-summary-in-use").text(inUse);
+	$("#battery-summary-needs-charging").text(needsCharging);
+}
