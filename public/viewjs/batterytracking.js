@@ -156,6 +156,10 @@ $('#save-batterytracking-button').on('click', function (e) {
 });
 
 $('#battery_id').on('change', function (e) {
+	$("#replacement-preview").addClass("d-none");
+	$("#replacement_battery_id").val("");
+	updateSubmitButton();
+
 	var input = $('#battery_id_text_input').val().toString();
 	$('#battery_id_text_input').val(input);
 	$('#battery_id').data('combobox').refresh();
@@ -171,10 +175,27 @@ $('#battery_id').on('change', function (e) {
 			else {
 				$("#replacement-battery-group").addClass("d-none");
 				$("#replacement_battery_id").val("");
+				$("#replacement-preview").addClass("d-none");
 			}
 			// The battery itself cannot be selected as replacement
 			$("#replacement_battery_id option").prop("disabled", false);
 			$("#replacement_battery_id option[value=\"" + batteryId + "\"]").prop("disabled", true);
+
+			var availableReplacementCount =
+				$("#replacement_battery_id option").filter(function () {
+					return this.value !== "" && !this.disabled;
+				}).length;
+
+			if (availableReplacementCount === 0) {
+				$("#replacement-battery-empty-message").removeClass("d-none");
+				$("#replacement_battery_id").prop("disabled", true);
+				$("#replacement-battery-hint").addClass("d-none");
+			}
+			else {
+				$("#replacement-battery-empty-message").addClass("d-none");
+				$("#replacement_battery_id").prop("disabled", false);
+				$("#replacement-battery-hint").removeClass("d-none");
+			}
 		});
 
 		Grocy.Components.BatteryCard.Refresh(batteryId);
@@ -190,6 +211,11 @@ $('#battery_id').on('change', function (e) {
 		$("#replacement-battery-group").addClass("d-none");
 		$("#replacement_battery_id").val("");
 	}
+});
+
+$("#replacement_battery_id").on("change", function () {
+	updateReplacementPreview();
+	updateSubmitButton();
 });
 
 $(".combobox").combobox(Object.assign(BootstrapComboboxDefaults, { "clearIfNoMatch": false }));
@@ -290,3 +316,43 @@ $('#battery_id_text_input').on('blur', function (e) {
 $("#tracked_time").find("input").on("focus", function (e) {
 	$(this).select();
 });
+
+function updateReplacementPreview() {
+	var replacementBatteryId = $("#replacement_battery_id").val();
+	if (!replacementBatteryId) {
+		$("#replacement-preview").addClass("d-none");
+		return;
+	}
+	var currentBatteryName =
+		$("#battery_id_text_input").val();
+	var replacementBatteryName =
+		$("#replacement_battery_id option:selected").text().trim();
+	var usedIn =
+		$("#batterycard-battery-used-in").text().trim();
+	$("#replacement-preview-current").text(currentBatteryName);
+	$("#replacement-preview-new").text(replacementBatteryName);
+	$("#replacement-preview-used-in").text(
+		usedIn && usedIn !== "-"
+			? usedIn
+			: __t("No device")
+	);
+	$("#replacement-preview").removeClass("d-none");
+}
+
+function updateSubmitButton() {
+	var replacementBatteryId = $("#replacement_battery_id").val();
+
+	if (replacementBatteryId) {
+		$("#save-batterytracking-button").html(
+			'<i class="fa-solid fa-repeat mr-1"></i>' +
+			__t("Replace battery")
+		);
+
+		$("#replacement-action-hint").removeClass("d-none");
+	}
+	else {
+		$("#save-batterytracking-button").text(__t("OK"));
+
+		$("#replacement-action-hint").addClass("d-none");
+	}
+}
