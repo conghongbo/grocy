@@ -14,6 +14,7 @@ use Grocy\Controllers\Users\User;
 use Grocy\Services\ApiKeyService;
 use Grocy\Services\CalendarService;
 use Grocy\Services\ChoresService;
+use Grocy\Services\IcalChoreDescriptionService;
 use Grocy\Services\LocalizationService;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -45,7 +46,7 @@ class CalendarApiController extends BaseApiController
 				}
 				if (isset($event['type']) && $event['type'] === 'chore')
 				{
-					$description = $this->AppendIcalChoreActionLinks($description, $event['chore_id']);
+					$description = $this->BuildIcalChoreDescription($event);
 				}
 
 				if ($event['date_format'] === 'date' || (isset($event['allDay']) && $event['allDay']))
@@ -137,21 +138,25 @@ class CalendarApiController extends BaseApiController
 		}
 	}
 
-	private function AppendIcalChoreActionLinks(string $description, int $choreId)
+	private function BuildIcalChoreDescription(array $event)
 	{
 		$iCalApiKey = ApiKeyService::GetInstance()->GetOrCreateApiKey(ApiKeyService::API_KEY_TYPE_SPECIAL_PURPOSE_CALENDAR_ICAL);
 		$urlManager = $this->AppContainer->get('UrlManager');
+		$localizationService = LocalizationService::GetInstance();
 
 		$actionLinks = [
-			LocalizationService::GetInstance()->__t('Mark as done') . ': ' . $urlManager->ConstructUrl('/api/calendar/ical/chores/' . $choreId . '/mark-as-done?secret=' . $iCalApiKey),
-			LocalizationService::GetInstance()->__t('Skip this iteration') . ': ' . $urlManager->ConstructUrl('/api/calendar/ical/chores/' . $choreId . '/skip?secret=' . $iCalApiKey)
+			$localizationService->__t('Mark as done') . ': ' . $urlManager->ConstructUrl('/api/calendar/ical/chores/' . $event['chore_id'] . '/mark-as-done?secret=' . $iCalApiKey),
+			$localizationService->__t('Skip this iteration') . ': ' . $urlManager->ConstructUrl('/api/calendar/ical/chores/' . $event['chore_id'] . '/skip?secret=' . $iCalApiKey)
 		];
 
-		if (!empty($description))
-		{
-			$description .= PHP_EOL . PHP_EOL;
-		}
-
-		return $description . implode(PHP_EOL, $actionLinks);
+		return IcalChoreDescriptionService::BuildDescription($event, [
+			'status' => $localizationService->__t('Status'),
+			IcalChoreDescriptionService::STATUS_DUE_TODAY => $localizationService->__t('Due today'),
+			IcalChoreDescriptionService::STATUS_OVERDUE => $localizationService->__t('Overdue'),
+			IcalChoreDescriptionService::STATUS_UPCOMING => $localizationService->__t('Upcoming'),
+			'next-due-date' => $localizationService->__t('Next due date'),
+			'last-tracked' => $localizationService->__t('Last tracked'),
+			'never' => $localizationService->__t('Never')
+		], $actionLinks);
 	}
 }
