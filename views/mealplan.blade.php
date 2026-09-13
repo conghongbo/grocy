@@ -197,6 +197,17 @@
                     </div>
 
                 </form>
+
+				<div id="mealplan-shopping-requirements-result"
+					class="d-none mt-3">
+
+					<h5>
+						{{ $__t('Shopping requirement details') }}
+					</h5>
+
+					<div id="mealplan-shopping-requirements-result-content">
+					</div>
+				</div>
             </div>
 
             <div class="modal-footer">

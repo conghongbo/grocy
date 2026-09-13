@@ -141,14 +141,27 @@ class RecipesService extends BaseService
 	// before aggregating products with ingredient units different from stock QU.
 	public function GetMealPlanShoppingRequirements($from, $to){
 		$sql = "
-			SELECT rpr.* 
-			FROM recipes_pos_resolved rpr 
+			SELECT
+				rpr.*,
+				mp.id AS meal_plan_entry_id,
+				mp.day AS meal_plan_day,
+				source_recipe.id AS source_recipe_id,
+				source_recipe.name AS source_recipe_name
+			FROM recipes_pos_resolved rpr
 			JOIN recipes r
-            	ON r.id = rpr.recipe_id
-        	JOIN meal_plan_internal_recipe_relation mpir
-            	ON mpir.recipe_id = r.id
-       		WHERE r.type = 'mealplan-shadow'
-          		AND mpir.day BETWEEN :from_date AND :to_date
+				ON r.id = rpr.recipe_id
+			JOIN meal_plan_internal_recipe_relation mpir
+				ON mpir.recipe_id = r.id
+			JOIN meal_plan mp
+				ON mp.day = mpir.day
+				AND mp.type = 'recipe'
+				AND r.name = CAST(mp.day AS TEXT)
+					|| '#'
+					|| CAST(mp.id AS TEXT)
+			JOIN recipes source_recipe
+				ON source_recipe.id = mp.recipe_id
+			WHERE r.type = 'mealplan-shadow'
+				AND mpir.day BETWEEN :from_date AND :to_date
 		";
 
 		$db = DatabaseService::GetInstance()->GetDbConnectionRaw();
@@ -167,19 +180,51 @@ class RecipesService extends BaseService
 				$product = $this->DB->products($productId);
 				$requirementsByProduct[$productId] = [
 					'product_id' => $productId,
+					'product_name' => $product->name,
 					'stock_qu_id' => (int)$product->qu_id_stock,
 					'purchase_qu_id' => (int)$product->qu_id_purchase,
 					'required_amount_stock' => 0.0,
 					'stock_amount' => (float)$recipePosition->stock_amount,
 					'missing_amount_stock' => 0.0,
-
 					'shopping_list_amount_stock' => 0.0,
 					'still_need_to_buy_stock' => 0.0,
-					'still_need_to_buy_purchase' => 0.0
+					'still_need_to_buy_purchase' => 0.0,
+					'sources' => []
         		];
 			}
 			$requirementsByProduct[$productId]['required_amount_stock']
         		+= (float)$recipePosition->recipe_amount;
+
+			$sourceKey = (int)$recipePosition->meal_plan_entry_id;
+
+			if (
+				!isset(
+					$requirementsByProduct[$productId]['sources'][$sourceKey]
+				)
+			)
+			{
+				$requirementsByProduct[$productId]['sources'][$sourceKey] = [
+					'meal_plan_entry_id' =>
+						(int)$recipePosition->meal_plan_entry_id,
+
+					'day' =>
+						$recipePosition->meal_plan_day,
+
+					'recipe_id' =>
+						(int)$recipePosition->source_recipe_id,
+
+					'recipe_name' =>
+						$recipePosition->source_recipe_name,
+
+					'required_amount_stock' => 0.0
+				];
+			}
+
+			$requirementsByProduct[$productId]
+				['sources'][$sourceKey]
+				['required_amount_stock']
+					+= (float)$recipePosition->recipe_amount;
+
 		}
 
 		foreach ($requirementsByProduct as &$requirement)
@@ -291,6 +336,20 @@ class RecipesService extends BaseService
 					2
 				);
 			}
+
+
+			foreach ($requirement['sources'] as &$source)
+			{
+				$source['required_amount_stock'] = round(
+					$source['required_amount_stock'],
+					2
+				);
+			}
+			unset($source);
+
+			$requirement['sources'] =
+				array_values($requirement['sources']);
+
 		}
 		unset($requirement);
 
@@ -429,8 +488,11 @@ class RecipesService extends BaseService
 			throw $ex;
 		}
 
-		return $writtenItems;
-	}
+			return [
+				'requirements' => $requirements,
+				'written_items' => $writtenItems
+			];
+		}
 
 	public function GetRecipesResolved($customWhere = null): Result
 	{

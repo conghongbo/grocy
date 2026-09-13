@@ -186,7 +186,7 @@ class RecipesApiController extends BaseApiController
 					(int)$requestBody['shopping_list_id'];
 			}
 
-			$writtenItems = RecipesService::GetInstance()
+			$result = RecipesService::GetInstance()
 				->AddMealPlanShoppingRequirementsToShoppingList(
 					$from,
 					$to,
@@ -199,7 +199,8 @@ class RecipesApiController extends BaseApiController
 					'from' => $from,
 					'to' => $to,
 					'shopping_list_id' => $listId,
-					'written_items' => $writtenItems
+					'requirements' => $result['requirements'],
+					'written_items' => $result['written_items']
 				]
 			);
 		}
