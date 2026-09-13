@@ -2483,3 +2483,12 @@ msgid "Pack"
 msgid_plural "Packs"
 msgstr[0] ""
 msgstr[1] ""
+
+msgid "Upcoming"
+msgstr ""
+
+msgid "Mark as done"
+msgstr ""
+
+msgid "Skip this iteration"
+msgstr ""

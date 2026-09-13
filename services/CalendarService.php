@@ -79,6 +79,8 @@ class CalendarService extends BaseService
 					'date_format' => 'datetime',
 					'type' => 'chore',
 					'chore_id' => $currentChoreEntry->chore_id,
+					'description' => $chore->description,
+					'last_tracked_time' => $currentChoreEntry->last_tracked_time,
 					'link' => $this->UrlManager->ConstructUrl('/choresoverview'),
 					'allDay' => $chore->track_date_only == 1,
 					'color' => $usersService->GetUserSettings(GROCY_USER_ID)['calendar_color_chores']
