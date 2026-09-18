@@ -1,4 +1,128 @@
-﻿var tasksTable = $('#tasks-table').DataTable({
+﻿function GetTaskDueStatus(dueDate) {
+	if (!dueDate) {
+		return "";
+	}
+
+	var due = moment(dueDate, "YYYY-MM-DD", true);
+
+	if (!due.isValid()) {
+		return "";
+	}
+
+	var today = moment().startOf("day");
+
+	var nextXDays = parseInt(
+		$("#info-due-soon-tasks").data("next-x-days"),
+		10
+	);
+
+	if (isNaN(nextXDays)) {
+		nextXDays = 0;
+	}
+
+	var dueDay = due.clone().startOf("day");
+
+	if (dueDay.isBefore(today)) {
+		return "overdue";
+	}
+
+	if (dueDay.isSame(today, "day")) {
+		return "duetoday";
+	}
+
+	if (
+		nextXDays > 0 &&
+		dueDay.isSameOrBefore(
+			today.clone().add(nextXDays, "days"),
+			"day"
+		)
+	) {
+		return "duesoon";
+	}
+
+	return "normal";
+}
+
+function ApplyTaskDueStatus(row) {
+	var taskRow = $(row);
+
+	var dueDate = taskRow.attr("data-task-due-date");
+	var done = taskRow.attr("data-task-done") === "1";
+
+	var statusCell = taskRow.find(".task-status-filter-value");
+	var badge = taskRow.find(".task-due-status");
+
+	// Always remove old contextual states first
+	taskRow.removeClass(
+		"table-danger table-info table-warning"
+	);
+
+	if (done) {
+		statusCell.text("done");
+		return;
+	}
+
+	var status = GetTaskDueStatus(dueDate);
+
+	/*
+	 * Keep "duetoday duesoon" intentionally.
+	 *
+	 * Grocy's original behaviour considered a task due today
+	 * also part of "due soon", so the Due soon filter includes today.
+	 */
+	if (status === "duetoday") {
+		statusCell.text("duetoday duesoon");
+	}
+	else {
+		statusCell.text(status);
+	}
+
+
+	if (status === "overdue") {
+		taskRow.addClass("table-danger");
+
+		badge.html(
+			'<span class="task-due-badge task-due-badge-overdue">' +
+			'<i class="fa-solid fa-circle-exclamation"></i>' +
+			'<span>' + __t("Overdue") + '</span>' +
+			'</span>'
+		);
+	}
+	else if (status === "duetoday") {
+		taskRow.addClass("table-info");
+
+		badge.html(
+			'<span class="task-due-badge task-due-badge-today">' +
+			'<i class="fa-solid fa-clock"></i>' +
+			'<span>' + __t("Due today") + '</span>' +
+			'</span>'
+		);
+	}
+	else if (status === "duesoon") {
+		taskRow.addClass("table-warning");
+
+		badge.html(
+			'<span class="task-due-badge task-due-badge-soon">' +
+			'<i class="fa-solid fa-clock"></i>' +
+			'<span>' + __t("Due soon") + '</span>' +
+			'</span>'
+		);
+	}
+	else {
+		badge.html(
+			'<span class="task-due-badge task-due-badge-normal">' +
+			'<i class="fa-regular fa-calendar"></i>' +
+			'<span>' + __t("Upcoming") + '</span>' +
+			'</span>'
+		);
+	}
+}
+
+$("#tasks-table tbody tr").each(function () {
+	ApplyTaskDueStatus(this);
+});
+
+var tasksTable = $('#tasks-table').DataTable({
 	'order': [[2, 'asc']],
 	'columnDefs': [
 		{ 'orderable': false, 'targets': 0 },
@@ -9,22 +133,43 @@
 $('#tasks-table tbody').removeClass("d-none");
 tasksTable.columns.adjust().draw();
 
-$("#search").on("keyup", Delay(function ()
-{
+function RefreshTasksEmptyState() {
+	var visibleRows = tasksTable.rows({
+		search: 'applied'
+	}).count();
+
+	if (visibleRows === 0) {
+		$("#tasks-empty-state").removeClass("d-none");
+		$("#tasks-table_wrapper").addClass("tasks-table-is-empty");
+	}
+	else {
+		$("#tasks-empty-state").addClass("d-none");
+		$("#tasks-table_wrapper").removeClass("tasks-table-is-empty");
+	}
+}
+
+tasksTable.on('draw', function () {
+	RefreshTasksEmptyState();
+});
+
+RefreshTasksEmptyState();
+
+$("#tasks-empty-clear-filter").on("click", function () {
+	$("#clear-filter-button").trigger("click");
+});
+
+$("#search").on("keyup", Delay(function () {
 	var value = $(this).val();
-	if (value === "all")
-	{
+	if (value === "all") {
 		value = "";
 	}
 
 	tasksTable.search(value).draw();
 }, Grocy.FormFocusDelay));
 
-$("#status-filter").on("change", function ()
-{
+$("#status-filter").on("change", function () {
 	var value = $(this).val();
-	if (value === "all")
-	{
+	if (value === "all") {
 		value = "";
 	}
 
@@ -34,34 +179,28 @@ $("#status-filter").on("change", function ()
 	tasksTable.column(tasksTable.colReorder.transpose(5)).search(value).draw();
 });
 
-$("#user-filter").on("change", function ()
-{
+$("#user-filter").on("change", function () {
 	var value = $(this).val();
-	if (value === "all")
-	{
+	if (value === "all") {
 		value = "";
 	}
-	else
-	{
+	else {
 		value = "^" + $.fn.dataTable.util.escapeRegex(value) + "$";
 	}
 
 	tasksTable.column(tasksTable.colReorder.transpose(4)).search(value, true, false).draw();
 });
 
-$("#category-filter").on("change", function ()
-{
+$("#category-filter").on("change", function () {
 	var value = $(this).val();
-	if (value === "all")
-	{
+	if (value === "all") {
 		value = "";
 	}
 
 	tasksTable.column(tasksTable.colReorder.transpose(3)).search(value).draw();
 });
 
-$("#clear-filter-button").on("click", function ()
-{
+$("#clear-filter-button").on("click", function () {
 	$("#search").val("");
 	$("#status-filter").val("all");
 	$("#category-filter").val("all");
@@ -72,15 +211,13 @@ $("#clear-filter-button").on("click", function ()
 	$("#show-done-tasks").trigger('checked', false);
 });
 
-$(".status-filter-message").on("click", function ()
-{
+$(".status-filter-message").on("click", function () {
 	var value = $(this).data("status-filter");
 	$("#status-filter").val(value);
 	$("#status-filter").trigger("change");
 });
 
-$(document).on('click', '.do-task-button', function (e)
-{
+$(document).on('click', '.do-task-button', function (e) {
 	e.preventDefault();
 
 	Grocy.FrontendHelpers.BeginUiBusy();
@@ -90,20 +227,35 @@ $(document).on('click', '.do-task-button', function (e)
 	var doneTime = moment().format('YYYY-MM-DD HH:mm:ss');
 
 	Grocy.Api.Post('tasks/' + taskId + '/complete', { 'done_time': doneTime },
-		function ()
-		{
-			if (!$("#show-done-tasks").is(":checked"))
-			{
-				animateCSS("#task-" + taskId + "-row", "fadeOut", function ()
-				{
+		function () {
+			if (!$("#show-done-tasks").is(":checked")) {
+				animateCSS("#task-" + taskId + "-row", "fadeOut", function () {
 					$("#task-" + taskId + "-row").remove();
 				});
 			}
-			else
-			{
-				$('#task-' + taskId + '-row').addClass("text-muted");
-				$('#task-' + taskId + '-name').addClass("text-strike-through");
-				$('.do-task-button[data-task-id="' + taskId + '"]').addClass("disabled");
+			else {
+				var taskRow = $('#task-' + taskId + '-row');
+				taskRow.attr("data-task-done", "1");
+
+				taskRow
+					.addClass("text-muted task-row-completed")
+					.removeClass("table-danger table-info table-warning");
+
+				$('#task-' + taskId + '-name')
+					.addClass("text-strike-through");
+
+				// Replace the due status badge immediately
+				taskRow.find('.task-due-badge')
+					.replaceWith(
+						'<span class="task-completed-badge">' +
+						'<i class="fa-solid fa-circle-check"></i> ' +
+						__t('Done') +
+						'</span>'
+					);
+
+				// Disable complete action until reload
+				$('.do-task-button[data-task-id="' + taskId + '"]')
+					.addClass("disabled");
 			}
 
 			Grocy.FrontendHelpers.EndUiBusy();
@@ -111,16 +263,14 @@ $(document).on('click', '.do-task-button', function (e)
 			RefreshContextualTimeago("#task-" + taskId + "-row");
 			RefreshStatistics();
 		},
-		function (xhr)
-		{
+		function (xhr) {
 			Grocy.FrontendHelpers.EndUiBusy();
 			console.error(xhr);
 		}
 	);
 });
 
-$(document).on('click', '.undo-task-button', function (e)
-{
+$(document).on('click', '.undo-task-button', function (e) {
 	e.preventDefault();
 
 	Grocy.FrontendHelpers.BeginUiBusy();
@@ -129,20 +279,17 @@ $(document).on('click', '.undo-task-button', function (e)
 	var taskName = $(e.currentTarget).attr('data-task-name');
 
 	Grocy.Api.Post('tasks/' + taskId + '/undo', {},
-		function ()
-		{
+		function () {
 			window.location.reload();
 		},
-		function (xhr)
-		{
+		function (xhr) {
 			Grocy.FrontendHelpers.EndUiBusy();
 			console.error(xhr);
 		}
 	);
 });
 
-$(document).on('click', '.delete-task-button', function (e)
-{
+$(document).on('click', '.delete-task-button', function (e) {
 	e.preventDefault();
 
 	var objectName = $(e.currentTarget).attr('data-task-name');
@@ -161,20 +308,15 @@ $(document).on('click', '.delete-task-button', function (e)
 				className: 'btn-danger'
 			}
 		},
-		callback: function (result)
-		{
-			if (result === true)
-			{
+		callback: function (result) {
+			if (result === true) {
 				Grocy.Api.Delete('objects/tasks/' + objectId, {},
-					function (result)
-					{
-						animateCSS("#task-" + objectId + "-row", "fadeOut", function ()
-						{
+					function (result) {
+						animateCSS("#task-" + objectId + "-row", "fadeOut", function () {
 							$("#task-" + objectId + "-row").remove();
 						});
 					},
-					function (xhr)
-					{
+					function (xhr) {
 						console.error(xhr);
 					}
 				);
@@ -183,65 +325,54 @@ $(document).on('click', '.delete-task-button', function (e)
 	});
 });
 
-$("#show-done-tasks").change(function ()
-{
-	if (this.checked)
-	{
+$("#show-done-tasks").change(function () {
+	if (this.checked) {
 		window.location.href = U('/tasks?include_done');
 	}
-	else
-	{
+	else {
 		window.location.href = U('/tasks');
 	}
 });
 
-if (GetUriParam('include_done'))
-{
+if (GetUriParam('include_done')) {
 	$("#show-done-tasks").prop('checked', true);
 }
 
-function RefreshStatistics()
-{
-	var nextXDays = $("#info-due-soon-tasks").data("next-x-days");
+function RefreshStatistics() {
 	Grocy.Api.Get('tasks',
-		function (result)
-		{
+		function (result) {
 			var dueTodayCount = 0;
 			var dueSoonCount = 0;
 			var overdueCount = 0;
-			var overdueThreshold = moment().subtract(1, "days").endOf("day");
-			var nextXDaysThreshold = moment().endOf("day").add(nextXDays, "days");
-			var todayThreshold = moment().endOf("day");
 
-			result.forEach(element =>
-			{
-				if (element.due_date)
-				{
-					var date = moment(element.due_date + " 23:59:59").endOf("day");
+			result.forEach(function (task) {
+				var status = GetTaskDueStatus(task.due_date);
 
-					if (date.isSameOrBefore(overdueThreshold))
-					{
-						overdueCount++;
-					}
-					else if (date.isSameOrBefore(todayThreshold))
-					{
-						dueTodayCount++;
-						dueSoonCount++;
-					}
-					else if (date.isSameOrBefore(nextXDaysThreshold))
-					{
-						dueSoonCount++;
-					}
+				if (status === "overdue") {
+					overdueCount++;
+				}
+				else if (status === "duetoday") {
+					dueTodayCount++;
+
+					// Keep original Grocy behaviour:
+					// today is also included in "due soon"
+					dueSoonCount++;
+				}
+				else if (status === "duesoon") {
+					dueSoonCount++;
 				}
 			});
 
-			$("#info-due-today-tasks").html('<span class="d-block d-md-none">' + dueTodayCount + ' <i class="fa-solid fa-clock"></i></span><span class="d-none d-md-block">' + __n(dueTodayCount, '%s task is due to be done today', '%s tasks are due to be done today'));
-			$("#info-due-soon-tasks").html('<span class="d-block d-md-none">' + dueSoonCount + ' <i class="fa-solid fa-clock"></i></span><span class="d-none d-md-block">' + __n(dueSoonCount, '%s task is due to be done', '%s tasks are due to be done') + ' ' + __n(nextXDays, 'within the next day', 'within the next %s days'));
-			$("#info-overdue-tasks").html('<span class="d-block d-md-none">' + overdueCount + ' <i class="fa-solid fa-times-circle"></i></span><span class="d-none d-md-block">' + __n(overdueCount, '%s task is overdue to be done', '%s tasks are overdue to be done'));
+			$("#overdue-tasks-count").text(overdueCount);
+			$("#due-today-tasks-count").text(dueTodayCount);
+			$("#due-soon-tasks-count").text(dueSoonCount);
 		},
-		function (xhr)
-		{
+		function (xhr) {
 			console.error(xhr);
+
+			$("#overdue-tasks-count").text("-");
+			$("#due-today-tasks-count").text("-");
+			$("#due-soon-tasks-count").text("-");
 		}
 	);
 }
