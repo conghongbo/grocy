@@ -370,10 +370,14 @@
 
             <div class="modal-body">
                 <p>
-                   <strong>
-                       {{ count($missingProducts) }}
-                   </strong>
-                   {{ $__t('products are below the defined minimum stock amount.') }}
+                    <strong>
+                        {{ count($missingProducts) }}
+                    </strong>
+                    @if(count($missingProducts) === 1)
+                        {{ $__t('product is below the defined minimum stock amount.') }}
+                    @else
+                        {{ $__t('products are below the defined minimum stock amount.') }}
+                    @endif
                 </p>
 
                 <p class="mb-0">
