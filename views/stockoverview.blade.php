@@ -369,7 +369,7 @@
                            </span>
                            {{ $__t('needed') }}
                        </span>
-                        @endif
+
                     </span>
 						@if($currentStockEntry->is_aggregated_amount == 1)
 						<span class="@if($currentStockEntry->product_no_own_stock == 0) pl-1 @endif text-secondary">
