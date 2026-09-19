@@ -154,6 +154,21 @@ class RecipesApiController extends BaseApiController
 			$from = $requestBody['from'];
 			$to = $requestBody['to'];
 
+			$preserveMinStock = false;
+
+			if (array_key_exists('preserve_min_stock', $requestBody))
+			{
+				if (!is_bool($requestBody['preserve_min_stock']))
+				{
+					throw new \Exception(
+						'preserve_min_stock must be a boolean'
+					);
+				}
+
+				$preserveMinStock =
+					$requestBody['preserve_min_stock'];
+			}
+
 			if ($from > $to)
 			{
 				throw new \Exception(
@@ -190,7 +205,8 @@ class RecipesApiController extends BaseApiController
 				->AddMealPlanShoppingRequirementsToShoppingList(
 					$from,
 					$to,
-					$listId
+					$listId,
+					$preserveMinStock
 				);
 
 			return $this->ApiResponse(
@@ -199,6 +215,7 @@ class RecipesApiController extends BaseApiController
 					'from' => $from,
 					'to' => $to,
 					'shopping_list_id' => $listId,
+					'preserve_min_stock' => $preserveMinStock,
 					'requirements' => $result['requirements'],
 					'written_items' => $result['written_items']
 				]

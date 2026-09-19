@@ -196,6 +196,17 @@
                         </select>
                     </div>
 
+					<div class="form-group form-check">
+						<input type="checkbox"
+							class="form-check-input"
+							id="mealplan-shopping-preserve-min-stock">
+
+						<label class="form-check-label"
+							for="mealplan-shopping-preserve-min-stock">
+							{{ $__t('Preserve minimum stock after planned meals') }}
+						</label>
+					</div>
+
                 </form>
 
 				<div id="mealplan-shopping-requirements-result"
