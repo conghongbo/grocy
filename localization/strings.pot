@@ -2176,6 +2176,9 @@ msgstr ""
 msgid "Due today"
 msgstr ""
 
+msgid "Not scheduled"
+msgstr ""
+
 msgid "%s task is due to be done today"
 msgid_plural "%s tasks are due to be done today"
 msgstr[0] ""

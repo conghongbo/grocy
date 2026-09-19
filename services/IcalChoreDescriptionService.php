@@ -5,13 +5,24 @@ namespace Grocy\Services;
 final class IcalChoreDescriptionService
 {
 	const STATUS_DUE_TODAY = 'due-today';
+	const STATUS_NOT_SCHEDULED = 'not-scheduled';
 	const STATUS_OVERDUE = 'overdue';
 	const STATUS_UPCOMING = 'upcoming';
 
-	public static function GetStatus(string $nextDueDate, ?\DateTimeImmutable $now = null): string
+	public static function GetStatus(?string $nextDueDate, ?\DateTimeImmutable $now = null, bool $allDay = false): string
 	{
+		if (empty($nextDueDate))
+		{
+			return self::STATUS_NOT_SCHEDULED;
+		}
+
 		$now = $now ?? new \DateTimeImmutable();
 		$nextDue = new \DateTimeImmutable($nextDueDate, $now->getTimezone());
+
+		if ($allDay && $nextDue->format('Y-m-d') === $now->format('Y-m-d'))
+		{
+			return self::STATUS_DUE_TODAY;
+		}
 
 		if ($nextDue < $now)
 		{
@@ -30,15 +41,19 @@ final class IcalChoreDescriptionService
 	{
 		$statusLabels = [
 			self::STATUS_DUE_TODAY => $labels[self::STATUS_DUE_TODAY],
+			self::STATUS_NOT_SCHEDULED => $labels[self::STATUS_NOT_SCHEDULED],
 			self::STATUS_OVERDUE => $labels[self::STATUS_OVERDUE],
 			self::STATUS_UPCOMING => $labels[self::STATUS_UPCOMING]
 		];
-		$status = self::GetStatus($event['start'], $now);
+		$nextDueDate = $event['start'] ?? null;
+		$status = self::GetStatus($nextDueDate, $now, !empty($event['allDay']));
 		$dateFormat = !empty($event['allDay']) ? 'Y-m-d' : 'Y-m-d H:i:s';
 
 		$details = [
 			$labels['status'] . ': ' . $statusLabels[$status],
-			$labels['next-due-date'] . ': ' . (new \DateTimeImmutable($event['start']))->format($dateFormat),
+			$labels['next-due-date'] . ': ' . (empty($nextDueDate)
+				? $labels['never']
+				: (new \DateTimeImmutable($nextDueDate))->format($dateFormat)),
 			$labels['last-tracked'] . ': ' . (empty($event['last_tracked_time'])
 				? $labels['never']
 				: (new \DateTimeImmutable($event['last_tracked_time']))->format($dateFormat))
@@ -47,9 +62,12 @@ final class IcalChoreDescriptionService
 		$sections = [implode(PHP_EOL, $details)];
 		if (!empty($event['description']))
 		{
-			$sections[] = $event['description'];
+			$sections[] = str_replace(["\r\n", "\r"], "\n", $event['description']);
 		}
-		$sections[] = implode(PHP_EOL, $actionLinks);
+		if (!empty($actionLinks))
+		{
+			$sections[] = implode(PHP_EOL, $actionLinks);
+		}
 
 		return implode(PHP_EOL . PHP_EOL, $sections);
 	}
