@@ -1055,8 +1055,10 @@ Grocy.Components.RecipePicker.GetPicker().on('change', function(e)
 	}
 });
 
-function RenderMealPlanShoppingRequirements(requirements)
-{
+function RenderMealPlanShoppingRequirements(
+    requirements,
+    preserveMinStock
+){
     var container =
         $("#mealplan-shopping-requirements-result-content");
 
@@ -1097,6 +1099,16 @@ function RenderMealPlanShoppingRequirements(requirements)
                 + requirement.stock_amount
             )
             .appendTo(body);
+
+		if (preserveMinStock)
+		{
+			$("<div>")
+				.text(
+					__t("Minimum stock to preserve") + ": "
+					+ requirement.minimum_stock_amount
+				)
+				.appendTo(body);
+		}
 
         $("<div>")
             .text(
@@ -1203,6 +1215,8 @@ $(document).on(
                 $("#mealplan-shopping-list-id").val()
             );
 
+		var preserveMinStock = $("#mealplan-shopping-preserve-min-stock").is(":checked");
+
         if (!from || !to)
         {
             toastr.error(
@@ -1232,8 +1246,9 @@ $(document).on(
             'recipes/mealplan/add-shopping-requirements',
             {
                 from: from,
-                to: to,
-                shopping_list_id: shoppingListId
+				to: to,
+				shopping_list_id: shoppingListId,
+				preserve_min_stock: preserveMinStock
             },
             function(result)
             {
@@ -1241,7 +1256,8 @@ $(document).on(
                 Grocy.FrontendHelpers.EndUiBusy();
 
 				RenderMealPlanShoppingRequirements(
-					result.requirements
+					result.requirements,
+					result.preserve_min_stock
 				);
 
 				button.addClass("d-none");

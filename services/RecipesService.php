@@ -139,7 +139,11 @@ class RecipesService extends BaseService
 
 	// TODO: Confirm that recipe_amount is normalized to the product stock QU
 	// before aggregating products with ingredient units different from stock QU.
-	public function GetMealPlanShoppingRequirements($from, $to){
+	public function GetMealPlanShoppingRequirements(
+		$from,
+		$to,
+		$preserveMinStock = false
+	){
 		$sql = "
 			SELECT
 				rpr.*,
@@ -183,6 +187,7 @@ class RecipesService extends BaseService
 					'product_name' => $product->name,
 					'stock_qu_id' => (int)$product->qu_id_stock,
 					'purchase_qu_id' => (int)$product->qu_id_purchase,
+					'minimum_stock_amount' => (float)$product->min_stock_amount,
 					'required_amount_stock' => 0.0,
 					'stock_amount' => (float)$recipePosition->stock_amount,
 					'missing_amount_stock' => 0.0,
@@ -235,9 +240,24 @@ class RecipesService extends BaseService
 			$requirement['stock_amount'] =
 				round($requirement['stock_amount'], 2);
 
+			$minimumStockAmount = 0.0;
+
+			if ($preserveMinStock)
+			{
+				$minimumStockAmount =
+					(float)$requirement['minimum_stock_amount'];
+			}
+
+			$targetAmountStock =
+				$requirement['required_amount_stock']
+				+ $minimumStockAmount;
+
+			$requirement['target_amount_stock'] =
+				round($targetAmountStock, 2);
+
 			$requirement['missing_amount_stock'] = round(
 				max(
-					$requirement['required_amount_stock']
+					$targetAmountStock
 					- $requirement['stock_amount'],
 					0
 				),
@@ -359,7 +379,8 @@ class RecipesService extends BaseService
 	public function AddMealPlanShoppingRequirementsToShoppingList(
 		$from,
 		$to,
-		$listId = 1
+		$listId = 1,
+		$preserveMinStock = false
 	){
 		$shoppingList = $this->DB
 			->shopping_lists()
@@ -375,7 +396,8 @@ class RecipesService extends BaseService
 
 		$requirements = $this->GetMealPlanShoppingRequirements(
 			$from,
-			$to
+			$to,
+			$preserveMinStock
 		);
 
 		$writtenItems = [];
