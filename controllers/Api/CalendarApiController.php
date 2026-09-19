@@ -152,6 +152,7 @@ class CalendarApiController extends BaseApiController
 		return IcalChoreDescriptionService::BuildDescription($event, [
 			'status' => $localizationService->__t('Status'),
 			IcalChoreDescriptionService::STATUS_DUE_TODAY => $localizationService->__t('Due today'),
+			IcalChoreDescriptionService::STATUS_NOT_SCHEDULED => $localizationService->__t('Not scheduled'),
 			IcalChoreDescriptionService::STATUS_OVERDUE => $localizationService->__t('Overdue'),
 			IcalChoreDescriptionService::STATUS_UPCOMING => $localizationService->__t('Upcoming'),
 			'next-due-date' => $localizationService->__t('Next due date'),
