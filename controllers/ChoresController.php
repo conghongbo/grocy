@@ -45,6 +45,7 @@ class ChoresController extends BaseController
 
 	public function ChoresList(Request $request, Response $response, array $args)
 	{
+		// Chores used by the table
 		if (isset($request->getQueryParams()['include_disabled']))
 		{
 			$chores = $this->DB->chores()->orderBy('name', 'COLLATE NOCASE');
@@ -54,8 +55,16 @@ class ChoresController extends BaseController
 			$chores = $this->DB->chores()->where('active = 1')->orderBy('name', 'COLLATE NOCASE');
 		}
 
+		// Chore statistics
+		$totalChores = $this->DB->chores()->count();
+		$activeChores = $this->DB->chores()->where('active = 1')->count();
+		$disabledChores = $this->DB->chores()->where('active = 0')->count();
+
 		return $this->RenderPage($response, 'chores', [
 			'chores' => $chores,
+			'totalChores' => $totalChores,
+			'activeChores' => $activeChores,
+			'disabledChores' => $disabledChores,
 			'userfields' => UserfieldsService::GetInstance()->GetFields('chores'),
 			'userfieldValues' => UserfieldsService::GetInstance()->GetAllValues('chores')
 		]);

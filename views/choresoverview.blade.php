@@ -23,7 +23,197 @@
 				</a>
 			</div>
 		</div>
-		<div class="border-top border-bottom my-2 py-1">
+
+		<style>
+			.chore-summary-card {
+				cursor: pointer;
+				border: 1px solid #dee2e6;
+				border-radius: 0.5rem;
+				transition:
+					transform 0.15s ease,
+					box-shadow 0.15s ease,
+					border-color 0.15s ease;
+				overflow: hidden;
+			}
+
+			.chore-summary-card:hover {
+				transform: translateY(-2px);
+				box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.08);
+			}
+
+			.chore-summary-card .card-body {
+				padding: 1rem 1.1rem;
+			}
+
+			.chore-summary-icon {
+				width: 2.5rem;
+				height: 2.5rem;
+				border-radius: 50%;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				font-size: 1rem;
+				background: rgba(0, 0, 0, 0.04);
+			}
+
+			.chore-summary-title {
+				font-size: 0.8rem;
+				font-weight: 600;
+				text-transform: uppercase;
+				letter-spacing: 0.03rem;
+				color: #6c757d;
+			}
+
+			.summary-count {
+				font-size: 1.75rem;
+				line-height: 1;
+				font-weight: 600;
+				margin-top: 0.35rem;
+			}
+
+			.chore-summary-description {
+				margin-top: 0.45rem;
+				font-size: 0.75rem;
+				color: #6c757d;
+			}
+
+			.chore-summary-card.active {
+				box-shadow: 0 0 0 2px currentColor;
+			}
+		</style>
+
+		<div class="row mt-2 mb-3">
+			<!-- Overdue -->
+			<div class="col-12 col-sm-6 col-xl-3 mb-3">
+				<div class="card h-100 chore-summary-card text-danger status-filter-message"
+					data-status-filter="overdue"
+					title="{{ $__t('Show overdue chores') }}">
+					<div class="card-body">
+						<div class="d-flex justify-content-between align-items-start">
+							<div>
+								<div class="chore-summary-title">
+									{{ $__t('Overdue') }}
+								</div>
+
+								<div
+									id="summary-overdue-count"
+									class="summary-count">
+									0
+								</div>
+							</div>
+
+							<div class="chore-summary-icon">
+								<i class="fa-solid fa-triangle-exclamation"></i>
+							</div>
+						</div>
+
+						<div class="chore-summary-description">
+							{{ $__t('Chores requiring attention') }}
+						</div>
+					</div>
+				</div>
+			</div>
+
+
+			<!-- Due today -->
+			<div class="col-12 col-sm-6 col-xl-3 mb-3">
+				<div class="card h-100 chore-summary-card text-info status-filter-message"
+					data-status-filter="duetoday"
+					title="{{ $__t('Show chores due today') }}">
+					<div class="card-body">
+						<div class="d-flex justify-content-between align-items-start">
+							<div>
+								<div class="chore-summary-title">
+									{{ $__t('Due today') }}
+								</div>
+
+								<div
+									id="summary-due-today-count"
+									class="summary-count">
+									0
+								</div>
+							</div>
+
+							<div class="chore-summary-icon">
+								<i class="fa-solid fa-calendar-day"></i>
+							</div>
+						</div>
+
+						<div class="chore-summary-description">
+							{{ $__t('Scheduled for today') }}
+						</div>
+					</div>
+				</div>
+			</div>
+
+
+			<!-- Due soon -->
+			<div class="col-12 col-sm-6 col-xl-3 mb-3 @if($nextXDays == 0) d-none @endif">
+				<div class="card h-100 chore-summary-card text-warning status-filter-message"
+					data-status-filter="duesoon"
+					title="{{ $__t('Show upcoming chores') }}">
+					<div class="card-body">
+						<div class="d-flex justify-content-between align-items-start">
+							<div>
+								<div class="chore-summary-title">
+									{{ $__t('Due soon') }}
+								</div>
+
+								<div
+									id="summary-due-soon-count"
+									class="summary-count">
+									0
+								</div>
+							</div>
+
+							<div class="chore-summary-icon">
+								<i class="fa-solid fa-clock"></i>
+							</div>
+						</div>
+
+						<div class="chore-summary-description">
+							{{ $__t('Upcoming chores') }}
+						</div>
+					</div>
+				</div>
+			</div>
+
+
+			<!-- Assigned to me -->
+			@if(GROCY_FEATURE_FLAG_CHORES_ASSIGNMENTS)
+			<div class="col-12 col-sm-6 col-xl-3 mb-3">
+				<div class="card h-100 chore-summary-card text-secondary user-filter-message"
+					data-user-filter="xx{{ GROCY_USER_ID }}xx"
+					title="{{ $__t('Show chores assigned to me') }}">
+					<div class="card-body">
+						<div class="d-flex justify-content-between align-items-start">
+							<div>
+								<div class="chore-summary-title">
+									{{ $__t('Assigned to me') }}
+								</div>
+
+								<div
+									id="summary-assigned-count"
+									class="summary-count">
+									0
+								</div>
+							</div>
+
+							<div class="chore-summary-icon">
+								<i class="fa-solid fa-user"></i>
+							</div>
+						</div>
+
+						<div class="chore-summary-description">
+							{{ $__t('Your assigned chores') }}
+						</div>
+					</div>
+				</div>
+			</div>
+			@endif
+		</div>
+
+		<div class="border-top border-bottom my-2 py-1 d-none">
 			<div id="info-overdue-chores"
 				data-status-filter="overdue"
 				class="error-message status-filter-message responsive-button mr-2"></div>
@@ -57,52 +247,108 @@
 	</div>
 </div>
 
-<div class="row collapse d-md-flex"
+<div class="d-flex justify-content-between align-items-center mb-2">
+	<div>
+		<h5 class="mb-0">
+			{{ $__t('Chores') }}
+		</h5>
+
+		<small class="text-muted">
+			{{ $__t('Search and filter your upcoming chores') }}
+		</small>
+	</div>
+</div>
+
+<div class="row collapse d-md-flex align-items-center mb-2"
 	id="table-filter-row">
-	<div class="col-12 col-md-6 col-xl-3">
+	<!-- Search -->
+	<div class="col-12 col-md-6 col-lg-4 mb-2">
 		<div class="input-group">
 			<div class="input-group-prepend">
-				<span class="input-group-text"><i class="fa-solid fa-search"></i></span>
+				<span class="input-group-text">
+					<i class="fa-solid fa-search"></i>
+				</span>
 			</div>
+
 			<input type="text"
 				id="search"
 				class="form-control"
-				placeholder="{{ $__t('Search') }}">
+				placeholder="{{ $__t('Search chores...') }}">
 		</div>
 	</div>
-	<div class="col-12 col-md-6 col-xl-3">
+
+	<!-- Status -->
+	<div class="col-12 col-md-6 col-lg-3 mb-2">
 		<div class="input-group">
 			<div class="input-group-prepend">
-				<span class="input-group-text"><i class="fa-solid fa-filter"></i>&nbsp;{{ $__t('Status') }}</span>
+				<span class="input-group-text">
+					<i class="fa-solid fa-filter"></i>&nbsp;
+					{{ $__t('Status') }}
+				</span>
 			</div>
+
 			<select class="custom-control custom-select"
 				id="status-filter">
-				<option value="all">{{ $__t('All') }}</option>
-				<option value="overdue">{{ $__t('Overdue') }}</option>
-				<option value="duetoday">{{ $__t('Due today') }}</option>
+				<option value="all">
+					{{ $__t('All') }}
+				</option>
+
+				<option value="overdue">
+					{{ $__t('Overdue') }}
+				</option>
+
+				<option value="duetoday">
+					{{ $__t('Due today') }}
+				</option>
+
 				@if($nextXDays > 0)
-				<option value="duesoon">{{ $__t('Due soon') }}</option>
+				<option value="duesoon">
+					{{ $__t('Due soon') }}
+				</option>
 				@endif
 			</select>
 		</div>
 	</div>
+
+	<!-- Assignment -->
 	@if(GROCY_FEATURE_FLAG_CHORES_ASSIGNMENTS)
-	<div class="col-12 col-md-6 col-xl-3">
+	<div class="col-12 col-md-6 col-lg-3 mb-2">
 		<div class="input-group">
 			<div class="input-group-prepend">
-				<span class="input-group-text"><i class="fa-solid fa-filter"></i>&nbsp;{{ $__t('Assignment') }}</span>
+				<span class="input-group-text">
+					<i class="fa-solid fa-user"></i>&nbsp;
+					{{ $__t('Assignment') }}
+				</span>
 			</div>
+
 			<select class="custom-control custom-select"
 				id="user-filter">
-				<option></option>
+				<option value="">
+					{{ $__t('All') }}
+				</option>
+
 				@foreach($users as $user)
-				<option data-user-id="{{ $user->id }}"
-					value="xx{{ $user->id }}xx">{{ $user->display_name }}</option>
+					<option
+						data-user-id="{{ $user->id }}"
+						value="xx{{ $user->id }}xx">
+						{{ $user->display_name }}
+					</option>
 				@endforeach
 			</select>
 		</div>
 	</div>
 	@endif
+
+	<!-- Clear filters -->
+	<div class="col-12 col-md-6 col-lg-2 mb-2">
+		<button type="button"
+			id="clear-chore-filters"
+			class="btn btn-outline-secondary btn-block">
+			<i class="fa-solid fa-xmark mr-1"></i>
+			{{ $__t('Clear filters') }}
+		</button>
+	</div>
+
 </div>
 
 <div class="row">

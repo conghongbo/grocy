@@ -7,12 +7,27 @@
 @section('content')
 <div class="row">
 	<div class="col-12 col-md-6 pb-3">
-		<h2 class="title">@yield('title')</h2>
+		<h2 class="title mb-1">@yield('title')</h2>
 
-		<hr class="my-2">
+		<p class="text-muted mb-3">
+			{{ $__t('Track completed chores and manage their next execution.') }}
+		</p>
+
+		<hr class="my-3">
 
 		<form id="choretracking-form"
 			novalidate>
+
+			<div class="mb-3">
+				<h5 class="mb-1">
+					<i class="fa-solid fa-list-check mr-1"></i>
+					{{ $__t('Select chore') }}
+				</h5>
+
+				<small class="text-muted">
+					{{ $__t('Choose the chore you want to track.') }}
+				</small>
+			</div>
 
 			<div class="form-group">
 				<label class="w-100"
@@ -32,6 +47,19 @@
 					@endforeach
 				</select>
 				<div class="invalid-feedback">{{ $__t('You have to select a chore') }}</div>
+			</div>
+
+			<hr class="my-4">
+
+			<div class="mb-3">
+				<h5 class="mb-1">
+					<i class="fa-solid fa-clock-rotate-left mr-1"></i>
+					{{ $__t('Tracking details') }}
+				</h5>
+
+				<small class="text-muted">
+					{{ $__t('Choose when the chore was completed and who completed it.') }}
+				</small>
 			</div>
 
 			@include('components.datetimepicker', array(
@@ -63,14 +91,59 @@
 			'entity' => 'chores_log'
 			))
 
-			<button class="btn btn-success save-choretracking-button">{{ $__t('OK') }}</button>
+			<hr class="my-4">
 
-			<button class="btn btn-secondary save-choretracking-button skip">{{ $__t('Skip') }}</button>
+			<div class="mb-3">
+				<h5 class="mb-1">
+					<i class="fa-solid fa-bolt mr-1"></i>
+					{{ $__t('Actions') }}
+				</h5>
 
+				<small class="text-muted">
+					{{ $__t('Track this execution or skip the next scheduled execution.') }}
+				</small>
+			</div>
+
+			<div id="manual-chore-skip-hint"
+				class="alert alert-info py-2 px-3 mb-3 d-none">
+				<i class="fa-solid fa-circle-info mr-1"></i>
+				{{ $__t('This chore uses a manual schedule. The next execution cannot be skipped.') }}
+			</div>
+
+			<button
+				type="submit"
+				class="btn btn-success save-choretracking-button mr-2 disabled">
+				<i class="fa-solid fa-check mr-1"></i>
+				{{ $__t('Track execution') }}
+			</button>
+
+			<button
+				type="button"
+				class="btn btn-outline-secondary save-choretracking-button skip disabled">
+				<i class="fa-solid fa-forward mr-1"></i>
+				{{ $__t('Skip next execution') }}
+			</button>
+
+			<div id="choretracking-ready-hint"
+				class="text-muted small mt-3">
+				<i class="fa-solid fa-circle-info mr-1"></i>
+				{{ $__t('Select a chore to start tracking.') }}
+			</div>
 		</form>
 	</div>
 
 	<div class="col-12 col-md-6">
+		<div class="mb-3">
+			<h5 class="mb-1">
+				<i class="fa-solid fa-circle-info mr-1"></i>
+				{{ $__t('Chore information') }}
+			</h5>
+
+			<small class="text-muted">
+				{{ $__t('Details about the currently selected chore.') }}
+			</small>
+		</div>
+
 		@include('components.chorecard')
 	</div>
 </div>
