@@ -1,4 +1,90 @@
-﻿$('#save-transfer-button').on('click', function (e)
+var TransferInitialLocationFromOptions = $("#location_id_from option").clone();
+var TransferInitialLocationToOptions = $("#location_id_to option").clone();
+
+function RefreshTransferLocationCombobox(locationElement)
+{
+	var combobox = locationElement.data("combobox");
+	if (combobox)
+	{
+		combobox.refresh();
+	}
+}
+
+function ResetTransferForm()
+{
+	$("#specific_stock_entry").find("option").remove().end().append("<option></option>");
+	$("#specific_stock_entry").attr("disabled", "");
+	$("#specific_stock_entry").removeAttr("required");
+	$("#use_specific_stock_entry").prop("checked", false);
+
+	Grocy.Components.ProductPicker.Clear();
+
+	Grocy.Components.ProductAmountPicker.Reset();
+	$("#display_amount").attr("min", Grocy.DefaultMinAmount);
+	$("#display_amount").removeAttr("max");
+	$("#display_amount").removeAttr("data-stock-amount");
+	$("#display_amount").val(Grocy.UserSettings.stock_default_transfer_amount);
+	RefreshLocaleNumberInput();
+	$(".input-group-productamountpicker").trigger("change");
+	$("#amount").val("");
+	$("#tare-weight-handling-info").addClass("d-none");
+
+	var locationFrom = $("#location_id_from");
+	var locationTo = $("#location_id_to");
+	locationFrom.empty().append(TransferInitialLocationFromOptions.clone()).val("");
+	locationTo.empty().append(TransferInitialLocationToOptions.clone()).val("");
+	locationTo.find("option").prop("disabled", false);
+	RefreshTransferLocationCombobox(locationFrom);
+	RefreshTransferLocationCombobox(locationTo);
+
+	$("#transfer-form").removeClass("was-validated");
+	Grocy.Components.ProductPicker.GetInputElement().focus();
+}
+
+$("#swap-locations-button").on("click", function ()
+{
+	var locationFrom = $("#location_id_from");
+	var locationTo = $("#location_id_to");
+	var locationFromValue = locationFrom.val();
+	var locationToValue = locationTo.val();
+
+	if (!locationFromValue || !locationToValue)
+	{
+		return;
+	}
+
+	if (locationFromValue == locationToValue)
+	{
+		locationFrom.trigger("change");
+		Grocy.FrontendHelpers.ValidateForm("transfer-form");
+		return;
+	}
+
+	// The source list normally contains only locations where the selected product
+	// is in stock. Keep the selected destination available so existing validation
+	// can report when the newly selected source has no stock.
+	if (locationFrom.find("option[value='" + locationToValue + "']").length == 0)
+	{
+		locationFrom.append(locationTo.find("option:selected").clone());
+	}
+
+	locationFrom.val(locationToValue);
+	RefreshTransferLocationCombobox(locationFrom);
+	locationFrom.trigger("change");
+
+	locationTo.val(locationFromValue);
+	RefreshTransferLocationCombobox(locationTo);
+	locationTo.trigger("change");
+
+	Grocy.FrontendHelpers.ValidateForm("transfer-form");
+});
+
+$("#reset-transfer-button").on("click", function ()
+{
+	ResetTransferForm();
+});
+
+$('#save-transfer-button').on('click', function (e)
 {
 	e.preventDefault();
 
@@ -94,28 +180,8 @@
 							toastr.info('<span>' + __t("Thawed") + "</span> <i class='fa-solid fa-fire-alt'></i>");
 						}
 
-						$("#specific_stock_entry").find("option").remove().end().append("<option></option>");
-						$("#specific_stock_entry").attr("disabled", "");
-						$("#specific_stock_entry").removeAttr("required");
-						if ($("#use_specific_stock_entry").is(":checked"))
-						{
-							$("#use_specific_stock_entry").click();
-						}
-
-						Grocy.Components.ProductAmountPicker.Reset();
-						$("#location_id_from").find("option").remove().end().append("<option></option>");
-						$("#display_amount").attr("min", Grocy.DefaultMinAmount);
-						$("#display_amount").removeAttr("max");
-						$('#display_amount').val(Grocy.UserSettings.stock_default_transfer_amount);
-						RefreshLocaleNumberInput();
-						$(".input-group-productamountpicker").trigger("change");
-						$("#tare-weight-handling-info").addClass("d-none");
-						Grocy.Components.ProductPicker.Clear();
-						$("#location_id_to").val("");
-						$("#location_id_from").val("");
-						Grocy.Components.ProductPicker.GetInputElement().focus();
+						ResetTransferForm();
 						Grocy.Components.ProductCard.Refresh(jsonForm.product_id);
-						Grocy.FrontendHelpers.ValidateForm('transfer-form');
 					}
 				},
 				function (xhr)
