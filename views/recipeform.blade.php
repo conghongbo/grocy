@@ -87,6 +87,13 @@
 			'disallowAllProductWorkflows' => true,
 			))
 
+			<button type="button"
+				id="create-produced-product-button"
+				class="btn btn-outline-primary btn-sm mb-3 d-none">
+				<i class="fa-solid fa-plus"></i>
+				{{ $__t('Create new produced product') }}
+			</button>
+
 			@include('components.userfieldsform', array(
 			'userfields' => $userfields,
 			'entity' => 'recipes'

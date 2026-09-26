@@ -1,4 +1,133 @@
-﻿function saveRecipePicture(result, location, jsonData)
+﻿var RecipeFormDraftStorageKey =
+	"grocy.recipeform.produced-product-draft";
+
+function StoreRecipeFormDraft()
+{
+	var description = $("#description").val();
+
+	if (
+		$.fn.summernote
+		&& $("#description").next(".note-editor").length > 0
+	)
+	{
+		description =
+			$("#description").summernote("code");
+	}
+
+	var draft = {
+		name: $("#name").val(),
+		base_servings: $("#base_servings").val(),
+		not_check_shoppinglist:
+			$("#not_check_shoppinglist").is(":checked"),
+		description: description
+	};
+
+	sessionStorage.setItem(
+		RecipeFormDraftStorageKey,
+		JSON.stringify(draft)
+	);
+}
+
+function RestoreRecipeFormDraft()
+{
+	if (
+		GetUriParam("flow")
+		!== "InplaceNewProductWithName"
+	)
+	{
+		return;
+	}
+
+	var storedDraft = sessionStorage.getItem(
+		RecipeFormDraftStorageKey
+	);
+
+	if (!storedDraft)
+	{
+		return;
+	}
+
+	try
+	{
+		var draft = JSON.parse(storedDraft);
+
+		$("#name").val(draft.name);
+		$("#base_servings").val(draft.base_servings);
+
+		$("#not_check_shoppinglist").prop(
+			"checked",
+			draft.not_check_shoppinglist
+		);
+
+		$("#description").val(draft.description);
+
+		if (
+			$.fn.summernote
+			&& $("#description").next(".note-editor").length > 0
+		)
+		{
+			$("#description").summernote(
+				"code",
+				draft.description
+			);
+		}
+
+		sessionStorage.removeItem(
+			RecipeFormDraftStorageKey
+		);
+	}
+	catch (ex)
+	{
+		console.error(ex);
+
+		sessionStorage.removeItem(
+			RecipeFormDraftStorageKey
+		);
+	}
+}
+
+function ValidateProducedProduct()
+{
+	var typedProductName =
+		Grocy.Components.ProductPicker
+			.GetInputElement()
+			.val()
+			.trim();
+
+	var selectedProductId =
+		Grocy.Components.ProductPicker.GetValue();
+
+	var invalidSelection =
+		typedProductName.length > 0
+		&& !selectedProductId;
+
+	if (invalidSelection)
+	{
+		Grocy.Components.ProductPicker.ShowCustomError(
+			__t(
+				'The produced product does not exist. Select an existing product or create it first.'
+			)
+		);
+
+		$("#create-produced-product-button")
+			.removeClass("d-none");
+
+		Grocy.Components.ProductPicker
+			.GetInputElement()
+			.focus();
+
+		return false;
+	}
+
+	Grocy.Components.ProductPicker.HideCustomError();
+
+	$("#create-produced-product-button")
+		.addClass("d-none");
+
+	return true;
+}
+
+function saveRecipePicture(result, location, jsonData)
 {
 	var recipeId = Grocy.EditObjectId || result.created_object_id;
 	Grocy.EditObjectId = recipeId; // Grocy.EditObjectId is not yet set when adding a recipe
@@ -31,6 +160,11 @@ $('.save-recipe').on('click', function(e)
 	e.preventDefault();
 
 	if (!Grocy.FrontendHelpers.ValidateForm("recipe-form", true))
+	{
+		return;
+	}
+
+	if (!ValidateProducedProduct())
 	{
 		return;
 	}
@@ -78,6 +212,62 @@ $('.save-recipe').on('click', function(e)
 		}
 	);
 });
+
+$("#create-produced-product-button").on(
+	"click",
+	function()
+	{
+		var productName =
+			Grocy.Components.ProductPicker
+				.GetInputElement()
+				.val()
+				.trim();
+
+		if (productName.length === 0)
+		{
+			return;
+		}
+
+		StoreRecipeFormDraft();
+
+		var returnTo =
+			Grocy.CurrentUrlRelative
+			+ "?flow=InplaceNewProductWithName";
+
+		window.location.href = U(
+			"/product/new"
+			+ "?flow=InplaceNewProductWithName"
+			+ "&name="
+			+ encodeURIComponent(productName)
+			+ "&returnto="
+			+ encodeURIComponent(returnTo)
+		);
+	}
+);
+
+Grocy.Components.ProductPicker
+	.GetPicker()
+	.on("change", function()
+	{
+		if (Grocy.Components.ProductPicker.GetValue())
+		{
+			Grocy.Components.ProductPicker
+				.HideCustomError();
+
+			$("#create-produced-product-button")
+				.addClass("d-none");
+		}
+	});
+
+Grocy.Components.ProductPicker
+	.GetInputElement()
+	.on("input", function()
+	{
+		Grocy.Components.ProductPicker.HideCustomError();
+
+		$("#create-produced-product-button")
+			.addClass("d-none");
+	});
 
 var recipesPosTables = $('#recipes-pos-table').DataTable({
 	'order': [[1, 'asc']],
@@ -389,3 +579,15 @@ $(document).on('click', '.recipe-grocycode-label-print', function(e)
 		}
 	});
 });
+
+setTimeout(
+	function()
+	{
+		RestoreRecipeFormDraft();
+
+		Grocy.FrontendHelpers.ValidateForm(
+			"recipe-form"
+		);
+	},
+	Grocy.FormFocusDelay
+);
