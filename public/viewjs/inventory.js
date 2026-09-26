@@ -206,18 +206,7 @@ Grocy.Components.ProductPicker.GetPicker().on('change', function (e) {
 					Grocy.Components.LocationPicker.SetId(productDetails.location.id);
 				}
 
-				if (Grocy.FeatureFlags.GROCY_FEATURE_FLAG_STOCK_BEST_BEFORE_DATE_TRACKING) {
-					if (productDetails.product.default_best_before_days.toString() !== '0') {
-						if (productDetails.product.default_best_before_days == -1) {
-							if (!$("#datetimepicker-shortcut").is(":checked")) {
-								$("#datetimepicker-shortcut").click();
-							}
-						}
-						else {
-							Grocy.Components.DateTimePicker.SetValue(moment().add(productDetails.product.default_best_before_days, 'days').format('YYYY-MM-DD'));
-						}
-					}
-				}
+				PrefillBestBeforeDate(productDetails.product, productDetails.location);
 
 				if (Grocy.FeatureFlags.GROCY_FEATURE_FLAG_LABEL_PRINTER) {
 					$("#stock_label_type").val(productDetails.product.default_stock_label_type);
@@ -271,6 +260,68 @@ Grocy.Components.ProductPicker.GetPicker().on('change', function (e) {
 		);
 	}
 });
+
+function PrefillBestBeforeDate(product, location) {
+	if (!Grocy.FeatureFlags.GROCY_FEATURE_FLAG_STOCK_BEST_BEFORE_DATE_TRACKING) {
+		return;
+	}
+
+	if (location == null) {
+		location = {};
+	}
+
+	var shortcutValue = $("#datetimepicker-shortcut").attr("data-datetimepicker-shortcut-value");
+	var dueDateCurrent = Grocy.Components.DateTimePicker.GetValue();
+	var dueDateDefault = null;
+	var dueDateFreezer = null;
+
+	if (product.default_best_before_days != 0) {
+		dueDateDefault = moment().add(product.default_best_before_days, 'days').format('YYYY-MM-DD');
+
+		if (product.default_best_before_days == -1) {
+			dueDateDefault = shortcutValue;
+		}
+	}
+
+	if (Grocy.FeatureFlags.GROCY_FEATURE_FLAG_STOCK_PRODUCT_FREEZING && BoolVal(location.is_freezer) && product.default_best_before_days_after_freezing != 0) {
+		dueDateFreezer = moment().add(product.default_best_before_days_after_freezing, 'days').format('YYYY-MM-DD');
+
+		if (product.default_best_before_days_after_freezing == -1) {
+			dueDateFreezer = shortcutValue;
+		}
+	}
+
+	if (dueDateDefault && !dueDateCurrent) {
+		if (!$("#datetimepicker-shortcut").is(":checked") && dueDateDefault == shortcutValue) {
+			$("#datetimepicker-shortcut").click();
+		}
+		else {
+			Grocy.Components.DateTimePicker.SetValue(dueDateDefault);
+		}
+	}
+
+	if (dueDateFreezer && (!dueDateCurrent || dueDateCurrent == dueDateDefault)) {
+		if (!$("#datetimepicker-shortcut").is(":checked") && dueDateFreezer == shortcutValue) {
+			$("#datetimepicker-shortcut").click();
+		}
+		else {
+			Grocy.Components.DateTimePicker.SetValue(dueDateFreezer);
+		}
+	}
+}
+
+if (Grocy.Components.LocationPicker !== undefined) {
+	Grocy.Components.LocationPicker.GetPicker().on('change', function (e) {
+		if (Grocy.FeatureFlags.GROCY_FEATURE_FLAG_STOCK_PRODUCT_FREEZING && CurrentProductDetails) {
+			Grocy.Api.Get('objects/locations/' + Grocy.Components.LocationPicker.GetValue(),
+				function (location) {
+					PrefillBestBeforeDate(CurrentProductDetails.product, location);
+				},
+				function (xhr) { }
+			);
+		}
+	});
+}
 
 function RefreshPriceHint() {
 	if ($('#amount').val() == 0 || $('#price').val() == 0) {
