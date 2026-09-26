@@ -83,8 +83,20 @@
 				</select>
 			</div>
 
-			<button id="save-transfer-button"
-				class="btn btn-success">{{ $__t('OK') }}</button>
+			<div class="d-flex flex-wrap">
+				<button id="save-transfer-button"
+					class="btn btn-success mr-2 mb-2">{{ $__t('OK') }}</button>
+				<button id="swap-locations-button"
+					type="button"
+					class="btn btn-outline-secondary mr-2 mb-2">
+					<i class="fa-solid fa-right-left"></i> {{ $__t('Swap locations') }}
+				</button>
+				<button id="reset-transfer-button"
+					type="button"
+					class="btn btn-outline-secondary mb-2">
+					<i class="fa-solid fa-eraser"></i> {{ $__t('Clear') }}
+				</button>
+			</div>
 
 		</form>
 	</div>
