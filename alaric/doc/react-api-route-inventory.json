@@ -1,0 +1,2125 @@
+{
+  "commit": "5555e15070c17ff0a14b8460928525c0c6a5c1b5",
+  "api_routes": [
+    {
+      "id": "A001",
+      "method": "GET",
+      "path": "/api/openapi/specification",
+      "controller": "OpenApiController",
+      "handler": "DocumentationSpec",
+      "local_openapi": false,
+      "runtime_notes": "No request body. 200 OpenAPI document with deployment server URL, version and generated userentity enums. Reads checked-in specification and UserfieldsService; this does not add runtime routes.",
+      "permissions": "Authenticated; no explicit action permission check.",
+      "dependencies": [
+        "UserfieldsService::GetEntities"
+      ]
+    },
+    {
+      "id": "A002",
+      "method": "GET",
+      "path": "/api/system/info",
+      "controller": "SystemApiController",
+      "handler": "GetSystemInfo",
+      "local_openapi": true,
+      "runtime_notes": "No parameters. 200 object: grocy_version {Version, ReleaseDate}, php_version, sqlite_version, db_version, os, client.",
+      "permissions": "Authenticated; no explicit action permission check.",
+      "dependencies": [
+        "ApplicationService::GetSystemInfo",
+        "ApplicationService::GetInstalledVersion"
+      ]
+    },
+    {
+      "id": "A003",
+      "method": "GET",
+      "path": "/api/system/time",
+      "controller": "SystemApiController",
+      "handler": "GetSystemTime",
+      "local_openapi": true,
+      "runtime_notes": "O query offset: integer seconds, default 0. 200 {timezone,time_local,time_local_sqlite3,time_utc,timestamp,offset}. Invalid integer: 400.",
+      "permissions": "Authenticated; no explicit action permission check.",
+      "dependencies": [
+        "ApplicationService::GetSystemTime"
+      ]
+    },
+    {
+      "id": "A004",
+      "method": "GET",
+      "path": "/api/system/db-changed-time",
+      "controller": "SystemApiController",
+      "handler": "GetDbChangedTime",
+      "local_openapi": true,
+      "runtime_notes": "No parameters. 200 {changed_time}; suitable as an invalidation signal, not a per-record version.",
+      "permissions": "Authenticated; no explicit action permission check.",
+      "dependencies": [
+        "DatabaseService::GetDbChangedTime",
+        "DatabaseService::GetDbFilePath"
+      ]
+    },
+    {
+      "id": "A005",
+      "method": "GET",
+      "path": "/api/system/config",
+      "controller": "SystemApiController",
+      "handler": "GetConfig",
+      "local_openapi": true,
+      "runtime_notes": "No parameters. 200 object of GROCY_* constants with prefix removed, excluding AUTHENTICATED, DATAPATH, IS_EMBEDDED_INSTALL, USER_ID. Not a dedicated safe bootstrap DTO; consume only needed fields.",
+      "permissions": "Authenticated; no explicit action permission check.",
+      "dependencies": []
+    },
+    {
+      "id": "A006",
+      "method": "POST",
+      "path": "/api/system/log-missing-localization",
+      "controller": "SystemApiController",
+      "handler": "LogMissingLocalization",
+      "local_openapi": true,
+      "runtime_notes": "R JSON text:string in dev mode; 204. Outside dev mode the handler returns no Response, so do not call it in production; likely framework error, requires runtime confirmation.",
+      "permissions": "Authenticated; no explicit action permission check.",
+      "dependencies": [
+        "LocalizationService::CheckAndAddMissingTranslationToPot"
+      ]
+    },
+    {
+      "id": "A007",
+      "method": "GET",
+      "path": "/api/system/localization-strings",
+      "controller": "SystemApiController",
+      "handler": "GetLocalizationStrings",
+      "local_openapi": true,
+      "runtime_notes": "No parameters. 200 PO-derived translation object, Cache-Control max-age=2592000. Does not supply the separate quantity-unit catalogue injected by Blade.",
+      "permissions": "Authenticated; no explicit action permission check.",
+      "dependencies": [
+        "LocalizationService::GetPoAsJsonString"
+      ]
+    },
+    {
+      "id": "A008",
+      "method": "GET",
+      "path": "/api/objects/{entity}",
+      "controller": "GenericEntityApiController",
+      "handler": "GetObjects",
+      "local_openapi": true,
+      "runtime_notes": "R entity path. O Q query parameters. 200 array of database rows; userfields added only when definitions exist. Entity API schema below defines fields. Invalid/unlistable entity 400; uncaught SQL/filter failures use global errors.",
+      "permissions": "Authenticated; no explicit action permission check.",
+      "dependencies": [
+        "UserfieldsService::GetFields",
+        "UserfieldsService::IsValidExposedEntity",
+        "UserfieldsService::GetEntities",
+        "UserfieldsService::GetAllValues",
+        "GenericEntityApiController::IsValidExposedEntity",
+        "GenericEntityApiController::IsEntityWithNoListing"
+      ]
+    },
+    {
+      "id": "A009",
+      "method": "GET",
+      "path": "/api/objects/{entity}/{objectId}",
+      "controller": "GenericEntityApiController",
+      "handler": "GetObject",
+      "local_openapi": true,
+      "runtime_notes": "R entity and objectId paths. 200 database row with userfields map or null; missing row 404; invalid/unlistable entity 400. Stock userfields use stock_id instead of numeric row id.",
+      "permissions": "Authenticated; no explicit action permission check.",
+      "dependencies": [
+        "UserfieldsService::GetValues",
+        "UserfieldsService::IsValidExposedEntity",
+        "UserfieldsService::GetEntities",
+        "UserfieldsService::GetFields",
+        "GenericEntityApiController::IsValidExposedEntity",
+        "GenericEntityApiController::IsEntityWithNoListing"
+      ]
+    },
+    {
+      "id": "A010",
+      "method": "POST",
+      "path": "/api/objects/{entity}",
+      "controller": "GenericEntityApiController",
+      "handler": "AddObject",
+      "local_openapi": true,
+      "runtime_notes": "R entity path and JSON column/value object (see entity dictionary). 200 {created_object_id}; not 201. Database constraints apply; no universal DTO validator. Product creation may auto-add missing products to shopping lists according to user settings.",
+      "permissions": "Entity-dependent mutation policy in [schema dictionary](react-api-schemas.md#generic-entity-policies).",
+      "dependencies": [
+        "UsersService::GetUserSetting",
+        "StockService::AddMissingProductsToShoppingList",
+        "StockService::ShoppingListExists",
+        "StockService::GetMissingProducts",
+        "DatabaseService::ExecuteDbQuery",
+        "DatabaseService::GetDbConnectionRaw",
+        "DatabaseService::GetDbFilePath",
+        "DatabaseService::ExecuteDbStatement",
+        "GenericEntityApiController::IsValidExposedEntity",
+        "GenericEntityApiController::IsEntityWithNoEdit",
+        "GenericEntityApiController::IsEntityWithEditRequiresAdmin"
+      ]
+    },
+    {
+      "id": "A011",
+      "method": "PUT",
+      "path": "/api/objects/{entity}/{objectId}",
+      "controller": "GenericEntityApiController",
+      "handler": "EditObject",
+      "local_openapi": true,
+      "runtime_notes": "R entity/objectId paths and JSON column/value object; supplied columns updated, 204. Missing row 400. Product updates may auto-add missing products. Do not PUT enriched response fields or userfields inside this object.",
+      "permissions": "Entity-dependent mutation policy in [schema dictionary](react-api-schemas.md#generic-entity-policies).",
+      "dependencies": [
+        "UsersService::GetUserSetting",
+        "StockService::AddMissingProductsToShoppingList",
+        "StockService::ShoppingListExists",
+        "StockService::GetMissingProducts",
+        "DatabaseService::ExecuteDbQuery",
+        "DatabaseService::GetDbConnectionRaw",
+        "DatabaseService::GetDbFilePath",
+        "DatabaseService::ExecuteDbStatement",
+        "GenericEntityApiController::IsValidExposedEntity",
+        "GenericEntityApiController::IsEntityWithNoEdit",
+        "GenericEntityApiController::IsEntityWithEditRequiresAdmin"
+      ]
+    },
+    {
+      "id": "A012",
+      "method": "DELETE",
+      "path": "/api/objects/{entity}/{objectId}",
+      "controller": "GenericEntityApiController",
+      "handler": "DeleteObject",
+      "local_openapi": true,
+      "runtime_notes": "R entity/objectId paths; no body required. 204; missing object 400. Database triggers/cascades apply. SQL delete failures are not wrapped by a local catch.",
+      "permissions": "Entity-dependent mutation policy in [schema dictionary](react-api-schemas.md#generic-entity-policies).",
+      "dependencies": [
+        "GenericEntityApiController::IsValidExposedEntity",
+        "GenericEntityApiController::IsEntityWithNoDelete",
+        "GenericEntityApiController::IsEntityWithEditRequiresAdmin"
+      ]
+    },
+    {
+      "id": "A013",
+      "method": "GET",
+      "path": "/api/userfields/{entity}/{objectId}",
+      "controller": "GenericEntityApiController",
+      "handler": "GetUserfields",
+      "local_openapi": true,
+      "runtime_notes": "R entity/objectId paths; entity accepts users and userentity-NAME in addition to exposed entities. 200 field-name/value map; empty definitions encode as [] rather than {}. No per-object existence check.",
+      "permissions": "Authenticated; no explicit action permission check.",
+      "dependencies": [
+        "UserfieldsService::GetValues",
+        "UserfieldsService::IsValidExposedEntity",
+        "UserfieldsService::GetEntities",
+        "UserfieldsService::GetFields"
+      ]
+    },
+    {
+      "id": "A014",
+      "method": "PUT",
+      "path": "/api/userfields/{entity}/{objectId}",
+      "controller": "GenericEntityApiController",
+      "handler": "SetUserfields",
+      "local_openapi": true,
+      "runtime_notes": "R entity/objectId and JSON field-name/value map. 204. Unknown entity/field 400. Writes supplied values individually; no all-or-nothing guarantee. For stock use stock_id; for custom objects use userentity-NAME with userobjects.id.",
+      "permissions": "MASTER_DATA_EDIT",
+      "dependencies": [
+        "UserfieldsService::SetValues",
+        "UserfieldsService::IsValidExposedEntity",
+        "UserfieldsService::GetEntities"
+      ]
+    },
+    {
+      "id": "A015",
+      "method": "PUT",
+      "path": "/api/files/{group}/{fileName}",
+      "controller": "FilesApiController",
+      "handler": "UploadFile",
+      "local_openapi": true,
+      "runtime_notes": "R group and Base64 filename path; URL-encode the Base64 segment. Raw binary body, NOT JSON or multipart. 204. Exclusive file creation refuses overwrite; invalid group/name or I/O errors 400.",
+      "permissions": "Authenticated; no explicit action permission check.",
+      "dependencies": [
+        "FilesService::GetFilePath",
+        "FilesApiController::CheckFileName"
+      ]
+    },
+    {
+      "id": "A016",
+      "method": "GET",
+      "path": "/api/files/{group}/{fileName}",
+      "controller": "FilesApiController",
+      "handler": "ServeFile",
+      "local_openapi": true,
+      "runtime_notes": "R group/Base64 filename. Optional Base64-stored-name_Base64-download-name syntax. O query force_serve_as=picture, best_fit_width, best_fit_height numeric. 200 binary with MIME type, inline Content-Disposition and 30-day cache. All caught failures become 404.",
+      "permissions": "Authenticated; no explicit action permission check.",
+      "dependencies": [
+        "FilesApiController::CheckFileName",
+        "FilesApiController::GetFilePath",
+        "FilesService::DownscaleImage",
+        "FilesService::GetFilePath"
+      ]
+    },
+    {
+      "id": "A017",
+      "method": "DELETE",
+      "path": "/api/files/{group}/{fileName}",
+      "controller": "FilesApiController",
+      "handler": "DeleteFile",
+      "local_openapi": true,
+      "runtime_notes": "R group/Base64 filename; no body. 204; invalid group/name/I/O 400. Allowed groups in entity dictionary.",
+      "permissions": "Authenticated; no explicit action permission check.",
+      "dependencies": [
+        "FilesService::DeleteFile",
+        "FilesService::GetFilePath"
+      ]
+    },
+    {
+      "id": "A018",
+      "method": "GET",
+      "path": "/api/users",
+      "controller": "UsersApiController",
+      "handler": "GetUsers",
+      "local_openapi": true,
+      "runtime_notes": "O Q. 200 array of UserDto rows, not password records. UsersService DTO selection is authoritative.",
+      "permissions": "USERS_READ",
+      "dependencies": [
+        "UsersService::GetUsersAsDto"
+      ]
+    },
+    {
+      "id": "A019",
+      "method": "POST",
+      "path": "/api/users",
+      "controller": "UsersApiController",
+      "handler": "CreateUser",
+      "local_openapi": true,
+      "runtime_notes": "R JSON username, first_name, last_name, password, picture_file_name (controller directly reads all). password_base64 optionally replaces password after decoding. 204. Blank password/user validation follows UsersService. Userfield save is separate.",
+      "permissions": "USERS_CREATE",
+      "dependencies": [
+        "UsersService::CreateUser"
+      ]
+    },
+    {
+      "id": "A020",
+      "method": "PUT",
+      "path": "/api/users/{userId}",
+      "controller": "UsersApiController",
+      "handler": "EditUser",
+      "local_openapi": true,
+      "runtime_notes": "R userId and JSON username, first_name, last_name, password, picture_file_name; password_base64 optionally replaces password. 204. Self uses USERS_EDIT_SELF, others USERS_EDIT. Follow UsersService empty-password behavior.",
+      "permissions": "USERS_EDIT_SELF for self; USERS_EDIT for other user.",
+      "dependencies": [
+        "UsersService::EditUser",
+        "UsersService::UserExists"
+      ]
+    },
+    {
+      "id": "A021",
+      "method": "DELETE",
+      "path": "/api/users/{userId}",
+      "controller": "UsersApiController",
+      "handler": "DeleteUser",
+      "local_openapi": true,
+      "runtime_notes": "R userId. No body. 204. UsersService constraints/errors apply.",
+      "permissions": "USERS_EDIT",
+      "dependencies": [
+        "UsersService::DeleteUser"
+      ]
+    },
+    {
+      "id": "A022",
+      "method": "GET",
+      "path": "/api/users/{userId}/permissions",
+      "controller": "UsersApiController",
+      "handler": "ListPermissions",
+      "local_openapi": true,
+      "runtime_notes": "R userId. 200 raw user_permissions row array, not resolved current-user permissions. ADMIN only.",
+      "permissions": "ADMIN",
+      "dependencies": []
+    },
+    {
+      "id": "A023",
+      "method": "POST",
+      "path": "/api/users/{userId}/permissions",
+      "controller": "UsersApiController",
+      "handler": "AddPermission",
+      "local_openapi": true,
+      "runtime_notes": "R userId and JSON permission_id. 204; inserts assignment.",
+      "permissions": "ADMIN",
+      "dependencies": []
+    },
+    {
+      "id": "A024",
+      "method": "PUT",
+      "path": "/api/users/{userId}/permissions",
+      "controller": "UsersApiController",
+      "handler": "SetPermissions",
+      "local_openapi": true,
+      "runtime_notes": "R userId and JSON permissions: array of permission IDs. 204; deletes old assignments then inserts replacements, no explicit transaction. Demo/prerelease force ADMIN instead of supplied list. Uses parsed body directly.",
+      "permissions": "ADMIN",
+      "dependencies": []
+    },
+    {
+      "id": "A025",
+      "method": "GET",
+      "path": "/api/user",
+      "controller": "UsersApiController",
+      "handler": "CurrentUser",
+      "local_openapi": true,
+      "runtime_notes": "No parameters. 200 filtered collection of UserDto rows for current ID, NOT a singleton object.",
+      "permissions": "Authenticated; no explicit action permission check.",
+      "dependencies": [
+        "UsersService::GetUsersAsDto"
+      ]
+    },
+    {
+      "id": "A026",
+      "method": "GET",
+      "path": "/api/user/settings",
+      "controller": "UsersApiController",
+      "handler": "GetUserSettings",
+      "local_openapi": true,
+      "runtime_notes": "No parameters. 200 key/value settings map including service defaults.",
+      "permissions": "Authenticated; no explicit action permission check.",
+      "dependencies": [
+        "UsersService::GetUserSettings"
+      ]
+    },
+    {
+      "id": "A027",
+      "method": "GET",
+      "path": "/api/user/settings/{settingKey}",
+      "controller": "UsersApiController",
+      "handler": "GetUserSetting",
+      "local_openapi": true,
+      "runtime_notes": "R settingKey. 200 {value:...}; value type follows setting/default.",
+      "permissions": "Authenticated; no explicit action permission check.",
+      "dependencies": [
+        "UsersService::GetUserSetting"
+      ]
+    },
+    {
+      "id": "A028",
+      "method": "PUT",
+      "path": "/api/user/settings/{settingKey}",
+      "controller": "UsersApiController",
+      "handler": "SetUserSetting",
+      "local_openapi": true,
+      "runtime_notes": "R settingKey and JSON value. 204; scalar settings are sanitized. Current user only.",
+      "permissions": "Authenticated; no explicit action permission check.",
+      "dependencies": [
+        "UsersService::SetUserSetting"
+      ]
+    },
+    {
+      "id": "A029",
+      "method": "DELETE",
+      "path": "/api/user/settings/{settingKey}",
+      "controller": "UsersApiController",
+      "handler": "DeleteUserSetting",
+      "local_openapi": true,
+      "runtime_notes": "R settingKey. 204; deletes override, so defaults may reappear on refetch.",
+      "permissions": "Authenticated; no explicit action permission check.",
+      "dependencies": [
+        "UsersService::DeleteUserSetting"
+      ]
+    },
+    {
+      "id": "A030",
+      "method": "GET",
+      "path": "/api/stock",
+      "controller": "StockApiController",
+      "handler": "CurrentStock",
+      "local_openapi": true,
+      "runtime_notes": "No implemented query options. 200 current stock row array enriched with product data; see service and schema dictionary. UI overview uses a different SQL view and additional filtering.",
+      "permissions": "Authenticated; no explicit action permission check.",
+      "dependencies": [
+        "StockService::GetCurrentStock",
+        "DatabaseService::ExecuteDbQuery",
+        "DatabaseService::GetDbConnectionRaw",
+        "DatabaseService::GetDbFilePath",
+        "DatabaseService::ExecuteDbStatement"
+      ]
+    },
+    {
+      "id": "A031",
+      "method": "GET",
+      "path": "/api/stock/entry/{entryId}",
+      "controller": "StockApiController",
+      "handler": "StockEntry",
+      "local_openapi": true,
+      "runtime_notes": "R entryId numeric stock row ID. 200 stock row or null from GetStockEntry; no explicit missing-row error.",
+      "permissions": "Authenticated; no explicit action permission check.",
+      "dependencies": [
+        "StockService::GetStockEntry"
+      ]
+    },
+    {
+      "id": "A032",
+      "method": "PUT",
+      "path": "/api/stock/entry/{entryId}",
+      "controller": "StockApiController",
+      "handler": "EditStockEntry",
+      "local_openapi": true,
+      "runtime_notes": "R entryId and JSON amount, open, purchased_date (last two directly read although not explicitly validated). O best_before_date, price, location_id, shopping_location_id, note default null. 200 StockLogEntry[] through StockTransactions. Preserve existing values when editing; this is not a sparse patch.",
+      "permissions": "STOCK_EDIT",
+      "dependencies": [
+        "StockService::EditStockEntry",
+        "StockService::CompactStockEntries",
+        "DatabaseService::GetDbConnectionRaw",
+        "DatabaseService::GetDbFilePath",
+        "DatabaseService::ExecuteDbStatement",
+        "StockApiController::StockTransactions"
+      ]
+    },
+    {
+      "id": "A033",
+      "method": "GET",
+      "path": "/api/stock/volatile",
+      "controller": "StockApiController",
+      "handler": "CurrentVolatileStock",
+      "local_openapi": true,
+      "runtime_notes": "O query due_soon_days numeric and nonempty, default 5 (0 falls back to 5). 200 {due_products,overdue_products,expired_products,missing_products}, each an array.",
+      "permissions": "Authenticated; no explicit action permission check.",
+      "dependencies": [
+        "StockService::GetDueProducts",
+        "StockService::GetCurrentStock",
+        "DatabaseService::ExecuteDbQuery",
+        "DatabaseService::GetDbConnectionRaw",
+        "DatabaseService::GetDbFilePath",
+        "DatabaseService::ExecuteDbStatement",
+        "StockService::GetExpiredProducts",
+        "StockService::GetMissingProducts"
+      ]
+    },
+    {
+      "id": "A034",
+      "method": "GET",
+      "path": "/api/stock/products/{productId}",
+      "controller": "StockApiController",
+      "handler": "ProductDetails",
+      "local_openapi": true,
+      "runtime_notes": "R productId. 200 ProductDetailsResponse with product/barcodes, units, locations, stock quantities/value, prices and dates. Missing/inactive product 400.",
+      "permissions": "Authenticated; no explicit action permission check.",
+      "dependencies": [
+        "StockService::GetProductDetails",
+        "StockService::ProductExists",
+        "StockService::GetCurrentStock",
+        "DatabaseService::ExecuteDbQuery",
+        "DatabaseService::GetDbConnectionRaw",
+        "DatabaseService::GetDbFilePath",
+        "DatabaseService::ExecuteDbStatement"
+      ]
+    },
+    {
+      "id": "A035",
+      "method": "GET",
+      "path": "/api/stock/products/{productId}/entries",
+      "controller": "StockApiController",
+      "handler": "ProductStockEntries",
+      "local_openapi": true,
+      "runtime_notes": "R productId; O include_sub_products boolean query, default false, and Q. 200 StockEntry[].",
+      "permissions": "Authenticated; no explicit action permission check.",
+      "dependencies": [
+        "StockService::GetProductStockEntries"
+      ]
+    },
+    {
+      "id": "A036",
+      "method": "GET",
+      "path": "/api/stock/products/{productId}/locations",
+      "controller": "StockApiController",
+      "handler": "ProductStockLocations",
+      "local_openapi": true,
+      "runtime_notes": "R productId; O include_sub_products boolean query, default false, and Q. 200 StockLocation[].",
+      "permissions": "Authenticated; no explicit action permission check.",
+      "dependencies": [
+        "StockService::GetProductStockLocations"
+      ]
+    },
+    {
+      "id": "A037",
+      "method": "GET",
+      "path": "/api/stock/products/{productId}/price-history",
+      "controller": "StockApiController",
+      "handler": "ProductPriceHistory",
+      "local_openapi": true,
+      "runtime_notes": "R productId. 200 array of {date,price,shopping_location}; invalid/inactive product 400.",
+      "permissions": "Authenticated; no explicit action permission check.",
+      "dependencies": [
+        "StockService::GetProductPriceHistory",
+        "StockService::ProductExists"
+      ]
+    },
+    {
+      "id": "A038",
+      "method": "POST",
+      "path": "/api/stock/products/{productId}/add",
+      "controller": "StockApiController",
+      "handler": "AddProduct",
+      "local_openapi": true,
+      "runtime_notes": "R productId and JSON amount:number >0 in stock units (tare mode uses gross weight). O best_before_date:date default service-derived; purchased_date:date default today; price, location_id, shopping_location_id default null; transaction_type default purchase; stock_label_type default 0; note default null. 200 StockLogEntry[]. Date defaults include shelf-life/freezer rules, not always today.",
+      "permissions": "STOCK_PURCHASE",
+      "dependencies": [
+        "StockService::AddProduct",
+        "LocalizationService::__t",
+        "LocalizationService::CheckAndAddMissingTranslationToPot",
+        "StockService::ProductExists",
+        "StockService::GetProductDetails",
+        "StockService::GetCurrentStock",
+        "DatabaseService::ExecuteDbQuery",
+        "DatabaseService::GetDbConnectionRaw",
+        "DatabaseService::GetDbFilePath",
+        "DatabaseService::ExecuteDbStatement",
+        "StockService::LocationExists",
+        "StockService::CompactStockEntries",
+        "StockApiController::StockTransactions"
+      ]
+    },
+    {
+      "id": "A039",
+      "method": "POST",
+      "path": "/api/stock/products/{productId}/consume",
+      "controller": "StockApiController",
+      "handler": "ConsumeProduct",
+      "local_openapi": true,
+      "runtime_notes": "R productId and amount:number. O spoiled=false, stock_entry_id=\"default\", location_id=null, recipe_id=null, exact_amount=false, allow_subproduct_substitution=false. 200 StockLogEntry[]. transaction_type is checked but transactiontype is read: preserve as a known defect, do not promise a supported override. Amount uses stock units; service handles tare, shortage, substitution and entry ordering.",
+      "permissions": "STOCK_CONSUME",
+      "dependencies": [
+        "StockService::ConsumeProduct",
+        "UsersService::GetUserSetting",
+        "StockService::ProductExists",
+        "StockService::LocationExists",
+        "StockService::GetProductDetails",
+        "StockService::GetCurrentStock",
+        "DatabaseService::ExecuteDbQuery",
+        "DatabaseService::GetDbConnectionRaw",
+        "DatabaseService::GetDbFilePath",
+        "DatabaseService::ExecuteDbStatement",
+        "StockService::GetProductStockEntries",
+        "StockService::GetProductStockEntriesForLocation",
+        "StockService::OpenProduct",
+        "LocalizationService::__t",
+        "LocalizationService::CheckAndAddMissingTranslationToPot",
+        "StockService::TransferProduct",
+        "StockService::AddMissingProductsToShoppingList",
+        "StockService::ShoppingListExists",
+        "StockService::GetMissingProducts",
+        "StockApiController::StockTransactions"
+      ]
+    },
+    {
+      "id": "A040",
+      "method": "POST",
+      "path": "/api/stock/products/{productId}/transfer",
+      "controller": "StockApiController",
+      "handler": "TransferProduct",
+      "local_openapi": true,
+      "runtime_notes": "R productId and JSON amount, location_id_from, location_id_to. O stock_entry_id=\"default\". 200 StockLogEntry[]. Service validates source stock and locations, applies freezer/thawing date rules.",
+      "permissions": "STOCK_TRANSFER",
+      "dependencies": [
+        "StockService::TransferProduct",
+        "LocalizationService::__t",
+        "LocalizationService::CheckAndAddMissingTranslationToPot",
+        "StockService::ProductExists",
+        "StockService::LocationExists",
+        "StockService::GetProductDetails",
+        "StockService::GetCurrentStock",
+        "DatabaseService::ExecuteDbQuery",
+        "DatabaseService::GetDbConnectionRaw",
+        "DatabaseService::GetDbFilePath",
+        "DatabaseService::ExecuteDbStatement",
+        "StockService::GetProductStockEntriesForLocation",
+        "StockService::GetProductStockEntries",
+        "StockApiController::StockTransactions"
+      ]
+    },
+    {
+      "id": "A041",
+      "method": "POST",
+      "path": "/api/stock/products/{productId}/inventory",
+      "controller": "StockApiController",
+      "handler": "InventoryProduct",
+      "local_openapi": true,
+      "runtime_notes": "R productId and new_amount (not amount). O best_before_date, purchased_date, location_id, price, shopping_location_id, note default null; stock_label_type=0. 200 StockLogEntry[]. Equal current amount errors; service selects purchase/consume adjustment.",
+      "permissions": "STOCK_INVENTORY",
+      "dependencies": [
+        "StockService::InventoryProduct",
+        "StockService::ProductExists",
+        "StockService::GetProductDetails",
+        "StockService::GetCurrentStock",
+        "DatabaseService::ExecuteDbQuery",
+        "DatabaseService::GetDbConnectionRaw",
+        "DatabaseService::GetDbFilePath",
+        "DatabaseService::ExecuteDbStatement",
+        "StockService::AddProduct",
+        "LocalizationService::__t",
+        "LocalizationService::CheckAndAddMissingTranslationToPot",
+        "StockService::LocationExists",
+        "StockService::CompactStockEntries",
+        "StockService::ConsumeProduct",
+        "UsersService::GetUserSetting",
+        "StockService::GetProductStockEntries",
+        "StockService::GetProductStockEntriesForLocation",
+        "StockService::OpenProduct",
+        "StockService::TransferProduct",
+        "StockService::AddMissingProductsToShoppingList",
+        "StockService::ShoppingListExists",
+        "StockService::GetMissingProducts",
+        "StockApiController::StockTransactions"
+      ]
+    },
+    {
+      "id": "A042",
+      "method": "POST",
+      "path": "/api/stock/products/{productId}/open",
+      "controller": "StockApiController",
+      "handler": "OpenProduct",
+      "local_openapi": true,
+      "runtime_notes": "R productId and amount. O stock_entry_id=\"default\", allow_subproduct_substitution=false. 200 StockLogEntry[]. Opening can split entries/change due dates; disabled opening, tare products or shortage can fail.",
+      "permissions": "STOCK_OPEN",
+      "dependencies": [
+        "StockService::OpenProduct",
+        "LocalizationService::__t",
+        "LocalizationService::CheckAndAddMissingTranslationToPot",
+        "UsersService::GetUserSetting",
+        "StockService::ProductExists",
+        "StockService::GetProductDetails",
+        "StockService::GetCurrentStock",
+        "DatabaseService::ExecuteDbQuery",
+        "DatabaseService::GetDbConnectionRaw",
+        "DatabaseService::GetDbFilePath",
+        "DatabaseService::ExecuteDbStatement",
+        "StockService::GetProductStockEntries",
+        "StockService::TransferProduct",
+        "StockService::LocationExists",
+        "StockService::GetProductStockEntriesForLocation",
+        "StockService::AddMissingProductsToShoppingList",
+        "StockService::ShoppingListExists",
+        "StockService::GetMissingProducts",
+        "StockApiController::StockTransactions"
+      ]
+    },
+    {
+      "id": "A043",
+      "method": "POST",
+      "path": "/api/stock/products/{productIdToKeep}/merge/{productIdToRemove}",
+      "controller": "StockApiController",
+      "handler": "MergeProducts",
+      "local_openapi": true,
+      "runtime_notes": "R productIdToKeep/productIdToRemove integer paths; no body. 204; validates both active, distinct products. Related database records migrate; refetch master data and stock.",
+      "permissions": "STOCK_EDIT",
+      "dependencies": [
+        "StockService::MergeProducts",
+        "DatabaseService::GetDbConnectionRaw",
+        "DatabaseService::GetDbFilePath",
+        "DatabaseService::ExecuteDbStatement",
+        "StockService::ProductExists"
+      ]
+    },
+    {
+      "id": "A044",
+      "method": "GET",
+      "path": "/api/stock/products/by-barcode/{barcode}",
+      "controller": "StockApiController",
+      "handler": "ProductDetailsByBarcode",
+      "local_openapi": true,
+      "runtime_notes": "R barcode string path, preserve leading zeros and URL-encode. Resolves barcode/Grocycode to product then returns ProductDetailsResponse; invalid/unknown barcode 400.",
+      "permissions": "Authenticated; no explicit action permission check.",
+      "dependencies": [
+        "StockService::GetProductIdFromBarcode",
+        "StockService::GetProductDetails",
+        "StockService::ProductExists",
+        "StockService::GetCurrentStock",
+        "DatabaseService::ExecuteDbQuery",
+        "DatabaseService::GetDbConnectionRaw",
+        "DatabaseService::GetDbFilePath",
+        "DatabaseService::ExecuteDbStatement"
+      ]
+    },
+    {
+      "id": "A045",
+      "method": "POST",
+      "path": "/api/stock/products/by-barcode/{barcode}/add",
+      "controller": "StockApiController",
+      "handler": "AddProductByBarcode",
+      "local_openapi": true,
+      "runtime_notes": "R barcode string path instead of productId. Same JSON fields and 200 response as AddProduct. Resolves barcode before delegating; outer catch maps delegated exceptions, including permission failures, to 400. JSON amount:number >0 in stock units (tare mode uses gross weight). O best_before_date:date default service-derived; purchased_date:date default today; price, location_id, shopping_location_id default null; transaction_type default purchase; stock_label_type default 0; note default null. 200 StockLogEntry[]. Date defaults include shelf-life/freezer rules, not always today.",
+      "permissions": "STOCK_PURCHASE",
+      "dependencies": [
+        "StockService::GetProductIdFromBarcode",
+        "StockApiController::AddProduct",
+        "StockService::AddProduct",
+        "LocalizationService::__t",
+        "LocalizationService::CheckAndAddMissingTranslationToPot",
+        "StockService::ProductExists",
+        "StockService::GetProductDetails",
+        "StockService::GetCurrentStock",
+        "DatabaseService::ExecuteDbQuery",
+        "DatabaseService::GetDbConnectionRaw",
+        "DatabaseService::GetDbFilePath",
+        "DatabaseService::ExecuteDbStatement",
+        "StockService::LocationExists",
+        "StockService::CompactStockEntries",
+        "StockApiController::StockTransactions"
+      ]
+    },
+    {
+      "id": "A046",
+      "method": "POST",
+      "path": "/api/stock/products/by-barcode/{barcode}/consume",
+      "controller": "StockApiController",
+      "handler": "ConsumeProductByBarcode",
+      "local_openapi": true,
+      "runtime_notes": "R barcode string path instead of productId. Same JSON fields and 200 response as ConsumeProduct. Grocycode extra data overrides body stock_entry_id. Resolves barcode before delegating; outer catch maps delegated exceptions, including permission failures, to 400. amount:number. O spoiled=false, stock_entry_id=\"default\", location_id=null, recipe_id=null, exact_amount=false, allow_subproduct_substitution=false. 200 StockLogEntry[]. transaction_type is checked but transactiontype is read: preserve as a known defect, do not promise a supported override. Amount uses stock units; service handles tare, shortage, substitution and entry ordering.",
+      "permissions": "STOCK_CONSUME",
+      "dependencies": [
+        "StockService::GetProductIdFromBarcode",
+        "StockApiController::ConsumeProduct",
+        "StockService::ConsumeProduct",
+        "UsersService::GetUserSetting",
+        "StockService::ProductExists",
+        "StockService::LocationExists",
+        "StockService::GetProductDetails",
+        "StockService::GetCurrentStock",
+        "DatabaseService::ExecuteDbQuery",
+        "DatabaseService::GetDbConnectionRaw",
+        "DatabaseService::GetDbFilePath",
+        "DatabaseService::ExecuteDbStatement",
+        "StockService::GetProductStockEntries",
+        "StockService::GetProductStockEntriesForLocation",
+        "StockService::OpenProduct",
+        "LocalizationService::__t",
+        "LocalizationService::CheckAndAddMissingTranslationToPot",
+        "StockService::TransferProduct",
+        "StockService::AddMissingProductsToShoppingList",
+        "StockService::ShoppingListExists",
+        "StockService::GetMissingProducts",
+        "StockApiController::StockTransactions"
+      ]
+    },
+    {
+      "id": "A047",
+      "method": "POST",
+      "path": "/api/stock/products/by-barcode/{barcode}/transfer",
+      "controller": "StockApiController",
+      "handler": "TransferProductByBarcode",
+      "local_openapi": true,
+      "runtime_notes": "R barcode string path instead of productId. Same JSON fields and 200 response as TransferProduct. Grocycode extra data overrides body stock_entry_id. Resolves barcode before delegating; outer catch maps delegated exceptions, including permission failures, to 400. JSON amount, location_id_from, location_id_to. O stock_entry_id=\"default\". 200 StockLogEntry[]. Service validates source stock and locations, applies freezer/thawing date rules.",
+      "permissions": "STOCK_TRANSFER",
+      "dependencies": [
+        "StockService::GetProductIdFromBarcode",
+        "StockApiController::TransferProduct",
+        "StockService::TransferProduct",
+        "LocalizationService::__t",
+        "LocalizationService::CheckAndAddMissingTranslationToPot",
+        "StockService::ProductExists",
+        "StockService::LocationExists",
+        "StockService::GetProductDetails",
+        "StockService::GetCurrentStock",
+        "DatabaseService::ExecuteDbQuery",
+        "DatabaseService::GetDbConnectionRaw",
+        "DatabaseService::GetDbFilePath",
+        "DatabaseService::ExecuteDbStatement",
+        "StockService::GetProductStockEntriesForLocation",
+        "StockService::GetProductStockEntries",
+        "StockApiController::StockTransactions"
+      ]
+    },
+    {
+      "id": "A048",
+      "method": "POST",
+      "path": "/api/stock/products/by-barcode/{barcode}/inventory",
+      "controller": "StockApiController",
+      "handler": "InventoryProductByBarcode",
+      "local_openapi": true,
+      "runtime_notes": "R barcode string path instead of productId. Same JSON fields and 200 response as InventoryProduct. Resolves barcode before delegating; outer catch maps delegated exceptions, including permission failures, to 400. new_amount (not amount). O best_before_date, purchased_date, location_id, price, shopping_location_id, note default null; stock_label_type=0. 200 StockLogEntry[]. Equal current amount errors; service selects purchase/consume adjustment.",
+      "permissions": "STOCK_INVENTORY",
+      "dependencies": [
+        "StockService::GetProductIdFromBarcode",
+        "StockApiController::InventoryProduct",
+        "StockService::InventoryProduct",
+        "StockService::ProductExists",
+        "StockService::GetProductDetails",
+        "StockService::GetCurrentStock",
+        "DatabaseService::ExecuteDbQuery",
+        "DatabaseService::GetDbConnectionRaw",
+        "DatabaseService::GetDbFilePath",
+        "DatabaseService::ExecuteDbStatement",
+        "StockService::AddProduct",
+        "LocalizationService::__t",
+        "LocalizationService::CheckAndAddMissingTranslationToPot",
+        "StockService::LocationExists",
+        "StockService::CompactStockEntries",
+        "StockService::ConsumeProduct",
+        "UsersService::GetUserSetting",
+        "StockService::GetProductStockEntries",
+        "StockService::GetProductStockEntriesForLocation",
+        "StockService::OpenProduct",
+        "StockService::TransferProduct",
+        "StockService::AddMissingProductsToShoppingList",
+        "StockService::ShoppingListExists",
+        "StockService::GetMissingProducts",
+        "StockApiController::StockTransactions"
+      ]
+    },
+    {
+      "id": "A049",
+      "method": "POST",
+      "path": "/api/stock/products/by-barcode/{barcode}/open",
+      "controller": "StockApiController",
+      "handler": "OpenProductByBarcode",
+      "local_openapi": true,
+      "runtime_notes": "R barcode string path instead of productId. Same JSON fields and 200 response as OpenProduct. Grocycode extra data overrides body stock_entry_id. Resolves barcode before delegating; outer catch maps delegated exceptions, including permission failures, to 400. amount. O stock_entry_id=\"default\", allow_subproduct_substitution=false. 200 StockLogEntry[]. Opening can split entries/change due dates; disabled opening, tare products or shortage can fail.",
+      "permissions": "STOCK_OPEN",
+      "dependencies": [
+        "StockService::GetProductIdFromBarcode",
+        "StockApiController::OpenProduct",
+        "StockService::OpenProduct",
+        "LocalizationService::__t",
+        "LocalizationService::CheckAndAddMissingTranslationToPot",
+        "UsersService::GetUserSetting",
+        "StockService::ProductExists",
+        "StockService::GetProductDetails",
+        "StockService::GetCurrentStock",
+        "DatabaseService::ExecuteDbQuery",
+        "DatabaseService::GetDbConnectionRaw",
+        "DatabaseService::GetDbFilePath",
+        "DatabaseService::ExecuteDbStatement",
+        "StockService::GetProductStockEntries",
+        "StockService::TransferProduct",
+        "StockService::LocationExists",
+        "StockService::GetProductStockEntriesForLocation",
+        "StockService::AddMissingProductsToShoppingList",
+        "StockService::ShoppingListExists",
+        "StockService::GetMissingProducts",
+        "StockApiController::StockTransactions"
+      ]
+    },
+    {
+      "id": "A050",
+      "method": "GET",
+      "path": "/api/stock/locations/{locationId}/entries",
+      "controller": "StockApiController",
+      "handler": "LocationStockEntries",
+      "local_openapi": true,
+      "runtime_notes": "R locationId; O Q. 200 StockEntry[]; service exceptions are uncaught here (global 500), unlike many other missing-ID endpoints.",
+      "permissions": "Authenticated; no explicit action permission check.",
+      "dependencies": [
+        "StockService::GetLocationStockEntries",
+        "StockService::LocationExists"
+      ]
+    },
+    {
+      "id": "A051",
+      "method": "GET",
+      "path": "/api/stock/bookings/{bookingId}",
+      "controller": "StockApiController",
+      "handler": "StockBooking",
+      "local_openapi": true,
+      "runtime_notes": "R bookingId numeric stock_log ID. 200 StockLogEntry; missing 400.",
+      "permissions": "Authenticated; no explicit action permission check.",
+      "dependencies": []
+    },
+    {
+      "id": "A052",
+      "method": "POST",
+      "path": "/api/stock/bookings/{bookingId}/undo",
+      "controller": "StockApiController",
+      "handler": "UndoBooking",
+      "local_openapi": true,
+      "runtime_notes": "R bookingId. No body. 204 (handler writes JSON before setting 204; client must ignore body). Dependent/already-undone bookings fail; related correlated bookings may be affected.",
+      "permissions": "STOCK_EDIT",
+      "dependencies": [
+        "StockService::UndoBooking"
+      ]
+    },
+    {
+      "id": "A053",
+      "method": "GET",
+      "path": "/api/stock/transactions/{transactionId}",
+      "controller": "StockApiController",
+      "handler": "StockTransactions",
+      "local_openapi": true,
+      "runtime_notes": "R transactionId string; no body. 200 StockLogEntry[]; missing/empty transaction 400. Distinguish transaction ID from booking ID, numeric stock row ID and string stock_id.",
+      "permissions": "Authenticated; no explicit action permission check.",
+      "dependencies": []
+    },
+    {
+      "id": "A054",
+      "method": "POST",
+      "path": "/api/stock/transactions/{transactionId}/undo",
+      "controller": "StockApiController",
+      "handler": "UndoTransaction",
+      "local_openapi": true,
+      "runtime_notes": "R transactionId. No body. 204; already undone/missing or dependent bookings fail. Do not automatically retry uncertain mutations.",
+      "permissions": "STOCK_EDIT",
+      "dependencies": [
+        "StockService::UndoTransaction",
+        "StockService::UndoBooking"
+      ]
+    },
+    {
+      "id": "A055",
+      "method": "GET",
+      "path": "/api/stock/barcodes/external-lookup/{barcode}",
+      "controller": "StockApiController",
+      "handler": "ExternalBarcodeLookup",
+      "local_openapi": true,
+      "runtime_notes": "R barcode. O query add: literal \"true\" reliably enables insertion; code also checks integer 1, so do not rely on query string \"1\". 200 plugin-derived object, potentially creating product, barcode, picture and conversion. Depends on configured plugin/network; missing plugin/duplicate product can fail.",
+      "permissions": "MASTER_DATA_EDIT",
+      "dependencies": [
+        "StockService::ExternalBarcodeLookup",
+        "ApplicationService::GetInstalledVersion",
+        "FilesService::GetFilePath",
+        "StockService::LoadExternalBarcodeLookupPlugin",
+        "UsersService::GetUserSettings"
+      ]
+    },
+    {
+      "id": "A056",
+      "method": "GET",
+      "path": "/api/stock/products/{productId}/printlabel",
+      "controller": "StockApiController",
+      "handler": "ProductPrintLabel",
+      "local_openapi": true,
+      "runtime_notes": "R path ID; no body/query. 200 object {product,grocycode,details} merged with configured label-printer parameters. GET executes webhook when LABEL_PRINTER_RUN_SERVER is enabled; otherwise frontend must invoke configured hook with returned data. Disable caching/prefetch/retries for this action; errors 400.",
+      "permissions": "Authenticated; no explicit action permission check.",
+      "dependencies": [
+        "StockService::GetProductDetails",
+        "StockService::ProductExists",
+        "StockService::GetCurrentStock",
+        "DatabaseService::ExecuteDbQuery",
+        "DatabaseService::GetDbConnectionRaw",
+        "DatabaseService::GetDbFilePath",
+        "DatabaseService::ExecuteDbStatement"
+      ]
+    },
+    {
+      "id": "A057",
+      "method": "GET",
+      "path": "/api/stock/entry/{entryId}/printlabel",
+      "controller": "StockApiController",
+      "handler": "StockEntryPrintLabel",
+      "local_openapi": true,
+      "runtime_notes": "R path ID; no body/query. 200 object {product,grocycode,details,stock_entry,due_date?} merged with configured label-printer parameters. GET executes webhook when LABEL_PRINTER_RUN_SERVER is enabled; otherwise frontend must invoke configured hook with returned data. Disable caching/prefetch/retries for this action; errors 400.",
+      "permissions": "Authenticated; no explicit action permission check.",
+      "dependencies": [
+        "StockService::GetProductDetails",
+        "StockService::ProductExists",
+        "StockService::GetCurrentStock",
+        "DatabaseService::ExecuteDbQuery",
+        "DatabaseService::GetDbConnectionRaw",
+        "DatabaseService::GetDbFilePath",
+        "DatabaseService::ExecuteDbStatement",
+        "LocalizationService::__t",
+        "LocalizationService::CheckAndAddMissingTranslationToPot"
+      ]
+    },
+    {
+      "id": "A058",
+      "method": "POST",
+      "path": "/api/stock/shoppinglist/add-missing-products",
+      "controller": "StockApiController",
+      "handler": "AddMissingProductsToShoppingList",
+      "local_openapi": true,
+      "runtime_notes": "JSON {} allowed. O list_id numeric/nonempty default 1. 204. Uses minimum-stock requirements and purchase-unit conversions.",
+      "permissions": "SHOPPINGLIST_ITEMS_ADD",
+      "dependencies": [
+        "StockService::AddMissingProductsToShoppingList",
+        "StockService::ShoppingListExists",
+        "StockService::GetMissingProducts",
+        "DatabaseService::ExecuteDbQuery",
+        "DatabaseService::GetDbConnectionRaw",
+        "DatabaseService::GetDbFilePath",
+        "DatabaseService::ExecuteDbStatement"
+      ]
+    },
+    {
+      "id": "A059",
+      "method": "POST",
+      "path": "/api/stock/shoppinglist/add-overdue-products",
+      "controller": "StockApiController",
+      "handler": "AddOverdueProductsToShoppingList",
+      "local_openapi": true,
+      "runtime_notes": "JSON {} allowed. O list_id default 1. 204. Adds overdue products through service, distinct from expired products.",
+      "permissions": "SHOPPINGLIST_ITEMS_ADD",
+      "dependencies": [
+        "StockService::AddOverdueProductsToShoppingList",
+        "StockService::ShoppingListExists",
+        "StockService::GetDueProducts",
+        "StockService::GetCurrentStock",
+        "DatabaseService::ExecuteDbQuery",
+        "DatabaseService::GetDbConnectionRaw",
+        "DatabaseService::GetDbFilePath",
+        "DatabaseService::ExecuteDbStatement"
+      ]
+    },
+    {
+      "id": "A060",
+      "method": "POST",
+      "path": "/api/stock/shoppinglist/add-expired-products",
+      "controller": "StockApiController",
+      "handler": "AddExpiredProductsToShoppingList",
+      "local_openapi": true,
+      "runtime_notes": "JSON {} allowed. O list_id default 1. 204. Adds expired products through service.",
+      "permissions": "SHOPPINGLIST_ITEMS_ADD",
+      "dependencies": [
+        "StockService::AddExpiredProductsToShoppingList",
+        "StockService::ShoppingListExists",
+        "StockService::GetExpiredProducts",
+        "StockService::GetCurrentStock",
+        "DatabaseService::ExecuteDbQuery",
+        "DatabaseService::GetDbConnectionRaw",
+        "DatabaseService::GetDbFilePath",
+        "DatabaseService::ExecuteDbStatement"
+      ]
+    },
+    {
+      "id": "A061",
+      "method": "POST",
+      "path": "/api/stock/shoppinglist/clear",
+      "controller": "StockApiController",
+      "handler": "ClearShoppingList",
+      "local_openapi": true,
+      "runtime_notes": "JSON {} allowed. O list_id=1, done_only=false. 204. Clear all or checked items; invalid list 400.",
+      "permissions": "SHOPPINGLIST_ITEMS_DELETE",
+      "dependencies": [
+        "StockService::ClearShoppingList",
+        "StockService::ShoppingListExists"
+      ]
+    },
+    {
+      "id": "A062",
+      "method": "POST",
+      "path": "/api/stock/shoppinglist/add-product",
+      "controller": "StockApiController",
+      "handler": "AddProductToShoppingList",
+      "local_openapi": true,
+      "runtime_notes": "R JSON product_id numeric/nonempty. O product_amount=1, list_id=1, qu_id=-1, note=null. 204. Updates/creates matching entry through service; zero/empty amount falls back to 1.",
+      "permissions": "SHOPPINGLIST_ITEMS_ADD",
+      "dependencies": [
+        "StockService::AddProductToShoppingList",
+        "StockService::ShoppingListExists",
+        "StockService::ProductExists"
+      ]
+    },
+    {
+      "id": "A063",
+      "method": "POST",
+      "path": "/api/stock/shoppinglist/remove-product",
+      "controller": "StockApiController",
+      "handler": "RemoveProductFromShoppingList",
+      "local_openapi": true,
+      "runtime_notes": "R JSON product_id numeric/nonempty. O product_amount=1, list_id=1. 204. Decrements/removes through service; zero/empty amount falls back to 1.",
+      "permissions": "SHOPPINGLIST_ITEMS_DELETE",
+      "dependencies": [
+        "StockService::RemoveProductFromShoppingList",
+        "UsersService::GetUserSetting",
+        "StockService::ShoppingListExists"
+      ]
+    },
+    {
+      "id": "A064",
+      "method": "POST",
+      "path": "/api/recipes/mealplan/add-shopping-requirements",
+      "controller": "RecipesApiController",
+      "handler": "AddMealPlanShoppingRequirementsToShoppingList",
+      "local_openapi": false,
+      "runtime_notes": "R JSON from/to dates YYYY-MM-DD, from<=to. O shopping_list_id positive numeric cast to integer, default 1; preserve_min_stock must be JSON boolean, default false. 200 {from,to,shopping_list_id,preserve_min_stock,requirements:Requirement[],written_items:WrittenItem[]}. Validates list/conversions and writes in transaction. See custom response dictionary.",
+      "permissions": "SHOPPINGLIST_ITEMS_ADD",
+      "dependencies": [
+        "RecipesService::AddMealPlanShoppingRequirementsToShoppingList",
+        "DatabaseService::GetDbConnectionRaw",
+        "DatabaseService::GetDbFilePath",
+        "RecipesService::GetMealPlanShoppingRequirements"
+      ]
+    },
+    {
+      "id": "A065",
+      "method": "POST",
+      "path": "/api/recipes/{recipeId}/add-not-fulfilled-products-to-shoppinglist",
+      "controller": "RecipesApiController",
+      "handler": "AddNotFulfilledProductsToShoppingList",
+      "local_openapi": true,
+      "runtime_notes": "R recipeId; JSON {} allowed, O excludedProductIds array. 204. Uses recipe desired servings, stock fulfillment and shopping-list settings. No shopping_list_id parameter in this handler. Service exceptions are uncaught (global 500).",
+      "permissions": "SHOPPINGLIST_ITEMS_ADD",
+      "dependencies": [
+        "RecipesService::AddNotFulfilledProductsToShoppingList",
+        "RecipesService::GetRecipesPosResolved",
+        "DatabaseService::ExecuteDbQuery",
+        "DatabaseService::GetDbConnectionRaw",
+        "DatabaseService::GetDbFilePath",
+        "DatabaseService::ExecuteDbStatement"
+      ]
+    },
+    {
+      "id": "A066",
+      "method": "GET",
+      "path": "/api/recipes/{recipeId}/fulfillment",
+      "controller": "RecipesApiController",
+      "handler": "GetRecipeFulfillment",
+      "local_openapi": true,
+      "runtime_notes": "Optional recipeId path distinguishes two registered routes. No ID: O Q, 200 RecipeFulfillmentResponse[]. With ID: 200 RecipeFulfillmentResponse; missing recipe 400. Do not add servings query parameters; persisted recipe desired_servings drives calculations.",
+      "permissions": "Authenticated; no explicit action permission check.",
+      "dependencies": [
+        "RecipesService::GetRecipesResolved"
+      ]
+    },
+    {
+      "id": "A067",
+      "method": "POST",
+      "path": "/api/recipes/{recipeId}/consume",
+      "controller": "RecipesApiController",
+      "handler": "ConsumeRecipe",
+      "local_openapi": true,
+      "runtime_notes": "R recipeId; no body used. 204. Reads resolved positions, consumes ingredients and may create self-produced product stock. Refetch stock, logs, recipes, shopping and calendar.",
+      "permissions": "STOCK_CONSUME",
+      "dependencies": [
+        "RecipesService::ConsumeRecipe",
+        "DatabaseService::GetDbConnectionRaw",
+        "DatabaseService::GetDbFilePath",
+        "StockService::ConsumeProduct",
+        "UsersService::GetUserSetting",
+        "StockService::ProductExists",
+        "StockService::LocationExists",
+        "StockService::GetProductDetails",
+        "StockService::GetCurrentStock",
+        "DatabaseService::ExecuteDbQuery",
+        "DatabaseService::ExecuteDbStatement",
+        "StockService::GetProductStockEntries",
+        "StockService::GetProductStockEntriesForLocation",
+        "StockService::OpenProduct",
+        "LocalizationService::__t",
+        "LocalizationService::CheckAndAddMissingTranslationToPot",
+        "StockService::TransferProduct",
+        "StockService::AddMissingProductsToShoppingList",
+        "StockService::ShoppingListExists",
+        "StockService::GetMissingProducts",
+        "StockService::AddProduct",
+        "StockService::CompactStockEntries",
+        "RecipesService::RecipeExists"
+      ]
+    },
+    {
+      "id": "A068",
+      "method": "GET",
+      "path": "/api/recipes/fulfillment",
+      "controller": "RecipesApiController",
+      "handler": "GetRecipeFulfillment",
+      "local_openapi": true,
+      "runtime_notes": "Optional recipeId path distinguishes two registered routes. No ID: O Q, 200 RecipeFulfillmentResponse[]. With ID: 200 RecipeFulfillmentResponse; missing recipe 400. Do not add servings query parameters; persisted recipe desired_servings drives calculations.",
+      "permissions": "Authenticated; no explicit action permission check.",
+      "dependencies": [
+        "RecipesService::GetRecipesResolved"
+      ]
+    },
+    {
+      "id": "A069",
+      "method": "POST",
+      "path": "/api/recipes/{recipeId}/copy",
+      "controller": "RecipesApiController",
+      "handler": "CopyRecipe",
+      "local_openapi": true,
+      "runtime_notes": "R recipeId, no body used. 200 {created_object_id}; copies recipe, positions and nestings through service. No explicit permission check in this route; do not claim RECIPES is enforced here.",
+      "permissions": "Authenticated; no explicit action permission check.",
+      "dependencies": [
+        "RecipesService::CopyRecipe",
+        "LocalizationService::__t",
+        "LocalizationService::CheckAndAddMissingTranslationToPot",
+        "DatabaseService::ExecuteDbStatement",
+        "DatabaseService::GetDbConnectionRaw",
+        "DatabaseService::GetDbFilePath",
+        "RecipesService::RecipeExists"
+      ]
+    },
+    {
+      "id": "A070",
+      "method": "GET",
+      "path": "/api/recipes/{recipeId}/printlabel",
+      "controller": "RecipesApiController",
+      "handler": "RecipePrintLabel",
+      "local_openapi": true,
+      "runtime_notes": "R path ID; no body/query. 200 object {recipe,grocycode,details} merged with configured label-printer parameters. GET executes webhook when LABEL_PRINTER_RUN_SERVER is enabled; otherwise frontend must invoke configured hook with returned data. Disable caching/prefetch/retries for this action; errors 400.",
+      "permissions": "Authenticated; no explicit action permission check.",
+      "dependencies": []
+    },
+    {
+      "id": "A071",
+      "method": "GET",
+      "path": "/api/chores",
+      "controller": "ChoresApiController",
+      "handler": "Current",
+      "local_openapi": true,
+      "runtime_notes": "O Q. 200 CurrentChoreResponse[] enriched next_execution_assigned_user; overview due_type is added by HTML controller, not this API.",
+      "permissions": "Authenticated; no explicit action permission check.",
+      "dependencies": [
+        "ChoresService::GetCurrent",
+        "UsersService::GetUsersAsDto"
+      ]
+    },
+    {
+      "id": "A072",
+      "method": "GET",
+      "path": "/api/chores/{choreId}",
+      "controller": "ChoresApiController",
+      "handler": "ChoreDetails",
+      "local_openapi": true,
+      "runtime_notes": "R choreId. 200 {chore,last_tracked,tracked_count,last_done_by,next_estimated_execution_time,next_execution_assigned_user,average_execution_frequency_hours}. Missing chore 400.",
+      "permissions": "Authenticated; no explicit action permission check.",
+      "dependencies": [
+        "ChoresService::GetChoreDetails",
+        "UsersService::GetUsersAsDto",
+        "ChoresService::ChoreExists"
+      ]
+    },
+    {
+      "id": "A073",
+      "method": "POST",
+      "path": "/api/chores/{choreId}/execute",
+      "controller": "ChoresApiController",
+      "handler": "TrackChoreExecution",
+      "local_openapi": true,
+      "runtime_notes": "R choreId; JSON {} allowed. O tracked_time date or YYYY-MM-DD HH:mm:ss default now; done_by default current user; skipped=false. 200 ChoreLogEntry. Manual chores cannot skip. May consume stock and recalculate assignments; save log custom fields using returned execution id.",
+      "permissions": "CHORE_TRACK_EXECUTION",
+      "dependencies": [
+        "ChoresService::TrackChore",
+        "StockService::ConsumeProduct",
+        "UsersService::GetUserSetting",
+        "StockService::ProductExists",
+        "StockService::LocationExists",
+        "StockService::GetProductDetails",
+        "StockService::GetCurrentStock",
+        "DatabaseService::ExecuteDbQuery",
+        "DatabaseService::GetDbConnectionRaw",
+        "DatabaseService::GetDbFilePath",
+        "DatabaseService::ExecuteDbStatement",
+        "StockService::GetProductStockEntries",
+        "StockService::GetProductStockEntriesForLocation",
+        "StockService::OpenProduct",
+        "LocalizationService::__t",
+        "LocalizationService::CheckAndAddMissingTranslationToPot",
+        "StockService::TransferProduct",
+        "StockService::AddMissingProductsToShoppingList",
+        "StockService::ShoppingListExists",
+        "StockService::GetMissingProducts",
+        "ChoresService::ChoreExists",
+        "ChoresService::CalculateNextExecutionAssignment",
+        "UsersService::GetUsersAsDto"
+      ]
+    },
+    {
+      "id": "A074",
+      "method": "POST",
+      "path": "/api/chores/executions/{executionId}/undo",
+      "controller": "ChoresApiController",
+      "handler": "UndoChoreExecution",
+      "local_openapi": true,
+      "runtime_notes": "R executionId, not choreId. No body. 204. Missing/already undone 400; recalculates schedule/assignment. Does not imply stock consumed by execution is restored.",
+      "permissions": "CHORE_UNDO_EXECUTION",
+      "dependencies": [
+        "ChoresService::UndoChoreExecution",
+        "ChoresService::CalculateNextExecutionAssignment",
+        "UsersService::GetUsersAsDto",
+        "ChoresService::ChoreExists"
+      ]
+    },
+    {
+      "id": "A075",
+      "method": "POST",
+      "path": "/api/chores/executions/calculate-next-assignments",
+      "controller": "ChoresApiController",
+      "handler": "CalculateNextExecutionAssignments",
+      "local_openapi": true,
+      "runtime_notes": "JSON {} allowed. O chore_id numeric/nonempty: one chore; absent recalculates all. 204. No explicit action permission check.",
+      "permissions": "Authenticated; no explicit action permission check.",
+      "dependencies": [
+        "ChoresService::CalculateNextExecutionAssignment",
+        "UsersService::GetUsersAsDto",
+        "ChoresService::ChoreExists"
+      ]
+    },
+    {
+      "id": "A076",
+      "method": "GET",
+      "path": "/api/chores/{choreId}/printlabel",
+      "controller": "ChoresApiController",
+      "handler": "ChorePrintLabel",
+      "local_openapi": true,
+      "runtime_notes": "R path ID; no body/query. 200 object {chore,grocycode,details} merged with configured label-printer parameters. GET executes webhook when LABEL_PRINTER_RUN_SERVER is enabled; otherwise frontend must invoke configured hook with returned data. Disable caching/prefetch/retries for this action; errors 400.",
+      "permissions": "Authenticated; no explicit action permission check.",
+      "dependencies": [
+        "ChoresService::GetChoreDetails",
+        "UsersService::GetUsersAsDto",
+        "ChoresService::ChoreExists"
+      ]
+    },
+    {
+      "id": "A077",
+      "method": "POST",
+      "path": "/api/chores/{choreIdToKeep}/merge/{choreIdToRemove}",
+      "controller": "ChoresApiController",
+      "handler": "MergeChores",
+      "local_openapi": true,
+      "runtime_notes": "R choreIdToKeep/choreIdToRemove integer paths; no body. 204. Both active and distinct; moves history and deletes removed chore.",
+      "permissions": "MASTER_DATA_EDIT",
+      "dependencies": [
+        "ChoresService::MergeChores",
+        "DatabaseService::GetDbConnectionRaw",
+        "DatabaseService::GetDbFilePath",
+        "DatabaseService::ExecuteDbStatement",
+        "ChoresService::ChoreExists"
+      ]
+    },
+    {
+      "id": "A078",
+      "method": "GET",
+      "path": "/api/print/shoppinglist/thermal",
+      "controller": "PrintApiController",
+      "handler": "PrintShoppingListThermal",
+      "local_openapi": true,
+      "runtime_notes": "O query list default 1; printHeader default true, only literal \"true\" enables it when supplied. 200 {result:\"OK\"}. Sends ESC/POS output to configured network/file printer; failures 400; never retry/prefetch automatically.",
+      "permissions": "SHOPPINGLIST",
+      "dependencies": [
+        "StockService::GetShoppinglistInPrintableStrings",
+        "StockService::ShoppingListExists",
+        "PrintService::printShoppingList"
+      ]
+    },
+    {
+      "id": "A079",
+      "method": "GET",
+      "path": "/api/batteries",
+      "controller": "BatteriesApiController",
+      "handler": "Current",
+      "local_openapi": true,
+      "runtime_notes": "O Q. 200 CurrentBatteryResponse[] with nested battery; local schema includes battery state additions.",
+      "permissions": "Authenticated; no explicit action permission check.",
+      "dependencies": [
+        "BatteriesService::GetCurrent"
+      ]
+    },
+    {
+      "id": "A080",
+      "method": "GET",
+      "path": "/api/batteries/{batteryId}",
+      "controller": "BatteriesApiController",
+      "handler": "BatteryDetails",
+      "local_openapi": true,
+      "runtime_notes": "R batteryId. 200 {battery,state,last_charged,charge_cycles_count,next_estimated_charge_time}; missing battery 400. state is a local extension.",
+      "permissions": "Authenticated; no explicit action permission check.",
+      "dependencies": [
+        "BatteriesService::GetBatteryDetails",
+        "BatteriesService::BatteryExists",
+        "BatteriesService::GetBatteryState"
+      ]
+    },
+    {
+      "id": "A081",
+      "method": "POST",
+      "path": "/api/batteries/{batteryId}/charge",
+      "controller": "BatteriesApiController",
+      "handler": "TrackChargeCycle",
+      "local_openapi": true,
+      "runtime_notes": "R batteryId; JSON {} allowed. O tracked_time YYYY-MM-DD HH:mm:ss, default now. 200 BatteryChargeCycleEntry, marks battery charged. Non-rechargeable battery fails. Save cycle custom fields separately.",
+      "permissions": "BATTERIES_TRACK_CHARGE_CYCLE",
+      "dependencies": [
+        "BatteriesService::TrackChargeCycle",
+        "BatteriesService::BatteryExists"
+      ]
+    },
+    {
+      "id": "A082",
+      "method": "POST",
+      "path": "/api/batteries/{batteryId}/replace",
+      "controller": "BatteriesApiController",
+      "handler": "ReplaceBattery",
+      "local_openapi": false,
+      "runtime_notes": "R batteryId and JSON replacement_battery_id. 200 {replaced_battery_id,replacement_battery_id,used_in}. Transaction clears original device and discharges rechargeable original or deactivates disposable original; assigns device to replacement. No dedicated replacement undo route.",
+      "permissions": "BATTERIES_TRACK_CHARGE_CYCLE",
+      "dependencies": [
+        "BatteriesService::ReplaceBattery",
+        "DatabaseService::GetDbConnectionRaw",
+        "DatabaseService::GetDbFilePath",
+        "BatteriesService::BatteryExists"
+      ]
+    },
+    {
+      "id": "A083",
+      "method": "POST",
+      "path": "/api/batteries/charge-cycles/{chargeCycleId}/undo",
+      "controller": "BatteriesApiController",
+      "handler": "UndoChargeCycle",
+      "local_openapi": true,
+      "runtime_notes": "R chargeCycleId, not batteryId. 204. Missing/already undone cycle 400. Marks log undone; does not reset is_charged in this implementation.",
+      "permissions": "BATTERIES_UNDO_CHARGE_CYCLE",
+      "dependencies": [
+        "BatteriesService::UndoChargeCycle"
+      ]
+    },
+    {
+      "id": "A084",
+      "method": "GET",
+      "path": "/api/batteries/{batteryId}/printlabel",
+      "controller": "BatteriesApiController",
+      "handler": "BatteryPrintLabel",
+      "local_openapi": true,
+      "runtime_notes": "R path ID; no body/query. 200 object {battery,grocycode,details} merged with configured label-printer parameters. GET executes webhook when LABEL_PRINTER_RUN_SERVER is enabled; otherwise frontend must invoke configured hook with returned data. Disable caching/prefetch/retries for this action; errors 400.",
+      "permissions": "Authenticated; no explicit action permission check.",
+      "dependencies": [
+        "BatteriesService::GetBatteryDetails",
+        "BatteriesService::BatteryExists",
+        "BatteriesService::GetBatteryState"
+      ]
+    },
+    {
+      "id": "A085",
+      "method": "GET",
+      "path": "/api/tasks",
+      "controller": "TasksApiController",
+      "handler": "Current",
+      "local_openapi": true,
+      "runtime_notes": "O Q. 200 CurrentTaskResponse[] (unfinished tasks only), enriched assigned_to_user and category. Completed list uses generic tasks; no include_done option.",
+      "permissions": "Authenticated; no explicit action permission check.",
+      "dependencies": [
+        "TasksService::GetCurrent",
+        "UsersService::GetUsersAsDto"
+      ]
+    },
+    {
+      "id": "A086",
+      "method": "POST",
+      "path": "/api/tasks/{taskId}/complete",
+      "controller": "TasksApiController",
+      "handler": "MarkTaskAsCompleted",
+      "local_openapi": true,
+      "runtime_notes": "R taskId; JSON {} allowed. O done_time YYYY-MM-DD HH:mm:ss, default now if missing/invalid. 204. Updates done=1 and done_timestamp.",
+      "permissions": "TASKS_MARK_COMPLETED",
+      "dependencies": [
+        "TasksService::MarkTaskAsCompleted",
+        "TasksService::TaskExists"
+      ]
+    },
+    {
+      "id": "A087",
+      "method": "POST",
+      "path": "/api/tasks/{taskId}/undo",
+      "controller": "TasksApiController",
+      "handler": "UndoTask",
+      "local_openapi": true,
+      "runtime_notes": "R taskId. No body. 204. Sets done=0 and done_timestamp=null; missing task 400.",
+      "permissions": "TASKS_UNDO_EXECUTION",
+      "dependencies": [
+        "TasksService::UndoTask",
+        "TasksService::TaskExists"
+      ]
+    },
+    {
+      "id": "A088",
+      "method": "GET",
+      "path": "/api/calendar/ical",
+      "controller": "CalendarApiController",
+      "handler": "Ical",
+      "local_openapi": true,
+      "runtime_notes": "O secret query special-purpose calendar key (or ordinary auth). 200 text/calendar; charset=utf-8, attachment Grocy.ics. Server-generated events include chore description and action links. Not a JSON event API.",
+      "permissions": "Authenticated; no explicit action permission check.",
+      "dependencies": [
+        "CalendarService::GetEvents",
+        "LocalizationService::__t",
+        "LocalizationService::CheckAndAddMissingTranslationToPot",
+        "StockService::GetCurrentStock",
+        "DatabaseService::ExecuteDbQuery",
+        "DatabaseService::GetDbConnectionRaw",
+        "DatabaseService::GetDbFilePath",
+        "DatabaseService::ExecuteDbStatement",
+        "TasksService::GetCurrent",
+        "UsersService::GetUsersAsDto",
+        "ChoresService::GetCurrent",
+        "BatteriesService::GetCurrent",
+        "CalendarApiController::BuildIcalChoreDescription",
+        "ApiKeyService::GetOrCreateApiKey",
+        "ApiKeyService::CreateApiKey",
+        "ApiKeyService::GenerateApiKey"
+      ]
+    },
+    {
+      "id": "A089",
+      "method": "GET",
+      "path": "/api/calendar/ical/sharing-link",
+      "controller": "CalendarApiController",
+      "handler": "IcalSharingLink",
+      "local_openapi": true,
+      "runtime_notes": "No parameters. 200 {url}; GET may create a special-purpose API key. Treat URL as a credential.",
+      "permissions": "Authenticated; no explicit action permission check.",
+      "dependencies": [
+        "ApiKeyService::GetOrCreateApiKey",
+        "ApiKeyService::CreateApiKey",
+        "ApiKeyService::GenerateApiKey"
+      ]
+    },
+    {
+      "id": "A090",
+      "method": "GET",
+      "path": "/api/calendar/ical/chores/{choreId}/mark-as-done",
+      "controller": "CalendarApiController",
+      "handler": "IcalChoreMarkAsDone",
+      "local_openapi": true,
+      "runtime_notes": "R choreId. O secret calendar key or normal auth. No body. 200 ChoreLogEntry using now/current authenticated key owner; delegated helper checks CHORE_TRACK_EXECUTION. Mutating GET: never prefetch.",
+      "permissions": "CHORE_TRACK_EXECUTION",
+      "dependencies": [
+        "CalendarApiController::TrackChoreFromIcal",
+        "ChoresService::TrackChore",
+        "StockService::ConsumeProduct",
+        "UsersService::GetUserSetting",
+        "StockService::ProductExists",
+        "StockService::LocationExists",
+        "StockService::GetProductDetails",
+        "StockService::GetCurrentStock",
+        "DatabaseService::ExecuteDbQuery",
+        "DatabaseService::GetDbConnectionRaw",
+        "DatabaseService::GetDbFilePath",
+        "DatabaseService::ExecuteDbStatement",
+        "StockService::GetProductStockEntries",
+        "StockService::GetProductStockEntriesForLocation",
+        "StockService::OpenProduct",
+        "LocalizationService::__t",
+        "LocalizationService::CheckAndAddMissingTranslationToPot",
+        "StockService::TransferProduct",
+        "StockService::AddMissingProductsToShoppingList",
+        "StockService::ShoppingListExists",
+        "StockService::GetMissingProducts",
+        "ChoresService::ChoreExists",
+        "ChoresService::CalculateNextExecutionAssignment",
+        "UsersService::GetUsersAsDto"
+      ]
+    },
+    {
+      "id": "A091",
+      "method": "GET",
+      "path": "/api/calendar/ical/chores/{choreId}/skip",
+      "controller": "CalendarApiController",
+      "handler": "IcalChoreSkip",
+      "local_openapi": true,
+      "runtime_notes": "R choreId. O secret calendar key or normal auth. No body. 200 ChoreLogEntry with skipped=true; delegated helper checks CHORE_TRACK_EXECUTION. Manual chore skip fails. Mutating GET: never prefetch.",
+      "permissions": "CHORE_TRACK_EXECUTION",
+      "dependencies": [
+        "CalendarApiController::TrackChoreFromIcal",
+        "ChoresService::TrackChore",
+        "StockService::ConsumeProduct",
+        "UsersService::GetUserSetting",
+        "StockService::ProductExists",
+        "StockService::LocationExists",
+        "StockService::GetProductDetails",
+        "StockService::GetCurrentStock",
+        "DatabaseService::ExecuteDbQuery",
+        "DatabaseService::GetDbConnectionRaw",
+        "DatabaseService::GetDbFilePath",
+        "DatabaseService::ExecuteDbStatement",
+        "StockService::GetProductStockEntries",
+        "StockService::GetProductStockEntriesForLocation",
+        "StockService::OpenProduct",
+        "LocalizationService::__t",
+        "LocalizationService::CheckAndAddMissingTranslationToPot",
+        "StockService::TransferProduct",
+        "StockService::AddMissingProductsToShoppingList",
+        "StockService::ShoppingListExists",
+        "StockService::GetMissingProducts",
+        "ChoresService::ChoreExists",
+        "ChoresService::CalculateNextExecutionAssignment",
+        "UsersService::GetUsersAsDto"
+      ]
+    }
+  ],
+  "options": "/api/{routes:.+}",
+  "html_routes": [
+    {
+      "method": "GET",
+      "path": "/",
+      "controller": "SystemController",
+      "handler": "Root"
+    },
+    {
+      "method": "GET",
+      "path": "/about",
+      "controller": "SystemController",
+      "handler": "About"
+    },
+    {
+      "method": "GET",
+      "path": "/manifest",
+      "controller": "SystemController",
+      "handler": "Manifest"
+    },
+    {
+      "method": "GET",
+      "path": "/barcodescannertesting",
+      "controller": "SystemController",
+      "handler": "BarcodeScannerTesting"
+    },
+    {
+      "method": "GET",
+      "path": "/login",
+      "controller": "LoginController",
+      "handler": "LoginPage"
+    },
+    {
+      "method": "POST",
+      "path": "/login",
+      "controller": "LoginController",
+      "handler": "ProcessLogin"
+    },
+    {
+      "method": "GET",
+      "path": "/logout",
+      "controller": "LoginController",
+      "handler": "Logout"
+    },
+    {
+      "method": "GET",
+      "path": "/userfields",
+      "controller": "GenericEntityController",
+      "handler": "UserfieldsList"
+    },
+    {
+      "method": "GET",
+      "path": "/userfield/{userfieldId}",
+      "controller": "GenericEntityController",
+      "handler": "UserfieldEditForm"
+    },
+    {
+      "method": "GET",
+      "path": "/userentities",
+      "controller": "GenericEntityController",
+      "handler": "UserentitiesList"
+    },
+    {
+      "method": "GET",
+      "path": "/userentity/{userentityId}",
+      "controller": "GenericEntityController",
+      "handler": "UserentityEditForm"
+    },
+    {
+      "method": "GET",
+      "path": "/userobjects/{userentityName}",
+      "controller": "GenericEntityController",
+      "handler": "UserobjectsList"
+    },
+    {
+      "method": "GET",
+      "path": "/userobject/{userentityName}/{userobjectId}",
+      "controller": "GenericEntityController",
+      "handler": "UserobjectEditForm"
+    },
+    {
+      "method": "GET",
+      "path": "/users",
+      "controller": "UsersController",
+      "handler": "UsersList"
+    },
+    {
+      "method": "GET",
+      "path": "/user/{userId}",
+      "controller": "UsersController",
+      "handler": "UserEditForm"
+    },
+    {
+      "method": "GET",
+      "path": "/user/{userId}/permissions",
+      "controller": "UsersController",
+      "handler": "PermissionList"
+    },
+    {
+      "method": "GET",
+      "path": "/usersettings",
+      "controller": "UsersController",
+      "handler": "UserSettings"
+    },
+    {
+      "method": "GET",
+      "path": "/products",
+      "controller": "StockController",
+      "handler": "ProductsList"
+    },
+    {
+      "method": "GET",
+      "path": "/product/{productId}",
+      "controller": "StockController",
+      "handler": "ProductEditForm"
+    },
+    {
+      "method": "GET",
+      "path": "/quantityunits",
+      "controller": "StockController",
+      "handler": "QuantityUnitsList"
+    },
+    {
+      "method": "GET",
+      "path": "/quantityunit/{quantityunitId}",
+      "controller": "StockController",
+      "handler": "QuantityUnitEditForm"
+    },
+    {
+      "method": "GET",
+      "path": "/quantityunitconversion/{quConversionId}",
+      "controller": "StockController",
+      "handler": "QuantityUnitConversionEditForm"
+    },
+    {
+      "method": "GET",
+      "path": "/productgroups",
+      "controller": "StockController",
+      "handler": "ProductGroupsList"
+    },
+    {
+      "method": "GET",
+      "path": "/productgroup/{productGroupId}",
+      "controller": "StockController",
+      "handler": "ProductGroupEditForm"
+    },
+    {
+      "method": "GET",
+      "path": "/product/{productId}/grocycode",
+      "controller": "StockController",
+      "handler": "ProductGrocycodeImage"
+    },
+    {
+      "method": "GET",
+      "path": "/stockoverview",
+      "controller": "StockController",
+      "handler": "Overview"
+    },
+    {
+      "method": "GET",
+      "path": "/stockentries",
+      "controller": "StockController",
+      "handler": "Stockentries"
+    },
+    {
+      "method": "GET",
+      "path": "/purchase",
+      "controller": "StockController",
+      "handler": "Purchase"
+    },
+    {
+      "method": "GET",
+      "path": "/consume",
+      "controller": "StockController",
+      "handler": "Consume"
+    },
+    {
+      "method": "GET",
+      "path": "/transfer",
+      "controller": "StockController",
+      "handler": "Transfer"
+    },
+    {
+      "method": "GET",
+      "path": "/inventory",
+      "controller": "StockController",
+      "handler": "Inventory"
+    },
+    {
+      "method": "GET",
+      "path": "/stockentry/{entryId}",
+      "controller": "StockController",
+      "handler": "StockEntryEditForm"
+    },
+    {
+      "method": "GET",
+      "path": "/stocksettings",
+      "controller": "StockController",
+      "handler": "StockSettings"
+    },
+    {
+      "method": "GET",
+      "path": "/locations",
+      "controller": "StockController",
+      "handler": "LocationsList"
+    },
+    {
+      "method": "GET",
+      "path": "/location/{locationId}",
+      "controller": "StockController",
+      "handler": "LocationEditForm"
+    },
+    {
+      "method": "GET",
+      "path": "/stockjournal",
+      "controller": "StockController",
+      "handler": "Journal"
+    },
+    {
+      "method": "GET",
+      "path": "/locationcontentsheet",
+      "controller": "StockController",
+      "handler": "LocationContentSheet"
+    },
+    {
+      "method": "GET",
+      "path": "/quantityunitpluraltesting",
+      "controller": "StockController",
+      "handler": "QuantityUnitPluralFormTesting"
+    },
+    {
+      "method": "GET",
+      "path": "/stockjournal/summary",
+      "controller": "StockController",
+      "handler": "JournalSummary"
+    },
+    {
+      "method": "GET",
+      "path": "/productbarcodes/{productBarcodeId}",
+      "controller": "StockController",
+      "handler": "ProductBarcodesEditForm"
+    },
+    {
+      "method": "GET",
+      "path": "/stockentry/{entryId}/grocycode",
+      "controller": "StockController",
+      "handler": "StockEntryGrocycodeImage"
+    },
+    {
+      "method": "GET",
+      "path": "/stockentry/{entryId}/label",
+      "controller": "StockController",
+      "handler": "StockEntryGrocycodeLabel"
+    },
+    {
+      "method": "GET",
+      "path": "/quantityunitconversionsresolved",
+      "controller": "StockController",
+      "handler": "QuantityUnitConversionsResolved"
+    },
+    {
+      "method": "GET",
+      "path": "/stockreports/spendings",
+      "controller": "StockReportsController",
+      "handler": "Spendings"
+    },
+    {
+      "method": "GET",
+      "path": "/shoppinglocations",
+      "controller": "StockController",
+      "handler": "ShoppingLocationsList"
+    },
+    {
+      "method": "GET",
+      "path": "/shoppinglocation/{shoppingLocationId}",
+      "controller": "StockController",
+      "handler": "ShoppingLocationEditForm"
+    },
+    {
+      "method": "GET",
+      "path": "/shoppinglist",
+      "controller": "StockController",
+      "handler": "ShoppingList"
+    },
+    {
+      "method": "GET",
+      "path": "/shoppinglistitem/{itemId}",
+      "controller": "StockController",
+      "handler": "ShoppingListItemEditForm"
+    },
+    {
+      "method": "GET",
+      "path": "/shoppinglist/{listId}",
+      "controller": "StockController",
+      "handler": "ShoppingListEditForm"
+    },
+    {
+      "method": "GET",
+      "path": "/shoppinglistsettings",
+      "controller": "StockController",
+      "handler": "ShoppingListSettings"
+    },
+    {
+      "method": "GET",
+      "path": "/recipes",
+      "controller": "RecipesController",
+      "handler": "Overview"
+    },
+    {
+      "method": "GET",
+      "path": "/recipe/{recipeId}",
+      "controller": "RecipesController",
+      "handler": "RecipeEditForm"
+    },
+    {
+      "method": "GET",
+      "path": "/recipe/{recipeId}/pos/{recipePosId}",
+      "controller": "RecipesController",
+      "handler": "RecipePosEditForm"
+    },
+    {
+      "method": "GET",
+      "path": "/recipessettings",
+      "controller": "RecipesController",
+      "handler": "RecipesSettings"
+    },
+    {
+      "method": "GET",
+      "path": "/recipe/{recipeId}/grocycode",
+      "controller": "RecipesController",
+      "handler": "RecipeGrocycodeImage"
+    },
+    {
+      "method": "GET",
+      "path": "/mealplan",
+      "controller": "RecipesController",
+      "handler": "MealPlan"
+    },
+    {
+      "method": "GET",
+      "path": "/mealplansections",
+      "controller": "RecipesController",
+      "handler": "MealPlanSectionsList"
+    },
+    {
+      "method": "GET",
+      "path": "/mealplansection/{sectionId}",
+      "controller": "RecipesController",
+      "handler": "MealPlanSectionEditForm"
+    },
+    {
+      "method": "GET",
+      "path": "/choresoverview",
+      "controller": "ChoresController",
+      "handler": "Overview"
+    },
+    {
+      "method": "GET",
+      "path": "/choretracking",
+      "controller": "ChoresController",
+      "handler": "TrackChoreExecution"
+    },
+    {
+      "method": "GET",
+      "path": "/choresjournal",
+      "controller": "ChoresController",
+      "handler": "Journal"
+    },
+    {
+      "method": "GET",
+      "path": "/chores",
+      "controller": "ChoresController",
+      "handler": "ChoresList"
+    },
+    {
+      "method": "GET",
+      "path": "/chore/{choreId}",
+      "controller": "ChoresController",
+      "handler": "ChoreEditForm"
+    },
+    {
+      "method": "GET",
+      "path": "/choressettings",
+      "controller": "ChoresController",
+      "handler": "ChoresSettings"
+    },
+    {
+      "method": "GET",
+      "path": "/chore/{choreId}/grocycode",
+      "controller": "ChoresController",
+      "handler": "ChoreGrocycodeImage"
+    },
+    {
+      "method": "GET",
+      "path": "/batteriesoverview",
+      "controller": "BatteriesController",
+      "handler": "Overview"
+    },
+    {
+      "method": "GET",
+      "path": "/batterytracking",
+      "controller": "BatteriesController",
+      "handler": "TrackChargeCycle"
+    },
+    {
+      "method": "GET",
+      "path": "/batteriesjournal",
+      "controller": "BatteriesController",
+      "handler": "Journal"
+    },
+    {
+      "method": "GET",
+      "path": "/batteries",
+      "controller": "BatteriesController",
+      "handler": "BatteriesList"
+    },
+    {
+      "method": "GET",
+      "path": "/battery/{batteryId}",
+      "controller": "BatteriesController",
+      "handler": "BatteryEditForm"
+    },
+    {
+      "method": "GET",
+      "path": "/batteriessettings",
+      "controller": "BatteriesController",
+      "handler": "BatteriesSettings"
+    },
+    {
+      "method": "GET",
+      "path": "/battery/{batteryId}/grocycode",
+      "controller": "BatteriesController",
+      "handler": "BatteryGrocycodeImage"
+    },
+    {
+      "method": "GET",
+      "path": "/tasks",
+      "controller": "TasksController",
+      "handler": "Overview"
+    },
+    {
+      "method": "GET",
+      "path": "/task/{taskId}",
+      "controller": "TasksController",
+      "handler": "TaskEditForm"
+    },
+    {
+      "method": "GET",
+      "path": "/taskcategories",
+      "controller": "TasksController",
+      "handler": "TaskCategoriesList"
+    },
+    {
+      "method": "GET",
+      "path": "/taskcategory/{categoryId}",
+      "controller": "TasksController",
+      "handler": "TaskCategoryEditForm"
+    },
+    {
+      "method": "GET",
+      "path": "/taskssettings",
+      "controller": "TasksController",
+      "handler": "TasksSettings"
+    },
+    {
+      "method": "GET",
+      "path": "/equipment",
+      "controller": "EquipmentController",
+      "handler": "Overview"
+    },
+    {
+      "method": "GET",
+      "path": "/equipment/{equipmentId}",
+      "controller": "EquipmentController",
+      "handler": "EditForm"
+    },
+    {
+      "method": "GET",
+      "path": "/calendar",
+      "controller": "CalendarController",
+      "handler": "Overview"
+    },
+    {
+      "method": "GET",
+      "path": "/api",
+      "controller": "OpenApiController",
+      "handler": "DocumentationUi"
+    },
+    {
+      "method": "GET",
+      "path": "/manageapikeys",
+      "controller": "OpenApiController",
+      "handler": "ApiKeysList"
+    },
+    {
+      "method": "GET",
+      "path": "/manageapikeys/new",
+      "controller": "OpenApiController",
+      "handler": "CreateNewApiKey"
+    }
+  ]
+}
