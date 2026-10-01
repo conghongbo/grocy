@@ -10,6 +10,15 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 
 class SystemController extends BaseController
 {
+	public function React(Request $request, Response $response, array $args)
+	{
+		$manifestPath = __DIR__ . '/../public/react/.vite/manifest.json';
+		$manifest = is_file($manifestPath) ? json_decode(file_get_contents($manifestPath), true) : [];
+		$entry = $manifest['src/main.tsx'] ?? null;
+
+		return $this->RenderPage($response, 'react', ['reactEntry' => $entry]);
+	}
+
 	public function About(Request $request, Response $response, array $args)
 	{
 		return $this->RenderPage($response, 'about', [

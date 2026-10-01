@@ -2,4 +2,5 @@ embedded.txt
 /.release
 /packages
 /public/packages
+/public/react
 .DS_Store
