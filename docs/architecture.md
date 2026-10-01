@@ -48,3 +48,7 @@ Database
 - Reduce coupling between UI logic and backend implementation.
 - Improve testability and maintainability.
 - Use AI-assisted development to support analysis, migration, testing, and documentation.
+
+## Implemented incremental architecture
+
+`/react` now hosts the opt-in application. A minimal PHP-rendered host supplies URLs and feature flags; React owns navigation and UI. `frontend/src/api/client.ts` handles transport, `api/grocy.ts` defines endpoint contracts, and reusable hooks handle asynchronous reads and mutations. Stock/inventory and task/chore/battery pages use existing REST service endpoints. Existing Blade pages continue to serve advanced workflows. See [migration.md](migration.md) for supported functionality, deployment, validation and parity gaps.

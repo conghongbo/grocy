@@ -32,6 +32,8 @@ use Slim\Routing\RouteCollectorProxy;
 
 $app->group('', function (RouteCollectorProxy $group)
 {
+	$group->get('/react', [\Grocy\Controllers\ReactController::class, 'Index']);
+
 	// System routes
 	$group->get('/', [SystemController::class, 'Root'])->setName('root');
 	$group->get('/about', [SystemController::class, 'About']);

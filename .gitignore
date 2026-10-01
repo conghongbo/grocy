@@ -3,3 +3,6 @@ embedded.txt
 /packages
 /public/packages
 .DS_Store
+
+/frontend/node_modules/
+/public/react/
