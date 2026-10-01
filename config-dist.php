@@ -231,3 +231,6 @@ DefaultUserSetting('calendar_color_tasks', '#28a745'); // The event color (hex c
 DefaultUserSetting('calendar_color_chores', '#ffc107'); // The event color (hex code) for due chores
 DefaultUserSetting('calendar_color_batteries', '#17a2b8'); // The event color (hex code) for due battery charge cycles
 DefaultUserSetting('calendar_color_meal_plan', '#6c757d'); // The event color (hex code) for meal plan items
+
+// Experimental React Tasks pilot. Missing build assets fall back to Blade.
+Setting('REACT_TASKS', false);

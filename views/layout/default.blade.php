@@ -769,7 +769,9 @@
 
 	@stack('pageScripts')
 	@stack('componentScripts')
+	@if(empty($reactPage))
 	<script src="{{ $U('/viewjs/' . $viewName . '.js?v=', true) }}{{ $version }}"></script>
+	@endif
 
 	@if(file_exists(GROCY_DATAPATH . '/custom_js.html'))
 	@php include GROCY_DATAPATH . '/custom_js.html' @endphp

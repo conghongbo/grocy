@@ -87,7 +87,7 @@ class BaseController
 			$this->View->set('DEFAULT_MIN_AMOUNT', $defaultMinAmount);
 		}
 
-		$this->View->set('viewName', $viewName);
+		$this->View->set('viewName', $data['reactViewName'] ?? $viewName);
 
 		return $this->View->Render($response, $viewName, $data);
 	}

@@ -497,6 +497,7 @@ Grocy.FrontendHelpers.RunWebhook = function (webhook, data, repetitions = 1)
 
 $(document).on("keyup paste change click", "input, select, textarea", function ()
 {
+	if ($(this).closest("#grocy-react-root").length) return;
 	$(this).addClass("is-dirty").closest("form").addClass("is-dirty");
 });
 
@@ -912,6 +913,7 @@ $('[data-toggle="tooltip"][data-html="true"]').on("shown.bs.tooltip", function (
 
 $(document).on("click", '.btn, a, button', function (e)
 {
+	if ($(e.target).closest("#grocy-react-root").length) return;
 	// Remove focus and hide any tooltips after click
 	document.activeElement.blur();
 	$(".tooltip").tooltip("hide");
