@@ -4,6 +4,7 @@ interface TaskRowProps {
     task: Task;
     onComplete: (taskId: number) => Promise<void>;
     onUndo: (taskId: number) => Promise<void>;
+    onEdit: (task: Task) => void;
     onDelete: (taskId: number) => Promise<void>;
 }
 
@@ -11,6 +12,7 @@ export function TaskRow({
     task,
     onComplete,
     onUndo,
+    onEdit,
     onDelete,
 }: TaskRowProps) {
     const isDone = task.done === 1;
@@ -73,6 +75,17 @@ export function TaskRow({
                         Complete
                     </button>
                 )}
+
+                {" "}
+
+                <button
+                    type="button"
+                    onClick={() => {
+                        onEdit(task);
+                    }}
+                >
+                    Edit
+                </button>
 
                 {" "}
 

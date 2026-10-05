@@ -7,17 +7,26 @@ import {
 import {
     tasksApi,
     type Task,
+    type TaskInput,
 } from "../../api/tasks";
 
 interface UseTasksResult {
     tasks: Task[];
     loading: boolean;
     error: string | null;
+    saving: boolean;
 
     refresh: () => Promise<void>;
     completeTask: (taskId: number) => Promise<void>;
     undoTask: (taskId: number) => Promise<void>;
     deleteTask: (taskId: number) => Promise<void>;
+    createTask: (
+        input: TaskInput,
+    ) => Promise<boolean>;
+    updateTask: (
+        taskId: number,
+        input: TaskInput,
+    ) => Promise<boolean>;
 }
 
 function getErrorMessage(
@@ -32,6 +41,7 @@ function getErrorMessage(
 export function useTasks(): UseTasksResult {
     const [tasks, setTasks] = useState<Task[]>([]);
     const [loading, setLoading] = useState(true);
+    const [saving, setSaving] = useState(false);
     const [error, setError] = useState<string | null>(
         null,
     );
@@ -121,14 +131,78 @@ export function useTasks(): UseTasksResult {
         [loadTasks],
     );
 
+    const createTask = useCallback(
+        async (
+            input: TaskInput,
+        ): Promise<boolean> => {
+            setSaving(true);
+            setError(null);
+
+            try {
+                await tasksApi.create(input);
+                await loadTasks();
+
+                return true;
+            } catch (caughtError) {
+                setError(
+                    getErrorMessage(
+                        caughtError,
+                        "Failed to create task",
+                    ),
+                );
+
+                return false;
+            } finally {
+                setSaving(false);
+            }
+        },
+        [loadTasks],
+    );
+
+    const updateTask = useCallback(
+        async (
+            taskId: number,
+            input: TaskInput,
+        ): Promise<boolean> => {
+            setSaving(true);
+            setError(null);
+
+            try {
+                await tasksApi.update(
+                    taskId,
+                    input,
+                );
+
+                await loadTasks();
+
+                return true;
+            } catch (caughtError) {
+                setError(
+                    getErrorMessage(
+                        caughtError,
+                        "Failed to update task",
+                    ),
+                );
+
+                return false;
+            } finally {
+                setSaving(false);
+            }
+        },
+        [loadTasks],
+    );
+
     return {
         tasks,
         loading,
+        saving,
         error,
 
         refresh,
         completeTask,
         undoTask,
         deleteTask,
+        createTask,
+        updateTask,
     };
 }

@@ -31,15 +31,17 @@ export interface Task {
     category: TaskCategory | null;
 }
 
-export interface CreateTaskInput {
+export interface TaskInput {
     name: string;
-    description?: string | null;
-    due_date?: string | null;
-    category_id?: number | null;
-    assigned_to_user_id?: number | null;
+    description: string;
+    due_date: string | null;
+    category_id: number | null;
+    assigned_to_user_id: number | null;
 }
 
-export type UpdateTaskInput = Partial<CreateTaskInput>;
+export interface CreateTaskResponse {
+    created_object_id: number;
+}
 
 export interface CompleteTaskInput {
     done_time?: string;
@@ -92,9 +94,9 @@ export const tasksApi = {
      * POST /api/objects/tasks
      */
     create(
-        input: CreateTaskInput,
-    ): Promise<unknown> {
-        return apiClient.post<unknown>(
+        input: TaskInput,
+    ): Promise<CreateTaskResponse> {
+        return apiClient.post<CreateTaskResponse>(
             "/api/objects/tasks",
             input,
         );
@@ -108,7 +110,7 @@ export const tasksApi = {
      */
     update(
         taskId: number,
-        input: UpdateTaskInput,
+        input: TaskInput,
     ): Promise<void> {
         return apiClient.put<void>(
             `/api/objects/tasks/${taskId}`,
