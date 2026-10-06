@@ -5,6 +5,8 @@ import { TaskRow } from "./TaskRow";
 interface TaskListProps {
     tasks: Task[];
 
+    canManageTasks: boolean;
+
     onComplete:
     (taskId: number) => Promise<void>;
 
@@ -20,6 +22,7 @@ interface TaskListProps {
 
 export function TaskList({
     tasks,
+    canManageTasks,
     onComplete,
     onUndo,
     onEdit,
@@ -54,6 +57,7 @@ export function TaskList({
                             <TaskRow
                                 key={task.id}
                                 task={task}
+                                canManageTasks={canManageTasks}
                                 onComplete={onComplete}
                                 onUndo={onUndo}
                                 onEdit={onEdit}

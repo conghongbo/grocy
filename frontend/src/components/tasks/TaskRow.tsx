@@ -9,6 +9,8 @@ import {
 interface TaskRowProps {
     task: Task;
 
+    canManageTasks: boolean;
+
     onComplete:
     (taskId: number) => Promise<void>;
 
@@ -24,6 +26,7 @@ interface TaskRowProps {
 
 export function TaskRow({
     task,
+    canManageTasks,
     onComplete,
     onUndo,
     onEdit,
@@ -150,67 +153,73 @@ export function TaskRow({
             </td>
 
             <td>
-                <div className="react-task-actions">
-                    {isDone ? (
+                {canManageTasks ? (
+                    <div className="react-task-actions">
+                        {isDone ? (
+                            <button
+                                type="button"
+                                className="
+                        react-task-btn
+                        react-task-btn-success
+                        react-task-btn-sm
+                    "
+                                onClick={() => {
+                                    void onUndo(
+                                        task.id,
+                                    );
+                                }}
+                            >
+                                Undo
+                            </button>
+                        ) : (
+                            <button
+                                type="button"
+                                className="
+                        react-task-btn
+                        react-task-btn-success
+                        react-task-btn-sm
+                    "
+                                onClick={() => {
+                                    void onComplete(
+                                        task.id,
+                                    );
+                                }}
+                            >
+                                ✓
+                            </button>
+                        )}
+
                         <button
                             type="button"
                             className="
-                                react-task-btn
-                                react-task-btn-success
-                                react-task-btn-sm
-                            "
+                    react-task-btn
+                    react-task-btn-info
+                    react-task-btn-sm
+                "
                             onClick={() => {
-                                void onUndo(
-                                    task.id,
-                                );
+                                onEdit(task);
                             }}
                         >
-                            Undo
+                            ✎
                         </button>
-                    ) : (
+
                         <button
                             type="button"
                             className="
-                                react-task-btn
-                                react-task-btn-success
-                                react-task-btn-sm
-                            "
-                            onClick={() => {
-                                void onComplete(
-                                    task.id,
-                                );
-                            }}
+                    react-task-btn
+                    react-task-btn-danger
+                    react-task-btn-sm
+                "
+                            onClick={handleDelete}
                         >
-                            ✓
+                            🗑
                         </button>
-                    )}
-
-                    <button
-                        type="button"
-                        className="
-                            react-task-btn
-                            react-task-btn-info
-                            react-task-btn-sm
-                        "
-                        onClick={() => {
-                            onEdit(task);
-                        }}
-                    >
-                        ✎
-                    </button>
-
-                    <button
-                        type="button"
-                        className="
-                            react-task-btn
-                            react-task-btn-danger
-                            react-task-btn-sm
-                        "
-                        onClick={handleDelete}
-                    >
-                        🗑
-                    </button>
-                </div>
+                    </div>
+                ) : (
+                    <span className="react-task-muted">
+                        Read only
+                    </span>
+                )}
             </td>
         </tr>
     );

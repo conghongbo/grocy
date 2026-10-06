@@ -22,6 +22,8 @@ import {
     filterTasks,
     getTaskSummary,
 } from "./taskFilters";
+import { useCurrentUser } from "./useCurrentUser";
+import { useTaskPermissions } from "./useTaskPermissions";
 
 export function TasksPage() {
     const {
@@ -45,6 +47,20 @@ export function TasksPage() {
         optionsError,
         refreshOptions,
     } = useTaskFormOptions();
+
+    const {
+        user,
+        loadingUser,
+        userError,
+    } = useCurrentUser();
+
+    const {
+        canManageTasks,
+        loadingPermissions,
+        permissionError,
+    } = useTaskPermissions(
+        user?.id ?? null,
+    );
 
     const [showForm, setShowForm] =
         useState(false);
@@ -156,19 +172,42 @@ export function TasksPage() {
                         Manage your tasks and keep track
                         of upcoming work
                     </p>
+
+                    {!loadingUser && user && (
+                        <small className="react-task-muted">
+                            Signed in as{" "}
+                            {user.display_name ??
+                                user.username}
+                        </small>
+                    )}
+
+                    {userError && (
+                        <small className="react-task-muted">
+                            User context unavailable
+                        </small>
+                    )}
+
+                    {permissionError && (
+                        <small className="react-task-muted">
+                            Task permissions unavailable
+                        </small>
+                    )}
                 </div>
 
                 <div className="react-tasks-header-actions">
-                    <button
-                        type="button"
-                        className="
-                    react-task-btn
-                    react-task-btn-primary
-                "
-                        onClick={handleCreate}
-                    >
-                        ＋ Add
-                    </button>
+                    {!loadingPermissions &&
+                        canManageTasks && (
+                            <button
+                                type="button"
+                                className="
+                react-task-btn
+                react-task-btn-primary
+            "
+                                onClick={handleCreate}
+                            >
+                                ＋ Add
+                            </button>
+                        )}
 
                     <button
                         type="button"
@@ -235,6 +274,7 @@ export function TasksPage() {
             {filteredTasks.length > 0 && (
                 <TaskList
                     tasks={filteredTasks}
+                    canManageTasks={canManageTasks}
                     onComplete={completeTask}
                     onUndo={undoTask}
                     onEdit={handleEdit}
