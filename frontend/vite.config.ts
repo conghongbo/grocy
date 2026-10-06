@@ -10,6 +10,8 @@ export default defineConfig({
     outDir: "../public/react",
     emptyOutDir: true,
 
+    cssCodeSplit: false,
+
     rollupOptions: {
       input: {
         tasks: resolve(
@@ -20,8 +22,22 @@ export default defineConfig({
 
       output: {
         entryFileNames: "[name].js",
-        chunkFileNames: "chunks/[name]-[hash].js",
-        assetFileNames: "assets/[name]-[hash][extname]",
+
+        chunkFileNames:
+          "chunks/[name]-[hash].js",
+
+        assetFileNames: (assetInfo) => {
+          if (
+            assetInfo.names?.some(
+              (name) =>
+                name.endsWith(".css"),
+            )
+          ) {
+            return "tasks.css";
+          }
+
+          return "assets/[name]-[hash][extname]";
+        },
       },
     },
   },

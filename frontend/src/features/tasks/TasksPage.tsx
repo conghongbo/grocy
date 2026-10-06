@@ -145,27 +145,41 @@ export function TasksPage() {
     }
 
     return (
-        <section>
-            <div>
-                <h1>Tasks</h1>
+        <section className="react-tasks-page">
+            <div className="react-tasks-header">
+                <div>
+                    <h1 className="react-tasks-title">
+                        Tasks
+                    </h1>
 
-                <button
-                    type="button"
-                    onClick={handleCreate}
-                >
-                    Add task
-                </button>
+                    <p className="react-tasks-subtitle">
+                        Manage your tasks and keep track
+                        of upcoming work
+                    </p>
+                </div>
 
-                {" "}
+                <div className="react-tasks-header-actions">
+                    <button
+                        type="button"
+                        className="
+                    react-task-btn
+                    react-task-btn-primary
+                "
+                        onClick={handleCreate}
+                    >
+                        ＋ Add
+                    </button>
 
-                <button
-                    type="button"
-                    onClick={() => {
-                        void refresh();
-                    }}
-                >
-                    Refresh
-                </button>
+                    <button
+                        type="button"
+                        className="react-task-btn"
+                        onClick={() => {
+                            void refresh();
+                        }}
+                    >
+                        ↻ Refresh
+                    </button>
+                </div>
             </div>
 
             {error && (

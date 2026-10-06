@@ -10,29 +10,62 @@ export function TaskSummary({
     summary,
 }: TaskSummaryProps) {
     return (
-        <div>
-            <div>
-                <strong>Overdue</strong>
-                <div>{summary.overdue}</div>
-                <small>
+        <div className="react-task-summary-grid">
+            <div
+                className="
+                    react-task-summary-card
+                    react-task-summary-card-overdue
+                "
+            >
+                <div className="react-task-summary-label">
+                    ● Overdue
+                </div>
+
+                <div className="react-task-summary-value">
+                    {summary.overdue}
+                </div>
+
+                <div className="react-task-summary-description">
                     Tasks that need attention
-                </small>
+                </div>
             </div>
 
-            <div>
-                <strong>Due Today</strong>
-                <div>{summary.dueToday}</div>
-                <small>
+            <div
+                className="
+                    react-task-summary-card
+                    react-task-summary-card-today
+                "
+            >
+                <div className="react-task-summary-label">
+                    ● Due Today
+                </div>
+
+                <div className="react-task-summary-value">
+                    {summary.dueToday}
+                </div>
+
+                <div className="react-task-summary-description">
                     Tasks scheduled for today
-                </small>
+                </div>
             </div>
 
-            <div>
-                <strong>Due Soon</strong>
-                <div>{summary.dueSoon}</div>
-                <small>
+            <div
+                className="
+                    react-task-summary-card
+                    react-task-summary-card-soon
+                "
+            >
+                <div className="react-task-summary-label">
+                    ● Due Soon
+                </div>
+
+                <div className="react-task-summary-value">
+                    {summary.dueSoon}
+                </div>
+
+                <div className="react-task-summary-description">
                     Within the next 5 days
-                </small>
+                </div>
             </div>
         </div>
     );

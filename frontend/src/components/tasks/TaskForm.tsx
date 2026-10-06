@@ -96,164 +96,187 @@ export function TaskForm({
     };
 
     return (
-        <form onSubmit={handleSubmit}>
-            <h2>
-                {task
-                    ? "Edit task"
-                    : "Create task"}
-            </h2>
-
-            <div>
-                <label htmlFor="react-task-name">
-                    Name
-                </label>
-
-                <input
-                    id="react-task-name"
-                    type="text"
-                    required
-                    disabled={saving}
-                    value={name}
-                    onChange={(event) => {
-                        setName(
-                            event.target.value,
-                        );
-                    }}
-                />
+        <form
+            className="
+        react-task-card
+        react-task-form
+    "
+            onSubmit={handleSubmit}
+        >
+            <div className="react-task-card-header">
+                {task ? "Edit task" : "Create task"}
             </div>
 
-            <div>
-                <label htmlFor="react-task-description">
-                    Description
-                </label>
+            <div className="react-task-card-body">
+                <div className="react-task-form-grid">
+                    <div className="react-task-field">
+                        <label htmlFor="react-task-name">
+                            Name
+                        </label>
 
-                <textarea
-                    id="react-task-description"
-                    rows={4}
-                    disabled={saving}
-                    value={description}
-                    onChange={(event) => {
-                        setDescription(
-                            event.target.value,
-                        );
-                    }}
-                />
-            </div>
+                        <input
+                            className="react-task-control"
+                            id="react-task-name"
+                            type="text"
+                            required
+                            disabled={saving}
+                            value={name}
+                            onChange={(event) => {
+                                setName(
+                                    event.target.value,
+                                );
+                            }}
+                        />
+                    </div>
 
-            <div>
-                <label htmlFor="react-task-due-date">
-                    Due
-                </label>
+                    <div
+                        className="
+        react-task-field
+        react-task-form-full
+    "
+                    >
+                        <label htmlFor="react-task-description">
+                            Description
+                        </label>
 
-                <input
-                    id="react-task-due-date"
-                    type="date"
-                    disabled={saving}
-                    value={dueDate}
-                    onChange={(event) => {
-                        setDueDate(
-                            event.target.value,
-                        );
-                    }}
-                />
-            </div>
+                        <textarea
+                            className="react-task-control"
+                            id="react-task-description"
+                            rows={4}
+                            disabled={saving}
+                            value={description}
+                            onChange={(event) => {
+                                setDescription(
+                                    event.target.value,
+                                );
+                            }}
+                        />
+                    </div>
 
-            <div>
-                <label htmlFor="react-task-category">
-                    Category
-                </label>
+                    <div className="react-task-field">
+                        <label htmlFor="react-task-due-date">
+                            Due
+                        </label>
 
-                <select
-                    id="react-task-category"
-                    disabled={
-                        saving ||
-                        loadingOptions
-                    }
-                    value={categoryId}
-                    onChange={(event) => {
-                        setCategoryId(
-                            event.target.value,
-                        );
-                    }}
-                >
-                    <option value="">
-                        Uncategorized
-                    </option>
+                        <input
+                            className="react-task-control"
+                            id="react-task-due-date"
+                            type="date"
+                            disabled={saving}
+                            value={dueDate}
+                            onChange={(event) => {
+                                setDueDate(
+                                    event.target.value,
+                                );
+                            }}
+                        />
+                    </div>
 
-                    {categories.map(
-                        (category) => (
-                            <option
-                                key={category.id}
-                                value={
-                                    category.id
-                                }
-                            >
-                                {category.name}
-                            </option>
-                        ),
-                    )}
-                </select>
-            </div>
+                    <div className="react-task-field">
+                        <label htmlFor="react-task-category">
+                            Category
+                        </label>
 
-            <div>
-                <label htmlFor="react-task-assigned-user">
-                    Assigned to
-                </label>
-
-                <select
-                    id="react-task-assigned-user"
-                    disabled={
-                        saving ||
-                        loadingOptions
-                    }
-                    value={
-                        assignedToUserId
-                    }
-                    onChange={(event) => {
-                        setAssignedToUserId(
-                            event.target.value,
-                        );
-                    }}
-                >
-                    <option value="">
-                        Unassigned
-                    </option>
-
-                    {users.map((user) => (
-                        <option
-                            key={user.id}
-                            value={user.id}
+                        <select
+                            className="react-task-control"
+                            id="react-task-category"
+                            disabled={
+                                saving ||
+                                loadingOptions
+                            }
+                            value={categoryId}
+                            onChange={(event) => {
+                                setCategoryId(
+                                    event.target.value,
+                                );
+                            }}
                         >
-                            {user.display_name ??
-                                user.username}
-                        </option>
-                    ))}
-                </select>
-            </div>
+                            <option value="">
+                                Uncategorized
+                            </option>
 
-            <div>
-                <button
-                    type="submit"
-                    disabled={
-                        saving ||
-                        loadingOptions ||
-                        name.trim() === ""
-                    }
-                >
-                    {saving
-                        ? "Saving..."
-                        : "Save"}
-                </button>
+                            {categories.map(
+                                (category) => (
+                                    <option
+                                        key={category.id}
+                                        value={
+                                            category.id
+                                        }
+                                    >
+                                        {category.name}
+                                    </option>
+                                ),
+                            )}
+                        </select>
+                    </div>
 
-                {" "}
+                    <div className="react-task-field">
+                        <label htmlFor="react-task-assigned-user">
+                            Assigned to
+                        </label>
 
-                <button
-                    type="button"
-                    disabled={saving}
-                    onClick={onCancel}
-                >
-                    Cancel
-                </button>
+                        <select
+                            className="react-task-control"
+                            id="react-task-assigned-user"
+                            disabled={
+                                saving ||
+                                loadingOptions
+                            }
+                            value={
+                                assignedToUserId
+                            }
+                            onChange={(event) => {
+                                setAssignedToUserId(
+                                    event.target.value,
+                                );
+                            }}
+                        >
+                            <option value="">
+                                Unassigned
+                            </option>
+
+                            {users.map((user) => (
+                                <option
+                                    key={user.id}
+                                    value={user.id}
+                                >
+                                    {user.display_name ??
+                                        user.username}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div className="react-task-form-actions">
+                        <button
+                            type="submit"
+                            className="
+        react-task-btn
+        react-task-btn-primary
+    "
+                            disabled={
+                                saving ||
+                                loadingOptions ||
+                                name.trim() === ""
+                            }
+                        >
+                            {saving
+                                ? "Saving..."
+                                : "Save"}
+                        </button>
+
+                        {" "}
+
+                        <button
+                            type="button"
+                            className="react-task-btn"
+                            disabled={saving}
+                            onClick={onCancel}
+                        >
+                            Cancel
+                        </button>
+                    </div>
+                </div>
             </div>
         </form>
     );

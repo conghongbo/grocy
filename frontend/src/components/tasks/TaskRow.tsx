@@ -1,11 +1,25 @@
 import type { Task } from "../../api/tasks";
 
+import {
+    isTaskDueSoon,
+    isTaskDueToday,
+    isTaskOverdue,
+} from "../../features/tasks/taskFilters";
+
 interface TaskRowProps {
     task: Task;
-    onComplete: (taskId: number) => Promise<void>;
-    onUndo: (taskId: number) => Promise<void>;
-    onEdit: (task: Task) => void;
-    onDelete: (taskId: number) => Promise<void>;
+
+    onComplete:
+    (taskId: number) => Promise<void>;
+
+    onUndo:
+    (taskId: number) => Promise<void>;
+
+    onEdit:
+    (task: Task) => void;
+
+    onDelete:
+    (taskId: number) => Promise<void>;
 }
 
 export function TaskRow({
@@ -16,85 +30,187 @@ export function TaskRow({
     onDelete,
 }: TaskRowProps) {
     const isDone = task.done === 1;
+    const overdue = isTaskOverdue(task);
+    const dueToday = isTaskDueToday(task);
+    const dueSoon = isTaskDueSoon(task);
 
-    const handleComplete = () => {
-        void onComplete(task.id);
-    };
+    let rowClassName = "";
 
-    const handleUndo = () => {
-        void onUndo(task.id);
-    };
+    if (overdue) {
+        rowClassName =
+            "react-task-row-overdue";
+    }
+
+    if (isDone) {
+        rowClassName =
+            "react-task-row-completed";
+    }
 
     const handleDelete = () => {
         void onDelete(task.id);
     };
 
     return (
-        <tr>
+        <tr className={rowClassName}>
             <td>
-                <strong>{task.name}</strong>
+                <div className="react-task-name">
+                    {task.name}
+                </div>
 
                 {task.description && (
-                    <div>
-                        <small>{task.description}</small>
+                    <div className="react-task-description">
+                        {task.description}
                     </div>
                 )}
             </td>
 
             <td>
-                {task.category?.name ?? "—"}
+                <div>
+                    {task.due_date
+                        ? task.due_date.slice(
+                            0,
+                            10,
+                        )
+                        : "—"}
+                </div>
+
+                {overdue && (
+                    <span
+                        className="
+                            react-task-badge
+                            react-task-badge-danger
+                        "
+                    >
+                        Overdue
+                    </span>
+                )}
+
+                {dueToday && (
+                    <span
+                        className="
+                            react-task-badge
+                            react-task-badge-info
+                        "
+                    >
+                        Due today
+                    </span>
+                )}
+
+                {dueSoon && (
+                    <span
+                        className="
+                            react-task-badge
+                            react-task-badge-warning
+                        "
+                    >
+                        Due soon
+                    </span>
+                )}
             </td>
 
             <td>
-                {task.assigned_to_user?.display_name ??
-                    task.assigned_to_user?.username ??
-                    "—"}
+                {task.category?.name ?? (
+                    <span className="react-task-muted">
+                        Uncategorized
+                    </span>
+                )}
             </td>
 
             <td>
-                {task.due_date ?? "—"}
-            </td>
-
-            <td>
-                {isDone ? "Completed" : "Open"}
+                {task.assigned_to_user
+                    ?.display_name ??
+                    task.assigned_to_user
+                        ?.username ?? (
+                        <span className="react-task-muted">
+                            Unassigned
+                        </span>
+                    )}
             </td>
 
             <td>
                 {isDone ? (
-                    <button
-                        type="button"
-                        onClick={handleUndo}
+                    <span
+                        className="
+                            react-task-badge
+                            react-task-badge-success
+                        "
                     >
-                        Undo
-                    </button>
+                        Completed
+                    </span>
                 ) : (
+                    <span
+                        className="
+                            react-task-badge
+                            react-task-badge-secondary
+                        "
+                    >
+                        Open
+                    </span>
+                )}
+            </td>
+
+            <td>
+                <div className="react-task-actions">
+                    {isDone ? (
+                        <button
+                            type="button"
+                            className="
+                                react-task-btn
+                                react-task-btn-success
+                                react-task-btn-sm
+                            "
+                            onClick={() => {
+                                void onUndo(
+                                    task.id,
+                                );
+                            }}
+                        >
+                            Undo
+                        </button>
+                    ) : (
+                        <button
+                            type="button"
+                            className="
+                                react-task-btn
+                                react-task-btn-success
+                                react-task-btn-sm
+                            "
+                            onClick={() => {
+                                void onComplete(
+                                    task.id,
+                                );
+                            }}
+                        >
+                            ✓
+                        </button>
+                    )}
+
                     <button
                         type="button"
-                        onClick={handleComplete}
+                        className="
+                            react-task-btn
+                            react-task-btn-info
+                            react-task-btn-sm
+                        "
+                        onClick={() => {
+                            onEdit(task);
+                        }}
                     >
-                        Complete
+                        ✎
                     </button>
-                )}
 
-                {" "}
-
-                <button
-                    type="button"
-                    onClick={() => {
-                        onEdit(task);
-                    }}
-                >
-                    Edit
-                </button>
-
-                {" "}
-
-                <button
-                    type="button"
-                    onClick={handleDelete}
-                >
-                    Delete
-                </button>
+                    <button
+                        type="button"
+                        className="
+                            react-task-btn
+                            react-task-btn-danger
+                            react-task-btn-sm
+                        "
+                        onClick={handleDelete}
+                    >
+                        🗑
+                    </button>
+                </div>
             </td>
         </tr>
     );

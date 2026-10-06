@@ -1176,6 +1176,11 @@ window.GROCY_REACT_CONTEXT = {
 };
 </script>
 
+<link
+    rel="stylesheet"
+    href="{{ $U('/react/tasks.css') }}"
+>
+
 <script
     type="module"
     src="{{ $U('/react/tasks.js') }}"
