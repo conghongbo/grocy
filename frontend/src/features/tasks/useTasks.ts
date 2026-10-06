@@ -76,12 +76,52 @@ export function useTasks(): UseTasksResult {
     }, []);
 
     useEffect(() => {
-        void loadTasks();
-    }, [loadTasks]);
+        let cancelled = false;
+
+        async function initialiseTasks() {
+            try {
+                const [
+                    currentResult,
+                    allResult,
+                ] = await Promise.all([
+                    tasksApi.getCurrent(),
+                    tasksApi.getAll(),
+                ]);
+
+                if (cancelled) {
+                    return;
+                }
+
+                setTasks(currentResult);
+                setAllTasks(allResult);
+                setError(null);
+            } catch (caughtError) {
+                if (cancelled) {
+                    return;
+                }
+
+                setError(
+                    getErrorMessage(
+                        caughtError,
+                        "Failed to load tasks",
+                    ),
+                );
+            } finally {
+                if (!cancelled) {
+                    setLoading(false);
+                }
+            }
+        }
+
+        void initialiseTasks();
+
+        return () => {
+            cancelled = true;
+        };
+    }, []);
 
     const refresh = useCallback(async () => {
         setLoading(true);
-
         await loadTasks();
     }, [loadTasks]);
 

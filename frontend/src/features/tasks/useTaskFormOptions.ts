@@ -67,8 +67,49 @@ export function useTaskFormOptions():
     }, []);
 
     useEffect(() => {
-        void loadOptions();
-    }, [loadOptions]);
+        let cancelled = false;
+
+        async function initialiseOptions() {
+            try {
+                const [
+                    categoryResult,
+                    userResult,
+                ] = await Promise.all([
+                    tasksApi.getCategories(),
+                    tasksApi.getAssignableUsers(),
+                ]);
+
+                if (cancelled) {
+                    return;
+                }
+
+                setCategories(categoryResult);
+                setUsers(userResult);
+                setOptionsError(null);
+            } catch (caughtError) {
+                if (cancelled) {
+                    return;
+                }
+
+                setOptionsError(
+                    getErrorMessage(
+                        caughtError,
+                        "Failed to load task form options",
+                    ),
+                );
+            } finally {
+                if (!cancelled) {
+                    setLoadingOptions(false);
+                }
+            }
+        }
+
+        void initialiseOptions();
+
+        return () => {
+            cancelled = true;
+        };
+    }, []);
 
     const refreshOptions =
         useCallback(async () => {
