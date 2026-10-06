@@ -37,6 +37,18 @@ export interface Task {
     category: TaskCategory | null;
 }
 
+export interface RawTask {
+    id: number;
+    name: string;
+    description: string | null;
+    due_date: string | null;
+    done: 0 | 1;
+    done_timestamp: string | null;
+    category_id: number | null;
+    assigned_to_user_id: number | null;
+    row_created_timestamp: string;
+}
+
 export interface TaskInput {
     name: string;
     description: string;
@@ -62,6 +74,12 @@ export const tasksApi = {
      */
     getCurrent(): Promise<Task[]> {
         return apiClient.get<Task[]>("/api/tasks");
+    },
+
+    getAll(): Promise<RawTask[]> {
+        return apiClient.get<RawTask[]>(
+            "/api/objects/tasks?order=due_date:asc",
+        );
     },
 
     getCategories(): Promise<TaskCategory[]> {

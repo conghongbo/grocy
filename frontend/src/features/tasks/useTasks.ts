@@ -6,12 +6,14 @@ import {
 
 import {
     tasksApi,
+    type RawTask,
     type Task,
     type TaskInput,
 } from "../../api/tasks";
 
 interface UseTasksResult {
     tasks: Task[];
+    allTasks: RawTask[];
     loading: boolean;
     error: string | null;
     saving: boolean;
@@ -40,6 +42,8 @@ function getErrorMessage(
 
 export function useTasks(): UseTasksResult {
     const [tasks, setTasks] = useState<Task[]>([]);
+    const [allTasks, setAllTasks] =
+        useState<RawTask[]>([]);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState<string | null>(
@@ -48,9 +52,16 @@ export function useTasks(): UseTasksResult {
 
     const loadTasks = useCallback(async () => {
         try {
-            const result = await tasksApi.getCurrent();
+            const [
+                currentResult,
+                allResult,
+            ] = await Promise.all([
+                tasksApi.getCurrent(),
+                tasksApi.getAll(),
+            ]);
 
-            setTasks(result);
+            setTasks(currentResult);
+            setAllTasks(allResult);
             setError(null);
         } catch (caughtError) {
             setError(
@@ -194,6 +205,7 @@ export function useTasks(): UseTasksResult {
 
     return {
         tasks,
+        allTasks,
         loading,
         saving,
         error,
