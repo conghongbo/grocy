@@ -11,6 +11,7 @@ import { TaskForm } from "../../components/tasks/TaskForm";
 import { TaskList } from "../../components/tasks/TaskList";
 
 import { useTasks } from "./useTasks";
+import { useTaskFormOptions } from "./useTaskFormOptions";
 
 export function TasksPage() {
     const {
@@ -25,6 +26,14 @@ export function TasksPage() {
         createTask,
         updateTask,
     } = useTasks();
+
+    const {
+        categories,
+        users,
+        loadingOptions,
+        optionsError,
+        refreshOptions,
+    } = useTaskFormOptions();
 
     const [showForm, setShowForm] =
         useState(false);
@@ -95,10 +104,28 @@ export function TasksPage() {
                 <ErrorState message={error} />
             )}
 
+            {optionsError && (
+                <div>
+                    <ErrorState message={optionsError} />
+
+                    <button
+                        type="button"
+                        onClick={() => {
+                            void refreshOptions();
+                        }}
+                    >
+                        Retry loading form options
+                    </button>
+                </div>
+            )}
+
             {showForm && (
                 <TaskForm
                     task={editingTask}
+                    categories={categories}
+                    users={users}
                     saving={saving}
+                    loadingOptions={loadingOptions}
                     onSave={handleSave}
                     onCancel={handleCancel}
                 />

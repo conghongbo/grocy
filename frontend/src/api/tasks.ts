@@ -13,6 +13,12 @@ export interface TaskCategory {
     row_created_timestamp?: string;
 }
 
+export interface TaskAssignableUser {
+    id: number;
+    username: string;
+    display_name?: string;
+}
+
 export interface Task {
     id: number;
     name: string;
@@ -56,6 +62,18 @@ export const tasksApi = {
      */
     getCurrent(): Promise<Task[]> {
         return apiClient.get<Task[]>("/api/tasks");
+    },
+
+    getCategories(): Promise<TaskCategory[]> {
+        return apiClient.get<TaskCategory[]>(
+            "/api/objects/task_categories?order=name:asc",
+        );
+    },
+
+    getAssignableUsers(): Promise<TaskAssignableUser[]> {
+        return apiClient.get<TaskAssignableUser[]>(
+            "/api/users",
+        );
     },
 
     /**
