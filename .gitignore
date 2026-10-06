@@ -3,3 +3,5 @@ embedded.txt
 /packages
 /public/packages
 .DS_Store
+# React frontend build output
+/public/react/

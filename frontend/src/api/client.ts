@@ -1,12 +1,16 @@
 import { getBootstrapContext } from "../app/bootstrap";
 
 export class ApiError extends Error {
+    public readonly status: number;
+
     constructor(
-        public readonly status: number,
+        status: number,
         message: string,
     ) {
         super(message);
+
         this.name = "ApiError";
+        this.status = status;
     }
 }
 
@@ -42,6 +46,16 @@ async function request<T>(
         return undefined as T;
     }
 
+    const contentType =
+        response.headers.get("content-type");
+
+    if (
+        !contentType ||
+        !contentType.includes("application/json")
+    ) {
+        return undefined as T;
+    }
+
     return response.json() as Promise<T>;
 }
 
@@ -56,6 +70,7 @@ export const apiClient = {
     ): Promise<T> {
         return request<T>(path, {
             method: "POST",
+
             body:
                 body === undefined
                     ? undefined
@@ -69,6 +84,7 @@ export const apiClient = {
     ): Promise<T> {
         return request<T>(path, {
             method: "PUT",
+
             body:
                 body === undefined
                     ? undefined

@@ -6,6 +6,11 @@
 
 @section('content')
 
+<div
+    id="react-tasks-root"
+    class="mb-4"
+></div>
+
 <style>
 	/* ================================
 	   Tasks page
@@ -1157,3 +1162,27 @@
 	</div>
 </div>
 @stop
+
+@push('pageScripts')
+<script>
+window.GROCY_REACT_CONTEXT = {
+    baseUrl: @json($U('')),
+    locale: @json($GROCY_LOCALE ?? 'en'),
+    user: null,
+    permissions: [],
+    page: {
+        name: 'tasks'
+    }
+};
+</script>
+
+<link
+    rel="stylesheet"
+    href="{{ $U('/react/tasks.css') }}"
+>
+
+<script
+    type="module"
+    src="{{ $U('/react/tasks.js') }}"
+></script>
+@endpush
