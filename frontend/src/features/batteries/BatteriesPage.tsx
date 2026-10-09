@@ -42,7 +42,7 @@ import {
 
 import {
     useCurrentUser,
-} from "../tasks/useCurrentUser";
+} from "../../hooks/useCurrentUser";
 
 import {
     DEFAULT_BATTERY_FILTERS,

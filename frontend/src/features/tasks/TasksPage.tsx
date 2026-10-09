@@ -22,7 +22,7 @@ import {
     filterTasks,
     getTaskSummary,
 } from "./taskFilters";
-import { useCurrentUser } from "./useCurrentUser";
+import { useCurrentUser } from "../../hooks/useCurrentUser";
 import { useTaskPermissions } from "./useTaskPermissions";
 
 export function TasksPage() {

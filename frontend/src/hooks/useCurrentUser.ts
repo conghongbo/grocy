@@ -6,7 +6,7 @@ import {
 import {
     userApi,
     type CurrentUser,
-} from "../../api/user";
+} from "../api/user";
 
 interface UseCurrentUserResult {
     user: CurrentUser | null;
