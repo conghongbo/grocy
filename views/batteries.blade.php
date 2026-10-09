@@ -5,6 +5,11 @@
 @section('title', $__t('Batteries'))
 
 @section('content')
+
+<div id="react-batteries-root"></div>
+
+<hr class="my-4">
+
 <div class="row">
 	<div class="col">
 		<div class="title-related-links">
@@ -142,4 +147,25 @@
 		</table>
 	</div>
 </div>
+
+<script>
+    window.GROCY_REACT_CONTEXT = {
+        baseUrl: @json($U('')),
+        locale: 'en',
+        user: null,
+        permissions: [],
+        page: {
+            name: 'batteries'
+        }
+    };
+</script>
+
+<link
+    rel="stylesheet"
+    href="{{ $U('/react/batteries.css') }}"
+>
+
+<script type="module"
+    src="{{ $U('/react/batteries.js') }}">
+</script>
 @stop

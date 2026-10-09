@@ -10,7 +10,7 @@ export default defineConfig({
     outDir: "../public/react",
     emptyOutDir: true,
 
-    cssCodeSplit: false,
+    cssCodeSplit: true,
 
     rollupOptions: {
       input: {
@@ -18,22 +18,36 @@ export default defineConfig({
           import.meta.dirname,
           "src/entries/tasks-entry.tsx",
         ),
+
+        batteries: resolve(
+          import.meta.dirname,
+          "src/entries/batteries-entry.tsx",
+        ),
       },
 
       output: {
-        entryFileNames: "[name].js",
+        entryFileNames:
+          "[name].js",
 
         chunkFileNames:
           "chunks/[name]-[hash].js",
 
         assetFileNames: (assetInfo) => {
+          const name =
+            assetInfo.name ?? "";
+
           if (
-            assetInfo.names?.some(
-              (name) =>
-                name.endsWith(".css"),
-            )
+            name === "tasks.css" ||
+            name.startsWith("tasks-")
           ) {
             return "tasks.css";
+          }
+
+          if (
+            name === "batteries.css" ||
+            name.startsWith("batteries-")
+          ) {
+            return "batteries.css";
           }
 
           return "assets/[name]-[hash][extname]";
