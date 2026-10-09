@@ -5,6 +5,31 @@
 @section('title', $__t('Chores overview'))
 
 @section('content')
+
+<div id="react-chores-overview-root"></div>
+
+<script>
+    window.GROCY_REACT_CONTEXT = {
+        baseUrl: @json($U('')),
+        locale: 'en',
+        user: null,
+        permissions: [],
+        page: {
+            name: 'chores-overview'
+        }
+    };
+</script>
+
+<link
+    rel="stylesheet"
+    href="{{ $U('/react/chores-overview.css') }}"
+>
+
+<script
+    type="module"
+    src="{{ $U('/react/chores-overview.js') }}">
+</script>
+
 <div class="row">
 	<div class="col">
 		<div class="title-related-links">
