@@ -408,8 +408,9 @@
         user: null,
         permissions: [],
         page: {
-            name: 'batteries-overview'
-        }
+    		name: 'batteries-overview',
+    		batteriesDueSoonDays: {{ $nextXDays }}
+		}
     };
 </script>
 
