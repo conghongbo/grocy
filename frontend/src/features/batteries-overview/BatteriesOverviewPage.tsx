@@ -82,6 +82,7 @@ export function BatteriesOverviewPage() {
     } = useCurrentUser();
 
     const {
+        canManageBatteries,
         canTrackChargeCycle,
         loadingPermissions,
         permissionError,
@@ -347,6 +348,9 @@ export function BatteriesOverviewPage() {
                 }
                 error={
                     detailsError
+                }
+                canManageBatteries={
+                    canManageBatteries
                 }
                 onClose={
                     closeDetails

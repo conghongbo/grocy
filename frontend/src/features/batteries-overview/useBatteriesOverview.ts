@@ -1,4 +1,5 @@
 import {
+    useCallback,
     useEffect,
     useMemo,
     useState,
@@ -23,14 +24,17 @@ export interface BatteryOverviewItem {
 
 interface UseBatteriesOverviewResult {
     items: BatteryOverviewItem[];
+    batteries: Battery[];
     loading: boolean;
+    refreshing: boolean;
     error: string | null;
+    refresh: () => Promise<void>;
 }
 
 function getBatteryState(
     battery: Battery,
 ): BatteryState {
-    if (battery.active === 0) {
+    if (Number(battery.active) === 0) {
         return "inactive";
     }
 
@@ -42,8 +46,8 @@ function getBatteryState(
     }
 
     if (
-        battery.rechargeable === 1 &&
-        battery.is_charged === 0
+        Number(battery.rechargeable) === 1 &&
+        Number(battery.is_charged) === 0
     ) {
         return "needs_charging";
     }
@@ -69,16 +73,41 @@ export function useBatteriesOverview():
     ] = useState(true);
 
     const [
+        refreshing,
+        setRefreshing,
+    ] = useState(false);
+
+    const [
         error,
         setError,
-    ] = useState<string | null>(
-        null,
-    );
+    ] = useState<string | null>(null);
+
+    const loadOverview =
+        useCallback(
+            async () => {
+                const [
+                    batteriesResult,
+                    currentResult,
+                ] = await Promise.all([
+                    batteriesApi.getAll(),
+                    batteriesApi.getCurrent(),
+                ]);
+
+                setBatteries(
+                    batteriesResult,
+                );
+
+                setCurrent(
+                    currentResult,
+                );
+            },
+            [],
+        );
 
     useEffect(() => {
         let cancelled = false;
 
-        async function loadOverview() {
+        async function loadInitialOverview() {
             try {
                 const [
                     batteriesResult,
@@ -119,12 +148,34 @@ export function useBatteriesOverview():
             }
         }
 
-        void loadOverview();
+        void loadInitialOverview();
 
         return () => {
             cancelled = true;
         };
     }, []);
+
+    const refresh =
+        useCallback(
+            async () => {
+                setRefreshing(true);
+                setError(null);
+
+                try {
+                    await loadOverview();
+                } catch (caughtError) {
+                    setError(
+                        getErrorMessage(
+                            caughtError,
+                            "Failed to refresh batteries overview",
+                        ),
+                    );
+                } finally {
+                    setRefreshing(false);
+                }
+            },
+            [loadOverview],
+        );
 
     const items =
         useMemo<
@@ -141,26 +192,30 @@ export function useBatteriesOverview():
                 );
 
             return current
-                .map((currentBattery) => {
-                    const battery =
-                        batteriesById.get(
-                            currentBattery.battery_id,
-                        );
+                .map(
+                    (
+                        currentBattery,
+                    ) => {
+                        const battery =
+                            batteriesById.get(
+                                currentBattery.battery_id,
+                            );
 
-                    if (!battery) {
-                        return null;
-                    }
+                        if (!battery) {
+                            return null;
+                        }
 
-                    return {
-                        battery,
-                        current:
-                            currentBattery,
-                        state:
-                            getBatteryState(
-                                battery,
-                            ),
-                    };
-                })
+                        return {
+                            battery,
+                            current:
+                                currentBattery,
+                            state:
+                                getBatteryState(
+                                    battery,
+                                ),
+                        };
+                    },
+                )
                 .filter(
                     (
                         item,
@@ -174,7 +229,10 @@ export function useBatteriesOverview():
 
     return {
         items,
+        batteries,
         loading,
+        refreshing,
         error,
+        refresh,
     };
 }

@@ -3,6 +3,10 @@ import type {
 } from "../../api/batteries";
 
 import {
+    buildGrocyUrl,
+} from "../../app/bootstrap";
+
+import {
     BatteryStateBadge,
 } from "./BatteryStateBadge";
 
@@ -15,6 +19,9 @@ interface BatteryOverviewDetailsModalProps {
 
     error:
     string | null;
+
+    canManageBatteries:
+    boolean;
 
     onClose:
     () => void;
@@ -37,6 +44,7 @@ export function BatteryOverviewDetailsModal({
     details,
     loading,
     error,
+    canManageBatteries,
     onClose,
 }: BatteryOverviewDetailsModalProps) {
     if (
@@ -49,6 +57,27 @@ export function BatteryOverviewDetailsModal({
 
     const battery =
         details?.battery ?? null;
+
+    const journalUrl =
+        battery
+            ? buildGrocyUrl(
+                `/batteriesjournal?embedded&battery=${battery.id}`,
+            )
+            : null;
+
+    const editUrl =
+        battery
+            ? buildGrocyUrl(
+                `/battery/${battery.id}?embedded`,
+            )
+            : null;
+
+    const grocycodeUrl =
+        battery
+            ? buildGrocyUrl(
+                `/battery/${battery.id}/grocycode?download=true`,
+            )
+            : null;
 
     return (
         <div
@@ -249,6 +278,43 @@ export function BatteryOverviewDetailsModal({
                                             ? battery.description
                                             : "No description"}
                                     </p>
+                                </div>
+
+                                <div className="react-battery-details-actions">
+                                    {journalUrl && (
+                                        <a
+                                            className="btn btn-outline-secondary"
+                                            href={
+                                                journalUrl
+                                            }
+                                        >
+                                            Battery journal
+                                        </a>
+                                    )}
+
+                                    {canManageBatteries &&
+                                        editUrl && (
+                                            <a
+                                                className="btn btn-outline-secondary"
+                                                href={
+                                                    editUrl
+                                                }
+                                            >
+                                                Edit battery
+                                            </a>
+                                        )}
+
+                                    {grocycodeUrl && (
+                                        <a
+                                            className="btn btn-outline-secondary"
+                                            href={
+                                                grocycodeUrl
+                                            }
+                                            download
+                                        >
+                                            Download Grocycode
+                                        </a>
+                                    )}
                                 </div>
                             </>
                         )}

@@ -306,3 +306,30 @@
         grid-template-columns: 1fr;
     }
 }
+
+.react-battery-details-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1.25rem;
+    padding-top: 1rem;
+    border-top:
+        1px solid rgb(0 0 0 / 8%);
+}
+
+.react-battery-details-actions .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+}
+
+@media (max-width: 575.98px) {
+    .react-battery-details-actions {
+        flex-direction: column;
+    }
+
+    .react-battery-details-actions .btn {
+        width: 100%;
+    }
+}
