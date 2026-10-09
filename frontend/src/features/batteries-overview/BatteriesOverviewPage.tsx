@@ -4,6 +4,10 @@ import {
 } from "react";
 
 import {
+    BatteryOverviewDetailsModal,
+} from "../../components/batteries/BatteryOverviewDetailsModal";
+
+import {
     BatteriesOverviewDueSummary,
 } from "../../components/batteries/BatteriesOverviewDueSummary";
 
@@ -40,7 +44,24 @@ import {
 } from "../../domain/batteries/batteriesOverviewFilters";
 
 import {
+    useBatteryOverviewDetails,
+} from "../../domain/batteries/useBatteryOverviewDetails";
+
+import {
+    useOverviewChargeTracking,
+} from "../../domain/batteries/useOverviewChargeTracking";
+
+import {
+    useCurrentUser,
+} from "../../hooks/useCurrentUser";
+
+import {
+    useBatteryPermissions,
+} from "../batteries/useBatteryPermissions";
+
+import {
     useBatteriesOverview,
+    type BatteryOverviewItem,
 } from "./useBatteriesOverview";
 
 const DEFAULT_DUE_SOON_DAYS = 5;
@@ -49,8 +70,40 @@ export function BatteriesOverviewPage() {
     const {
         items,
         loading,
+        refreshing,
         error,
+        refresh,
     } = useBatteriesOverview();
+
+    const {
+        user,
+        loadingUser,
+        userError,
+    } = useCurrentUser();
+
+    const {
+        canTrackChargeCycle,
+        loadingPermissions,
+        permissionError,
+    } = useBatteryPermissions(
+        user?.id ?? null,
+    );
+
+    const {
+        chargingBatteryId,
+        chargeError,
+        trackCharge,
+    } = useOverviewChargeTracking(
+        refresh,
+    );
+
+    const {
+        details,
+        loadingDetails,
+        detailsError,
+        openDetails,
+        closeDetails,
+    } = useBatteryOverviewDetails();
 
     const [
         search,
@@ -73,14 +126,6 @@ export function BatteriesOverviewPage() {
             "all",
         );
 
-    /*
-     * Phase 6B fallback.
-     *
-     * The Legacy page currently uses 5 days.
-     * Once the Blade bootstrap context is wired
-     * to the existing Grocy user setting, this
-     * value should come from that context.
-     */
     const dueSoonDays =
         DEFAULT_DUE_SOON_DAYS;
 
@@ -138,7 +183,36 @@ export function BatteriesOverviewPage() {
         setDue("all");
     }
 
-    if (loading) {
+    function handleOpenDetails(
+        item: BatteryOverviewItem,
+    ) {
+        void openDetails(
+            item.battery.id,
+        );
+    }
+
+    async function handleTrackCharge(
+        item: BatteryOverviewItem,
+    ) {
+        const confirmed =
+            window.confirm(
+                `Track a charge cycle for "${item.battery.name}"?`,
+            );
+
+        if (!confirmed) {
+            return;
+        }
+
+        await trackCharge(
+            item.battery.id,
+        );
+    }
+
+    if (
+        loading ||
+        loadingUser ||
+        loadingPermissions
+    ) {
         return <LoadingState />;
     }
 
@@ -146,6 +220,22 @@ export function BatteriesOverviewPage() {
         return (
             <ErrorState
                 message={error}
+            />
+        );
+    }
+
+    if (userError) {
+        return (
+            <ErrorState
+                message={userError}
+            />
+        );
+    }
+
+    if (permissionError) {
+        return (
+            <ErrorState
+                message={permissionError}
             />
         );
     }
@@ -163,12 +253,20 @@ export function BatteriesOverviewPage() {
                     </p>
                 </div>
 
-                <span className="react-batteries-overview-count">
-                    {filteredItems.length}
-                    {" / "}
-                    {items.length}
-                    {" batteries"}
-                </span>
+                <div className="react-batteries-overview-header-status">
+                    <span className="react-batteries-overview-count">
+                        {filteredItems.length}
+                        {" / "}
+                        {items.length}
+                        {" batteries"}
+                    </span>
+
+                    {refreshing && (
+                        <span className="text-muted">
+                            Refreshing...
+                        </span>
+                    )}
+                </div>
             </div>
 
             <BatteriesOverviewDueSummary
@@ -209,6 +307,14 @@ export function BatteriesOverviewPage() {
                 }
             />
 
+            {chargeError && (
+                <ErrorState
+                    message={
+                        chargeError
+                    }
+                />
+            )}
+
             {filteredItems.length ===
                 0 ? (
                 <EmptyState message="No batteries match the current filters." />
@@ -217,8 +323,35 @@ export function BatteriesOverviewPage() {
                     items={
                         filteredItems
                     }
+                    canTrackChargeCycle={
+                        canTrackChargeCycle
+                    }
+                    chargingBatteryId={
+                        chargingBatteryId
+                    }
+                    onOpenDetails={
+                        handleOpenDetails
+                    }
+                    onTrackCharge={
+                        handleTrackCharge
+                    }
                 />
             )}
+
+            <BatteryOverviewDetailsModal
+                details={
+                    details
+                }
+                loading={
+                    loadingDetails
+                }
+                error={
+                    detailsError
+                }
+                onClose={
+                    closeDetails
+                }
+            />
         </section>
     );
 }

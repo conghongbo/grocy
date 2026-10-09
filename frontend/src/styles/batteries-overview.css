@@ -52,3 +52,257 @@
         flex-direction: column;
     }
 }
+
+.react-batteries-overview-due-summary {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.react-batteries-due-card {
+    width: 100%;
+    border: 1px solid #dee2e6;
+    border-top-width: 4px;
+    padding: 0.6rem 0.75rem;
+    background: #fff;
+    text-align: left;
+    cursor: pointer;
+}
+
+.react-batteries-due-card.overdue {
+    border-top-color: #dc3545;
+}
+
+.react-batteries-due-card.today {
+    border-top-color: #4054b2;
+}
+
+.react-batteries-due-card.soon {
+    border-top-color: #e0a800;
+}
+
+.react-batteries-due-card.active {
+    box-shadow:
+        0 0 0 2px rgba(0, 0, 0, 0.15);
+}
+
+.react-batteries-overview-summary {
+    display: grid;
+    grid-template-columns:
+        repeat(4,
+            minmax(0, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.react-batteries-summary-card {
+    display: flex;
+    min-height: 72px;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    border: 1px solid #dee2e6;
+    border-radius: 0.25rem;
+    padding: 0.75rem 1rem;
+    background: #fff;
+    text-align: left;
+    cursor: pointer;
+}
+
+.react-batteries-summary-card span {
+    color: #6c757d;
+    font-size: 0.875rem;
+}
+
+.react-batteries-summary-card strong {
+    margin-top: 0.25rem;
+    font-size: 1.4rem;
+}
+
+.react-batteries-summary-card.active {
+    border-color: #6c757d;
+    box-shadow:
+        0 0 0 2px rgba(0, 0, 0, 0.08);
+}
+
+.react-batteries-overview-filters {
+    display: grid;
+    grid-template-columns:
+        minmax(220px, 1fr) minmax(180px, 0.7fr) auto;
+    gap: 1rem;
+    align-items: end;
+    margin-bottom: 1rem;
+}
+
+.react-batteries-filter-field {
+    margin: 0;
+}
+
+.react-batteries-filter-field>span {
+    display: block;
+    margin-bottom: 0.25rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.react-batteries-filter-clear {
+    display: flex;
+    align-items: flex-end;
+}
+
+@media (max-width: 991.98px) {
+    .react-batteries-overview-summary {
+        grid-template-columns:
+            repeat(2,
+                minmax(0, 1fr));
+    }
+
+    .react-batteries-overview-due-summary {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .react-batteries-overview-filters {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .react-batteries-overview-summary {
+        grid-template-columns: 1fr;
+    }
+}
+
+.react-batteries-overview-table td:last-child,
+.react-batteries-overview-table th:last-child {
+    width: 1%;
+    white-space: nowrap;
+}
+
+.react-batteries-overview-table .btn {
+    white-space: nowrap;
+}
+
+.react-battery-details-trigger {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-weight: 600;
+    text-align: left;
+    text-decoration: underline;
+    text-underline-offset: 0.2rem;
+    cursor: pointer;
+}
+
+.react-battery-details-trigger:hover {
+    opacity: 0.7;
+}
+
+.react-battery-details-backdrop {
+    position: fixed;
+    z-index: 1055;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    background: rgb(0 0 0 / 45%);
+}
+
+.react-battery-details-modal {
+    width: min(680px, 100%);
+    max-height: calc(100vh - 2rem);
+    overflow: auto;
+    border-radius: 0.35rem;
+    background: var(--bs-body-bg, #fff);
+    box-shadow:
+        0 1rem 3rem rgb(0 0 0 / 25%);
+}
+
+.react-battery-details-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    border-bottom:
+        1px solid rgb(0 0 0 / 10%);
+}
+
+.react-battery-details-header h4 {
+    margin: 0;
+}
+
+.react-battery-details-name {
+    margin-top: 0.25rem;
+    opacity: 0.7;
+}
+
+.react-battery-details-body {
+    padding: 1.25rem;
+}
+
+.react-battery-details-loading {
+    padding: 2rem 0;
+    text-align: center;
+}
+
+.react-battery-details-state {
+    margin-bottom: 1rem;
+}
+
+.react-battery-details-grid {
+    display: grid;
+    grid-template-columns:
+        repeat(2,
+            minmax(0, 1fr));
+    gap: 1rem;
+    margin: 0;
+}
+
+.react-battery-details-grid>div {
+    min-width: 0;
+    padding-bottom: 0.75rem;
+    border-bottom:
+        1px solid rgb(0 0 0 / 8%);
+}
+
+.react-battery-details-grid dt {
+    margin-bottom: 0.25rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    opacity: 0.65;
+}
+
+.react-battery-details-grid dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+
+.react-battery-details-description {
+    margin-top: 1.25rem;
+}
+
+.react-battery-details-description p {
+    margin:
+        0.35rem 0 0;
+    white-space: pre-wrap;
+}
+
+.react-battery-details-footer {
+    display: flex;
+    justify-content: flex-end;
+    padding: 1rem 1.25rem;
+    border-top:
+        1px solid rgb(0 0 0 / 10%);
+}
+
+@media (max-width: 575.98px) {
+    .react-battery-details-grid {
+        grid-template-columns: 1fr;
+    }
+}

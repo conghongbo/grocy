@@ -8,6 +8,20 @@ import type {
 
 interface BatteriesOverviewRowProps {
     item: BatteryOverviewItem;
+
+    canTrackChargeCycle:
+    boolean;
+
+    charging:
+    boolean;
+
+    onOpenDetails: (
+        item: BatteryOverviewItem,
+    ) => void;
+
+    onTrackCharge: (
+        item: BatteryOverviewItem,
+    ) => void;
 }
 
 function formatDateTime(
@@ -25,6 +39,10 @@ function formatDateTime(
 
 export function BatteriesOverviewRow({
     item,
+    canTrackChargeCycle,
+    charging,
+    onOpenDetails,
+    onTrackCharge,
 }: BatteriesOverviewRowProps) {
     const {
         battery,
@@ -32,14 +50,33 @@ export function BatteriesOverviewRow({
         state,
     } = item;
 
+    const rechargeable =
+        Number(
+            battery.rechargeable,
+        ) === 1;
+
+    const canTrack =
+        rechargeable &&
+        canTrackChargeCycle;
+
     return (
         <tr>
             <td>
-                {battery.name}
+                <button
+                    type="button"
+                    className="react-battery-details-trigger"
+                    onClick={() => {
+                        onOpenDetails(
+                            item,
+                        );
+                    }}
+                >
+                    {battery.name}
+                </button>
             </td>
 
             <td>
-                {battery.rechargeable === 1
+                {rechargeable
                     ? "Rechargeable"
                     : "Single-use"}
             </td>
@@ -63,12 +100,40 @@ export function BatteriesOverviewRow({
             </td>
 
             <td>
-                {battery.charge_interval_days >
-                    0
+                {Number(
+                    battery
+                        .charge_interval_days,
+                ) > 0
                     ? formatDateTime(
-                        current.next_estimated_charge_time,
+                        current
+                            .next_estimated_charge_time,
                     )
                     : "—"}
+            </td>
+
+            <td>
+                {canTrack ? (
+                    <button
+                        type="button"
+                        className="btn btn-sm btn-success"
+                        disabled={
+                            charging
+                        }
+                        onClick={() => {
+                            onTrackCharge(
+                                item,
+                            );
+                        }}
+                    >
+                        {charging
+                            ? "Tracking..."
+                            : "Track charge"}
+                    </button>
+                ) : (
+                    <span className="text-muted">
+                        —
+                    </span>
+                )}
             </td>
         </tr>
     );
