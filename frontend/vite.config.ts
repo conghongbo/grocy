@@ -28,6 +28,11 @@ export default defineConfig({
           import.meta.dirname,
           "src/entries/batteries-overview-entry.tsx",
         ),
+
+        "chores-overview": resolve(
+          import.meta.dirname,
+          "src/entries/chores-overview-entry.tsx",
+        ),
       },
 
       output: {
@@ -40,6 +45,13 @@ export default defineConfig({
         assetFileNames: (assetInfo) => {
           const name =
             assetInfo.name ?? "";
+
+          if (
+            name === "chores-overview.css" ||
+            name.startsWith("chores-overview-")
+          ) {
+            return "chores-overview.css";
+          }
 
           if (
             name === "tasks.css" ||

@@ -1,0 +1,109 @@
+.react-chores-overview {
+    margin: 1rem 0 2rem;
+    padding: 1.25rem;
+
+    background: #fff;
+
+    border: 1px solid #dee2e6;
+    border-radius: 0.5rem;
+}
+
+.react-chores-overview-header {
+    display: flex;
+
+    justify-content: space-between;
+    align-items: center;
+
+    gap: 1rem;
+
+    margin-bottom: 1.25rem;
+}
+
+.react-chores-overview-header h3 {
+    margin: 0;
+
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.react-chores-overview-header p {
+    margin: 0.35rem 0 0;
+
+    color: #6c757d;
+
+    font-size: 0.875rem;
+}
+
+.react-chores-overview-count {
+    padding: 0.35rem 0.75rem;
+
+    border-radius: 999px;
+
+    background: #f1f3f5;
+
+    color: #495057;
+
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.chores-overview-table-wrapper {
+    width: 100%;
+
+    overflow-x: auto;
+}
+
+.chores-overview-table {
+    width: 100%;
+
+    border-collapse: collapse;
+
+    font-size: 0.9rem;
+}
+
+.chores-overview-table th {
+    padding: 0.75rem;
+
+    text-align: left;
+
+    background: #f8f9fa;
+
+    border-bottom: 2px solid #dee2e6;
+
+    white-space: nowrap;
+}
+
+.chores-overview-table td {
+    padding: 0.75rem;
+
+    border-bottom: 1px solid #e9ecef;
+
+    vertical-align: middle;
+}
+
+.chores-overview-table tbody tr:hover {
+    background: #f8f9fa;
+}
+
+.chores-overview-empty {
+    padding: 2rem;
+
+    text-align: center;
+
+    color: #6c757d;
+}
+
+@media (max-width: 768px) {
+    .react-chores-overview {
+        padding: 1rem;
+    }
+
+    .react-chores-overview-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .chores-overview-table {
+        min-width: 650px;
+    }
+}
