@@ -21,7 +21,7 @@ import {
     DEFAULT_TASK_FILTERS,
     filterTasks,
     getTaskSummary,
-} from "./taskFilters";
+} from "../../domain/tasks/taskFilters";
 import { useCurrentUser } from "../../hooks/useCurrentUser";
 import { useTaskPermissions } from "./useTaskPermissions";
 

@@ -10,6 +10,10 @@ import {
     type BatteryInput,
 } from "../../api/batteries";
 
+import {
+    getErrorMessage,
+} from "../../utils/errors";
+
 export function useBatteries() {
     const [batteries, setBatteries] =
         useState<Battery[]>([]);
@@ -38,14 +42,12 @@ export function useBatteries() {
                     await batteriesApi.getAll();
 
                 setBatteries(result);
-            } catch (loadError) {
-                console.error(
-                    "Failed to load batteries",
-                    loadError,
-                );
-
+            } catch (caughtError) {
                 setError(
-                    "Failed to load batteries.",
+                    getErrorMessage(
+                        caughtError,
+                        "Failed to load batteries",
+                    ),
                 );
             } finally {
                 setLoading(false);
@@ -66,15 +68,13 @@ export function useBatteries() {
                 if (!cancelled) {
                     setBatteries(result);
                 }
-            } catch (loadError) {
-                console.error(
-                    "Failed to load batteries",
-                    loadError,
-                );
-
+            } catch (caughtError) {
                 if (!cancelled) {
                     setError(
-                        "Failed to load batteries.",
+                        getErrorMessage(
+                            caughtError,
+                            "Failed to load batteries",
+                        ),
                     );
                 }
             } finally {
@@ -107,14 +107,12 @@ export function useBatteries() {
                     await loadBatteries();
 
                     return true;
-                } catch (createError) {
-                    console.error(
-                        "Failed to create battery",
-                        createError,
-                    );
-
+                } catch (caughtError) {
                     setMutationError(
-                        "Failed to create battery.",
+                        getErrorMessage(
+                            caughtError,
+                            "Failed to create battery",
+                        ),
                     );
 
                     return false;
@@ -143,14 +141,12 @@ export function useBatteries() {
                     await loadBatteries();
 
                     return true;
-                } catch (updateError) {
-                    console.error(
-                        "Failed to update battery",
-                        updateError,
-                    );
-
+                } catch (caughtError) {
                     setMutationError(
-                        "Failed to update battery.",
+                        getErrorMessage(
+                            caughtError,
+                            "Failed to update battery",
+                        ),
                     );
 
                     return false;
@@ -177,14 +173,12 @@ export function useBatteries() {
                     await loadBatteries();
 
                     return true;
-                } catch (deleteError) {
-                    console.error(
-                        "Failed to delete battery",
-                        deleteError,
-                    );
-
+                } catch (caughtError) {
                     setMutationError(
-                        "Failed to delete battery.",
+                        getErrorMessage(
+                            caughtError,
+                            "Failed to delete battery",
+                        ),
                     );
 
                     return false;

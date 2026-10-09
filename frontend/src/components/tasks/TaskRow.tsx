@@ -4,7 +4,7 @@ import {
     isTaskDueSoon,
     isTaskDueToday,
     isTaskOverdue,
-} from "../../features/tasks/taskFilters";
+} from "../../domain/tasks/taskFilters";
 
 interface TaskRowProps {
     task: Task;

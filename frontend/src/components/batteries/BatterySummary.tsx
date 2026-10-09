@@ -1,6 +1,6 @@
 import type {
     BatterySummary as BatterySummaryData,
-} from "../../features/batteries/batteryFilters";
+} from "../../domain/batteries/batteryFilters";
 
 interface BatterySummaryProps {
     summary: BatterySummaryData;

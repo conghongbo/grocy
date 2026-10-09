@@ -11,6 +11,10 @@ import {
     hasPermission,
 } from "../utils/permissions";
 
+import {
+    getErrorMessage,
+} from "../utils/errors";
+
 export interface UsePermissionsResult {
     has: (
         permissionName: string,
@@ -118,9 +122,10 @@ export function usePermissions(
                     loading: false,
 
                     error:
-                        caughtError instanceof Error
-                            ? caughtError.message
-                            : "Failed to load permissions",
+                        getErrorMessage(
+                            caughtError,
+                            "Failed to load permissions",
+                        ),
                 });
             }
         }

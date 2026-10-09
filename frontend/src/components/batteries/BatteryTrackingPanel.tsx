@@ -9,7 +9,7 @@ import type {
 
 import {
     useBatteryTracking,
-} from "../../features/batteries/useBatteryTracking";
+} from "../../domain/batteries/useBatteryTracking";
 
 import {
     BatteryStateBadge,

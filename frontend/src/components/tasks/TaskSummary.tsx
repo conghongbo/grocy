@@ -1,6 +1,6 @@
 import type {
     TaskSummary as TaskSummaryData,
-} from "../../features/tasks/taskFilters";
+} from "../../domain/tasks/taskFilters";
 
 interface TaskSummaryProps {
     summary: TaskSummaryData;

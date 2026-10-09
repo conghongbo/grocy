@@ -8,18 +8,14 @@ import {
     type CurrentUser,
 } from "../api/user";
 
+import {
+    getErrorMessage,
+} from "../utils/errors";
+
 interface UseCurrentUserResult {
     user: CurrentUser | null;
     loadingUser: boolean;
     userError: string | null;
-}
-
-function getErrorMessage(
-    error: unknown,
-): string {
-    return error instanceof Error
-        ? error.message
-        : "Failed to load current user";
 }
 
 export function useCurrentUser():
@@ -59,6 +55,7 @@ export function useCurrentUser():
                 setUserError(
                     getErrorMessage(
                         caughtError,
+                        "Failed to load current user",
                     ),
                 );
             } finally {

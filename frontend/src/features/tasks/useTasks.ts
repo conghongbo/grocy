@@ -11,6 +11,10 @@ import {
     type TaskInput,
 } from "../../api/tasks";
 
+import {
+    getErrorMessage,
+} from "../../utils/errors";
+
 interface UseTasksResult {
     tasks: Task[];
     allTasks: RawTask[];
@@ -29,15 +33,6 @@ interface UseTasksResult {
         taskId: number,
         input: TaskInput,
     ) => Promise<boolean>;
-}
-
-function getErrorMessage(
-    error: unknown,
-    fallback: string,
-): string {
-    return error instanceof Error
-        ? error.message
-        : fallback;
 }
 
 export function useTasks(): UseTasksResult {

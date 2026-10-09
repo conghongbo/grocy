@@ -6,7 +6,7 @@ import type {
 import type {
     TaskFiltersState,
     TaskStatusFilter,
-} from "../../features/tasks/taskFilters";
+} from "../../domain/tasks/taskFilters";
 
 interface TaskFiltersProps {
     filters: TaskFiltersState;

@@ -10,6 +10,10 @@ import {
     type BatteryDetails,
 } from "../../api/batteries";
 
+import {
+    getErrorMessage,
+} from "../../utils/errors";
+
 interface UseBatteryTrackingResult {
     details: BatteryDetails | null;
     loading: boolean;
@@ -71,9 +75,10 @@ export function useBatteryTracking(
                 setDetails(null);
 
                 setError(
-                    caughtError instanceof Error
-                        ? caughtError.message
-                        : "Failed to load battery details",
+                    getErrorMessage(
+                        caughtError,
+                        "Failed to load battery details",
+                    ),
                 );
             } finally {
                 setLoading(false);
@@ -102,9 +107,10 @@ export function useBatteryTracking(
                     setDetails(null);
 
                     setError(
-                        caughtError instanceof Error
-                            ? caughtError.message
-                            : "Failed to load battery details",
+                        getErrorMessage(
+                            caughtError,
+                            "Failed to load battery details",
+                        ),
                     );
                 }
             } finally {
@@ -155,9 +161,10 @@ export function useBatteryTracking(
                     return true;
                 } catch (caughtError) {
                     setError(
-                        caughtError instanceof Error
-                            ? caughtError.message
-                            : "Failed to track charge cycle",
+                        getErrorMessage(
+                            caughtError,
+                            "Failed to track charge cycle",
+                        ),
                     );
 
                     return false;
@@ -201,9 +208,10 @@ export function useBatteryTracking(
                     return true;
                 } catch (caughtError) {
                     setError(
-                        caughtError instanceof Error
-                            ? caughtError.message
-                            : "Failed to replace battery",
+                        getErrorMessage(
+                            caughtError,
+                            "Failed to replace battery",
+                        ),
                     );
 
                     return false;

@@ -1,11 +1,9 @@
 import {
-    useEffect,
-    useState,
-} from "react";
+    useBatteryChargeHistory,
+} from "../../domain/batteries/useBatteryChargeHistory";
 
-import {
-    batteriesApi,
-    type BatteryChargeCycleEntry,
+import type {
+    BatteryChargeCycleEntry,
 } from "../../api/batteries";
 
 interface BatteryChargeHistoryProps {
@@ -51,113 +49,21 @@ export function BatteryChargeHistory({
     canUndoChargeCycle,
     onHistoryChanged,
 }: BatteryChargeHistoryProps) {
-    const [
+    const {
         history,
-        setHistory,
-    ] = useState<
-        BatteryChargeCycleEntry[]
-    >([]);
-
-    const [
         loading,
-        setLoading,
-    ] = useState(true);
-
-    const [
         mutatingId,
-        setMutatingId,
-    ] = useState<number | null>(
-        null,
-    );
-
-    const [
         error,
-        setError,
-    ] = useState<string | null>(
-        null,
+        refreshHistory,
+        undoChargeCycle,
+    } = useBatteryChargeHistory(
+        batteryId,
     );
-
-    useEffect(() => {
-        let cancelled = false;
-
-        async function loadInitialHistory() {
-            try {
-                const result =
-                    await batteriesApi
-                        .getChargeHistory(
-                            batteryId,
-                        );
-
-                if (!cancelled) {
-                    setHistory(
-                        result,
-                    );
-
-                    setError(null);
-                }
-            } catch (caughtError) {
-                if (!cancelled) {
-                    setError(
-                        caughtError instanceof Error
-                            ? caughtError.message
-                            : "Failed to load charge history",
-                    );
-                }
-            } finally {
-                if (!cancelled) {
-                    setLoading(false);
-                }
-            }
-        }
-
-        void loadInitialHistory();
-
-        return () => {
-            cancelled = true;
-        };
-    }, [batteryId]);
-
-    async function refreshHistory() {
-        setLoading(true);
-        setError(null);
-
-        try {
-            const result =
-                await batteriesApi
-                    .getChargeHistory(
-                        batteryId,
-                    );
-
-            setHistory(result);
-        } catch (caughtError) {
-            setError(
-                caughtError instanceof Error
-                    ? caughtError.message
-                    : "Failed to load charge history",
-            );
-        } finally {
-            setLoading(false);
-        }
-    }
 
     async function handleUndo(
         chargeCycle:
             BatteryChargeCycleEntry,
     ) {
-        if (
-            Number(
-                chargeCycle.undone,
-            ) === 1
-        ) {
-            return;
-        }
-
-        if (
-            !canUndoChargeCycle
-        ) {
-            return;
-        }
-
         const confirmed =
             window.confirm(
                 `Undo charge cycle #${chargeCycle.id} from ${formatDateTime(
@@ -169,31 +75,16 @@ export function BatteryChargeHistory({
             return;
         }
 
-        setMutatingId(
-            chargeCycle.id,
-        );
-
-        setError(null);
-
-        try {
-            await batteriesApi
-                .undoChargeCycle(
-                    chargeCycle.id,
-                );
-
-            await Promise.all([
-                refreshHistory(),
-                onHistoryChanged(),
-            ]);
-        } catch (caughtError) {
-            setError(
-                caughtError instanceof Error
-                    ? caughtError.message
-                    : "Failed to undo charge cycle",
+        const succeeded =
+            await undoChargeCycle(
+                chargeCycle.id,
             );
-        } finally {
-            setMutatingId(null);
+
+        if (!succeeded) {
+            return;
         }
+
+        await onHistoryChanged();
     }
 
     return (

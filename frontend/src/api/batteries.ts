@@ -24,13 +24,6 @@ export interface CreateBatteryResponse {
     created_object_id: number;
 }
 
-export interface BatteryDetails {
-    battery: Battery;
-    last_charged: string | null;
-    charge_cycles_count: number;
-    next_estimated_charge_time: string | null;
-}
-
 export type BatteryState =
     | "ready"
     | "in_use"

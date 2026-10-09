@@ -10,21 +10,16 @@ import {
     type TaskCategory,
 } from "../../api/tasks";
 
+import {
+    getErrorMessage,
+} from "../../utils/errors";
+
 interface UseTaskFormOptionsResult {
     categories: TaskCategory[];
     users: TaskAssignableUser[];
     loadingOptions: boolean;
     optionsError: string | null;
     refreshOptions: () => Promise<void>;
-}
-
-function getErrorMessage(
-    error: unknown,
-    fallback: string,
-): string {
-    return error instanceof Error
-        ? error.message
-        : fallback;
 }
 
 export function useTaskFormOptions():

@@ -1,7 +1,7 @@
 import type {
     BatteryFiltersState,
     BatteryTypeFilter,
-} from "../../features/batteries/batteryFilters";
+} from "../../domain/batteries/batteryFilters";
 
 interface BatteryFiltersProps {
     filters: BatteryFiltersState;

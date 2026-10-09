@@ -49,7 +49,7 @@ import {
     filterBatteries,
     getBatterySummary,
     type BatteryFiltersState,
-} from "./batteryFilters";
+} from "../../domain/batteries/batteryFilters";
 
 import {
     useBatteries,
