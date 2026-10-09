@@ -1,0 +1,484 @@
+.react-batteries-page {
+    margin-bottom: 2rem;
+}
+
+.react-batteries-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+}
+
+.react-batteries-header h2 {
+    margin-bottom: 0.25rem;
+}
+
+.react-batteries-header p {
+    margin: 0;
+    color: #6c757d;
+}
+
+.react-batteries-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Summary */
+
+.react-battery-summary {
+    display: grid;
+    grid-template-columns:
+        repeat(4, minmax(0, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+}
+
+.react-battery-summary-card {
+    display: flex;
+    flex-direction: column;
+    min-height: 112px;
+    padding: 1rem;
+    border: 1px solid #dee2e6;
+    border-left: 4px solid #6c757d;
+    border-radius: 0.5rem;
+    background: #fff;
+}
+
+.react-battery-summary-card-active {
+    border-left-color: #28a745;
+}
+
+.react-battery-summary-card-disabled {
+    border-left-color: #6c757d;
+}
+
+.react-battery-summary-card-rechargeable {
+    border-left-color: #17a2b8;
+}
+
+.react-battery-summary-label {
+    margin-bottom: 0.35rem;
+    color: #6c757d;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.react-battery-summary-value {
+    margin-bottom: 0.25rem;
+    font-size: 1.75rem;
+    line-height: 1;
+}
+
+.react-battery-summary-card small {
+    margin-top: auto;
+    color: #6c757d;
+}
+
+/* Filters */
+
+.react-battery-filters {
+    margin-bottom: 1.25rem;
+    padding: 1rem;
+    border: 1px solid #dee2e6;
+    border-radius: 0.5rem;
+    background: #fff;
+}
+
+.react-battery-filters-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.react-battery-filters-header h3 {
+    margin: 0 0 0.2rem;
+    font-size: 1rem;
+}
+
+.react-battery-filters-header small {
+    color: #6c757d;
+}
+
+.react-battery-filter-grid {
+    display: grid;
+    grid-template-columns:
+        minmax(240px, 2fr) minmax(180px, 1fr) minmax(180px, 1fr);
+    gap: 1rem;
+    align-items: end;
+}
+
+.react-battery-filter-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.react-battery-filter-field>label {
+    margin: 0;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.react-battery-filter-checkbox-field {
+    justify-content: flex-end;
+}
+
+.react-battery-checkbox {
+    display: flex;
+    align-items: center;
+    min-height: 38px;
+    gap: 0.5rem;
+    margin: 0;
+    padding: 0 0.75rem;
+    border: 1px solid #ced4da;
+    border-radius: 0.25rem;
+    background: #fff;
+    cursor: pointer;
+}
+
+.react-battery-checkbox input {
+    margin: 0;
+}
+
+/* Table */
+
+.react-batteries-table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    border: 1px solid #dee2e6;
+    border-radius: 0.5rem;
+    background: #fff;
+}
+
+.react-batteries-table {
+    width: 100%;
+    margin: 0;
+    border-collapse: collapse;
+}
+
+.react-batteries-table th,
+.react-batteries-table td {
+    padding: 0.65rem 0.75rem;
+    border-bottom: 1px solid #dee2e6;
+    text-align: left;
+    vertical-align: middle;
+}
+
+.react-batteries-table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.react-batteries-table th {
+    background: #f8f9fa;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.react-batteries-table tbody tr:hover {
+    background: #f8f9fa;
+}
+
+.react-battery-row-disabled {
+    opacity: 0.55;
+}
+
+.react-battery-status {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.2rem 0.5rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.react-battery-status-active {
+    background: #e7f5ec;
+    color: #26713b;
+}
+
+.react-battery-status-disabled {
+    background: #eceff1;
+    color: #60676d;
+}
+
+/* Tracking */
+
+.react-battery-type-label {
+    display: block;
+    margin-top: 0.2rem;
+    color: #6c757d;
+    font-size: 0.75rem;
+    font-weight: 400;
+}
+
+.react-battery-row-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+}
+
+.react-battery-tracking-panel {
+    margin-bottom: 1.25rem;
+    padding: 1rem;
+    border: 1px solid #ced4da;
+    border-left: 4px solid #17a2b8;
+    border-radius: 0.5rem;
+    background: #fff;
+}
+
+.react-battery-tracking-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.react-battery-tracking-header h3 {
+    margin: 0 0 0.2rem;
+    font-size: 1.1rem;
+}
+
+.react-battery-tracking-header-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.react-battery-tracking-details {
+    display: grid;
+    grid-template-columns:
+        repeat(3, minmax(0, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.react-battery-detail-card {
+    display: flex;
+    flex-direction: column;
+    min-height: 82px;
+    gap: 0.35rem;
+    padding: 0.75rem;
+    border: 1px solid #dee2e6;
+    border-radius: 0.4rem;
+    background: #f8f9fa;
+}
+
+.react-battery-detail-card>span:first-child {
+    color: #6c757d;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+}
+
+.react-battery-state {
+    display: inline-flex;
+    align-self: flex-start;
+    padding: 0.25rem 0.55rem;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+.react-battery-state-ready {
+    background: #e7f5ec;
+    color: #26713b;
+}
+
+.react-battery-state-in-use {
+    background: #e6f4f8;
+    color: #17697a;
+}
+
+.react-battery-state-needs-charging {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.react-battery-state-inactive {
+    background: #eceff1;
+    color: #60676d;
+}
+
+.react-battery-workflows {
+    display: grid;
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.react-battery-workflow-card {
+    padding: 1rem;
+    border: 1px solid #dee2e6;
+    border-radius: 0.4rem;
+}
+
+.react-battery-workflow-card h4 {
+    margin: 0 0 0.35rem;
+    font-size: 1rem;
+}
+
+.react-battery-workflow-card p {
+    margin-bottom: 0.75rem;
+    color: #6c757d;
+}
+
+.react-battery-replacement-form {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+}
+
+.react-battery-replacement-form label {
+    margin: 0;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.react-battery-replacement-form select {
+    width: 100%;
+}
+
+/* Charge history */
+
+.react-battery-charge-history {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #dee2e6;
+}
+
+.react-battery-charge-history-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.75rem;
+}
+
+.react-battery-charge-history-header h4 {
+    margin: 0 0 0.2rem;
+    font-size: 1rem;
+}
+
+.react-battery-charge-history-table-wrapper {
+    overflow-x: auto;
+}
+
+.react-battery-charge-history-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.react-battery-charge-history-table th,
+.react-battery-charge-history-table td {
+    padding: 0.65rem;
+    border-bottom: 1px solid #dee2e6;
+    text-align: left;
+    vertical-align: middle;
+}
+
+.react-battery-charge-history-table th {
+    background: #f8f9fa;
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+.react-battery-charge-cycle-undone {
+    color: #6c757d;
+}
+
+.react-battery-charge-cycle-undone td {
+    opacity: 0.75;
+}
+
+.react-battery-charge-cycle-status {
+    display: inline-flex;
+    padding: 0.2rem 0.5rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.react-battery-charge-cycle-status-active {
+    background: #e7f5ec;
+    color: #26713b;
+}
+
+.react-battery-charge-cycle-status-undone {
+    background: #eceff1;
+    color: #60676d;
+}
+
+/* Responsive */
+
+@media (max-width: 991px) {
+    .react-battery-summary {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+
+    .react-battery-filter-grid {
+        grid-template-columns:
+            1fr 1fr;
+    }
+
+    .react-battery-filter-checkbox-field {
+        grid-column: 1 / -1;
+    }
+
+    .react-battery-tracking-details {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 767px) {
+    .react-batteries-header {
+        flex-direction: column;
+    }
+
+    .react-batteries-header-actions {
+        width: 100%;
+        flex-wrap: wrap;
+    }
+
+    .react-battery-summary {
+        grid-template-columns: 1fr;
+    }
+
+    .react-battery-filter-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .react-battery-filter-checkbox-field {
+        grid-column: auto;
+    }
+
+    .react-battery-filters-header {
+        flex-direction: column;
+    }
+
+    .react-battery-tracking-header {
+        flex-direction: column;
+    }
+
+    .react-battery-tracking-details {
+        grid-template-columns: 1fr;
+    }
+
+    .react-battery-workflows {
+        grid-template-columns: 1fr;
+    }
+
+    .react-battery-charge-history-header {
+        flex-direction: column;
+    }
+}

@@ -6,13 +6,25 @@ export interface CurrentUser {
     first_name?: string | null;
     last_name?: string | null;
     display_name?: string | null;
-    is_admin?: boolean;
+    picture_file_name?: string | null;
+    row_created_timestamp?: string;
 }
 
 export const userApi = {
-    getCurrent(): Promise<CurrentUser> {
-        return apiClient.get<CurrentUser>(
-            "/api/user",
-        );
+    async getCurrent(): Promise<CurrentUser> {
+        const users =
+            await apiClient.get<CurrentUser[]>(
+                "/api/user",
+            );
+
+        const currentUser = users[0];
+
+        if (!currentUser) {
+            throw new Error(
+                "Current user was not returned by Grocy.",
+            );
+        }
+
+        return currentUser;
     },
 };
