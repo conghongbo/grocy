@@ -38,6 +38,12 @@ export interface BatteryDetails {
     next_estimated_charge_time: string | null;
 }
 
+export interface CurrentBattery {
+    battery_id: number;
+    last_tracked_time: string | null;
+    next_estimated_charge_time: string | null;
+}
+
 export interface BatteryChargeCycleEntry {
     id: number;
     battery_id: number;
@@ -65,6 +71,12 @@ export const batteriesApi = {
     getAll(): Promise<Battery[]> {
         return apiClient.get<Battery[]>(
             "/api/objects/batteries?order=name:asc",
+        );
+    },
+
+    getCurrent(): Promise<CurrentBattery[]> {
+        return apiClient.get<CurrentBattery[]>(
+            "/api/batteries",
         );
     },
 

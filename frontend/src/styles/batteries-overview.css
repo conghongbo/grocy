@@ -1,0 +1,54 @@
+.react-batteries-overview {
+    margin: 1rem 0 1.5rem;
+}
+
+.react-batteries-overview-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.react-batteries-overview-header h3 {
+    margin: 0;
+    font-size: 1.25rem;
+}
+
+.react-batteries-overview-header p {
+    margin: 0.25rem 0 0;
+    color: #6c757d;
+}
+
+.react-batteries-overview-count {
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+    padding: 0.35rem 0.65rem;
+    border: 1px solid #dee2e6;
+    border-radius: 0.25rem;
+    font-size: 0.875rem;
+}
+
+.react-batteries-overview-table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.react-batteries-overview-table {
+    margin-bottom: 0;
+}
+
+.react-batteries-overview-table th {
+    white-space: nowrap;
+}
+
+.react-batteries-overview-table td {
+    vertical-align: middle;
+}
+
+@media (max-width: 767.98px) {
+    .react-batteries-overview-header {
+        flex-direction: column;
+    }
+}

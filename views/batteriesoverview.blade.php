@@ -5,6 +5,11 @@
 @section('title', $__t('Batteries overview'))
 
 @section('content')
+
+<div id="react-batteries-overview-root"></div>
+
+<hr class="my-4">
+
 <div class="row">
 	<div class="col">
 		<div class="title-related-links">
@@ -395,4 +400,26 @@
 @include('components.batterycard', [
 'asModal' => true
 ])
+
+<script>
+    window.GROCY_REACT_CONTEXT = {
+        baseUrl: @json($U('')),
+        locale: 'en',
+        user: null,
+        permissions: [],
+        page: {
+            name: 'batteries-overview'
+        }
+    };
+</script>
+
+<link
+    rel="stylesheet"
+    href="{{ $U('/react/batteries-overview.css') }}"
+>
+
+<script
+    type="module"
+    src="{{ $U('/react/batteries-overview.js') }}">
+</script>
 @stop

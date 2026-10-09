@@ -23,6 +23,11 @@ export default defineConfig({
           import.meta.dirname,
           "src/entries/batteries-entry.tsx",
         ),
+
+        "batteries-overview": resolve(
+          import.meta.dirname,
+          "src/entries/batteries-overview-entry.tsx",
+        ),
       },
 
       output: {
@@ -41,6 +46,16 @@ export default defineConfig({
             name.startsWith("tasks-")
           ) {
             return "tasks.css";
+          }
+
+          // Must be checked before "batteries-"
+          if (
+            name === "batteries-overview.css" ||
+            name.startsWith(
+              "batteries-overview-",
+            )
+          ) {
+            return "batteries-overview.css";
           }
 
           if (
