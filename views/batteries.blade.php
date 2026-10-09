@@ -148,6 +148,25 @@
 	</div>
 </div>
 
+@php
+    $reactBatteryUserfields = [];
+
+    foreach ($userfields as $userfield)
+    {
+        $reactBatteryUserfields[] = [
+            'id' => (int)$userfield->id,
+            'entity' => $userfield->entity,
+            'name' => $userfield->name,
+            'caption' => $userfield->caption,
+            'type' => $userfield->type,
+            'show_as_column_in_tables' => (int)$userfield->show_as_column_in_tables,
+            'sort_number' => $userfield->sort_number === null
+                ? null
+                : (int)$userfield->sort_number
+        ];
+    }
+@endphp
+
 <script>
     window.GROCY_REACT_CONTEXT = {
         baseUrl: @json($U('')),
@@ -155,7 +174,8 @@
         user: null,
         permissions: [],
         page: {
-            name: 'batteries'
+            name: 'batteries',
+            batteryUserfields: @json($reactBatteryUserfields)
         }
     };
 </script>
