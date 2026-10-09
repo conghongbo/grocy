@@ -4,6 +4,10 @@ import {
 } from "react";
 
 import {
+    getBootstrapContext,
+} from "../../app/bootstrap";
+
+import {
     BatteryOverviewDetailsModal,
 } from "../../components/batteries/BatteryOverviewDetailsModal";
 
@@ -48,6 +52,10 @@ import {
 } from "../../domain/batteries/useBatteryOverviewDetails";
 
 import {
+    useBatteryLabelPrinter,
+} from "../../domain/batteries/useBatteryLabelPrinter";
+
+import {
     useOverviewChargeTracking,
 } from "../../domain/batteries/useOverviewChargeTracking";
 
@@ -61,10 +69,11 @@ import {
 
 import {
     useBatteriesOverview,
-    type BatteryOverviewItem,
 } from "./useBatteriesOverview";
 
-const DEFAULT_DUE_SOON_DAYS = 5;
+import type {
+    BatteryOverviewItem,
+} from "../../domain/batteries/batteryOverview";
 
 export function BatteriesOverviewPage() {
     const {
@@ -106,6 +115,12 @@ export function BatteriesOverviewPage() {
         closeDetails,
     } = useBatteryOverviewDetails();
 
+    const {
+        printingBatteryId,
+        printError,
+        printLabel,
+    } = useBatteryLabelPrinter();
+
     const [
         search,
         setSearch,
@@ -127,8 +142,39 @@ export function BatteriesOverviewPage() {
             "all",
         );
 
+    const {
+        page,
+    } = getBootstrapContext();
+
     const dueSoonDays =
-        DEFAULT_DUE_SOON_DAYS;
+        page.batteriesDueSoonDays ??
+        0;
+
+    const batteryUserfields =
+        (
+            page.batteryUserfields ??
+            []
+        )
+            .filter(
+                (userfield) =>
+                    Number(
+                        userfield.show_as_column_in_tables,
+                    ) === 1,
+            )
+            .sort(
+                (
+                    left,
+                    right,
+                ) =>
+                    (
+                        left.sort_number ??
+                        Number.MAX_SAFE_INTEGER
+                    ) -
+                    (
+                        right.sort_number ??
+                        Number.MAX_SAFE_INTEGER
+                    ),
+            );
 
     const summary =
         useMemo(
@@ -189,6 +235,14 @@ export function BatteriesOverviewPage() {
     ) {
         void openDetails(
             item.battery.id,
+        );
+    }
+
+    function handlePrintLabel(
+        batteryId: number,
+    ) {
+        void printLabel(
+            batteryId,
         );
     }
 
@@ -316,6 +370,14 @@ export function BatteriesOverviewPage() {
                 />
             )}
 
+            {printError && (
+                <ErrorState
+                    message={
+                        printError
+                    }
+                />
+            )}
+
             {filteredItems.length ===
                 0 ? (
                 <EmptyState message="No batteries match the current filters." />
@@ -323,6 +385,9 @@ export function BatteriesOverviewPage() {
                 <BatteriesOverviewList
                     items={
                         filteredItems
+                    }
+                    userfields={
+                        batteryUserfields
                     }
                     canTrackChargeCycle={
                         canTrackChargeCycle
@@ -351,6 +416,18 @@ export function BatteriesOverviewPage() {
                 }
                 canManageBatteries={
                     canManageBatteries
+                }
+                labelPrinterEnabled={
+                    page.labelPrinterEnabled ??
+                    false
+                }
+                printingLabel={
+                    details !== null &&
+                    printingBatteryId ===
+                    details.battery.id
+                }
+                onPrintLabel={
+                    handlePrintLabel
                 }
                 onClose={
                     closeDetails

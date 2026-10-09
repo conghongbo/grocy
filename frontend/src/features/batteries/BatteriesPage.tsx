@@ -6,7 +6,12 @@ import {
 import type {
     Battery,
     BatteryInput,
+    BatteryUserfieldValues,
 } from "../../api/batteries";
+
+import {
+    getBootstrapContext,
+} from "../../app/bootstrap";
 
 import {
     BatteryFilters,
@@ -59,6 +64,10 @@ import {
     useBatteryPermissions,
 } from "./useBatteryPermissions";
 
+import {
+    BatteryEditForm,
+} from "./BatteryEditForm";
+
 export function BatteriesPage() {
     const [
         editingBattery,
@@ -78,6 +87,14 @@ export function BatteriesPage() {
         showForm,
         setShowForm,
     ] = useState(false);
+
+    const {
+        page,
+    } = getBootstrapContext();
+
+    const batteryUserfields =
+        page.batteryUserfields ??
+        [];
 
     const [
         filters,
@@ -148,6 +165,8 @@ export function BatteriesPage() {
 
     async function handleSave(
         input: BatteryInput,
+        userfields:
+            BatteryUserfieldValues,
     ): Promise<boolean> {
         if (!canManageBatteries) {
             return false;
@@ -157,11 +176,13 @@ export function BatteriesPage() {
             return updateBattery(
                 editingBattery.id,
                 input,
+                userfields,
             );
         }
 
         return createBattery(
             input,
+            userfields,
         );
     }
 
@@ -327,18 +348,20 @@ export function BatteriesPage() {
             )}
 
             {showForm &&
-                permissionsReady &&
-                canManageBatteries && (
-                    <BatteryForm
+                (editingBattery ? (
+                    <BatteryEditForm
                         key={
-                            editingBattery
-                                ? `edit-${editingBattery.id}`
-                                : "add"
+                            editingBattery.id
                         }
                         battery={
                             editingBattery
                         }
-                        saving={saving}
+                        userfieldDefinitions={
+                            batteryUserfields
+                        }
+                        saving={
+                            saving
+                        }
                         onSave={
                             handleSave
                         }
@@ -346,7 +369,27 @@ export function BatteriesPage() {
                             handleCancelForm
                         }
                     />
-                )}
+                ) : (
+                    <BatteryForm
+                        key="add"
+                        battery={null}
+                        userfieldDefinitions={
+                            batteryUserfields
+                        }
+                        initialUserfieldValues={{}}
+                        loadingUserfields={false}
+                        userfieldsError={null}
+                        saving={
+                            saving
+                        }
+                        onSave={
+                            handleSave
+                        }
+                        onCancel={
+                            handleCancelForm
+                        }
+                    />
+                ))}
 
             {trackingBattery &&
                 canOpenTracking && (

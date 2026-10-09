@@ -10,6 +10,11 @@ export interface Battery {
     active: number;
     rechargeable: number;
     is_charged: number;
+
+    userfields?: Record<
+        string,
+        string | null
+    > | null;
 }
 
 export interface BatteryInput {
@@ -19,6 +24,15 @@ export interface BatteryInput {
     charge_interval_days: number;
     active: number;
 }
+
+export type BatteryUserfieldValue =
+    string | null;
+
+export type BatteryUserfieldValues =
+    Record<
+        string,
+        BatteryUserfieldValue
+    >;
 
 export interface CreateBatteryResponse {
     created_object_id: number;
@@ -88,6 +102,26 @@ export const batteriesApi = {
         );
     },
 
+    getUserfields(
+        batteryId: number,
+    ): Promise<BatteryUserfieldValues> {
+        return apiClient.get<
+            BatteryUserfieldValues
+        >(
+            `/api/userfields/batteries/${batteryId}`,
+        );
+    },
+
+    updateUserfields(
+        batteryId: number,
+        values: BatteryUserfieldValues,
+    ): Promise<void> {
+        return apiClient.put<void>(
+            `/api/userfields/batteries/${batteryId}`,
+            values,
+        );
+    },
+
     create(
         input: BatteryInput,
     ): Promise<CreateBatteryResponse> {
@@ -154,6 +188,16 @@ export const batteriesApi = {
             BatteryChargeCycleEntry[]
         >(
             `/api/objects/battery_charge_cycles?query[]=battery_id=${batteryId}&order=tracked_time:desc`,
+        );
+    },
+
+    getPrintLabelData(
+        batteryId: number,
+    ): Promise<Record<string, unknown>> {
+        return apiClient.get<
+            Record<string, unknown>
+        >(
+            `/api/batteries/${batteryId}/printlabel`,
         );
     },
 };

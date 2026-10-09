@@ -1,3 +1,13 @@
+export interface BatteryUserfieldDefinition {
+    id: number;
+    entity: string;
+    name: string;
+    caption: string;
+    type: string;
+    show_as_column_in_tables: number;
+    sort_number: number | null;
+}
+
 export interface GrocyBootstrapContext {
     baseUrl: string;
     locale: string;
@@ -11,12 +21,31 @@ export interface GrocyBootstrapContext {
 
     page: {
         name: string;
+
+        batteriesDueSoonDays?: number;
+
+        batteryUserfields?: BatteryUserfieldDefinition[];
+
+        labelPrinterEnabled?: boolean;
     };
 }
 
 declare global {
     interface Window {
         GROCY_REACT_CONTEXT?: GrocyBootstrapContext;
+
+        Grocy?: {
+            Webhooks?: {
+                labelprinter?: unknown;
+            };
+
+            FrontendHelpers?: {
+                RunWebhook?: (
+                    webhook: unknown,
+                    data: Record<string, unknown>,
+                ) => void;
+            };
+        };
     }
 }
 

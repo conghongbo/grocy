@@ -23,6 +23,16 @@ interface BatteryOverviewDetailsModalProps {
     canManageBatteries:
     boolean;
 
+    labelPrinterEnabled:
+    boolean;
+
+    printingLabel:
+    boolean;
+
+    onPrintLabel: (
+        batteryId: number,
+    ) => void;
+
     onClose:
     () => void;
 }
@@ -45,6 +55,9 @@ export function BatteryOverviewDetailsModal({
     loading,
     error,
     canManageBatteries,
+    labelPrinterEnabled,
+    printingLabel,
+    onPrintLabel,
     onClose,
 }: BatteryOverviewDetailsModalProps) {
     if (
@@ -314,6 +327,25 @@ export function BatteryOverviewDetailsModal({
                                         >
                                             Download Grocycode
                                         </a>
+                                    )}
+
+                                    {labelPrinterEnabled && (
+                                        <button
+                                            type="button"
+                                            className="btn btn-outline-secondary"
+                                            disabled={
+                                                printingLabel
+                                            }
+                                            onClick={() => {
+                                                onPrintLabel(
+                                                    battery.id,
+                                                );
+                                            }}
+                                        >
+                                            {printingLabel
+                                                ? "Printing..."
+                                                : "Print Grocycode"}
+                                        </button>
                                     )}
                                 </div>
                             </>

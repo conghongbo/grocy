@@ -16,11 +16,9 @@ import {
     getErrorMessage,
 } from "../../utils/errors";
 
-export interface BatteryOverviewItem {
-    battery: Battery;
-    current: CurrentBattery;
-    state: BatteryState;
-}
+import type {
+    BatteryOverviewItem,
+} from "../../domain/batteries/batteryOverview";
 
 interface UseBatteriesOverviewResult {
     items: BatteryOverviewItem[];

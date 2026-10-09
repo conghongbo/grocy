@@ -8,6 +8,7 @@ import {
     batteriesApi,
     type Battery,
     type BatteryInput,
+    type BatteryUserfieldValues,
 } from "../../api/batteries";
 
 import {
@@ -95,13 +96,21 @@ export function useBatteries() {
         useCallback(
             async (
                 input: BatteryInput,
+                userfields:
+                    BatteryUserfieldValues,
             ): Promise<boolean> => {
                 setSaving(true);
                 setMutationError(null);
 
                 try {
-                    await batteriesApi.create(
-                        input,
+                    const result =
+                        await batteriesApi.create(
+                            input,
+                        );
+
+                    await batteriesApi.updateUserfields(
+                        result.created_object_id,
+                        userfields,
                     );
 
                     await loadBatteries();
@@ -128,6 +137,8 @@ export function useBatteries() {
             async (
                 batteryId: number,
                 input: BatteryInput,
+                userfields:
+                    BatteryUserfieldValues,
             ): Promise<boolean> => {
                 setSaving(true);
                 setMutationError(null);
@@ -136,6 +147,11 @@ export function useBatteries() {
                     await batteriesApi.update(
                         batteryId,
                         input,
+                    );
+
+                    await batteriesApi.updateUserfields(
+                        batteryId,
+                        userfields,
                     );
 
                     await loadBatteries();

@@ -1,6 +1,6 @@
 import type {
     BatteryOverviewItem,
-} from "../../features/batteries-overview/useBatteriesOverview";
+} from "./batteryOverview";
 
 export type BatteryOverviewStateFilter =
     | "all"

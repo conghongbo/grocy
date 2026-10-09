@@ -1,13 +1,24 @@
+import type {
+    BatteryUserfieldDefinition,
+} from "../../app/bootstrap";
+
+import type {
+    BatteryOverviewItem,
+} from "../../domain/batteries/batteryOverview";
+
 import {
     BatteryStateBadge,
 } from "./BatteryStateBadge";
 
-import type {
-    BatteryOverviewItem,
-} from "../../features/batteries-overview/useBatteriesOverview";
+import {
+    BatteryUserfieldValue,
+} from "./BatteryUserfieldValue";
 
 interface BatteriesOverviewRowProps {
     item: BatteryOverviewItem;
+
+    userfields:
+    BatteryUserfieldDefinition[];
 
     canTrackChargeCycle:
     boolean;
@@ -39,6 +50,7 @@ function formatDateTime(
 
 export function BatteriesOverviewRow({
     item,
+    userfields,
     canTrackChargeCycle,
     charging,
     onOpenDetails,
@@ -110,6 +122,29 @@ export function BatteriesOverviewRow({
                     )
                     : "—"}
             </td>
+
+            {userfields.map(
+                (userfield) => (
+                    <td
+                        key={
+                            userfield.id
+                        }
+                    >
+                        <BatteryUserfieldValue
+                            definition={
+                                userfield
+                            }
+                            value={
+                                battery
+                                    .userfields?.[
+                                userfield
+                                    .name
+                                ]
+                            }
+                        />
+                    </td>
+                ),
+            )}
 
             <td>
                 {canTrack ? (

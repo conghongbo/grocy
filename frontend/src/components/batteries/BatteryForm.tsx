@@ -6,14 +6,37 @@ import {
 import type {
     Battery,
     BatteryInput,
+    BatteryUserfieldValues,
 } from "../../api/batteries";
+
+import type {
+    BatteryUserfieldDefinition,
+} from "../../app/bootstrap";
+
+import {
+    BatteryUserfieldsForm,
+} from "./BatteryUserfieldsForm";
 
 interface BatteryFormProps {
     battery: Battery | null;
+
+    userfieldDefinitions:
+    BatteryUserfieldDefinition[];
+
+    initialUserfieldValues:
+    BatteryUserfieldValues;
+
+    loadingUserfields:
+    boolean;
+
+    userfieldsError:
+    string | null;
+
     saving: boolean;
 
     onSave: (
         input: BatteryInput,
+        userfields: BatteryUserfieldValues,
     ) => Promise<boolean>;
 
     onCancel: () => void;
@@ -21,6 +44,10 @@ interface BatteryFormProps {
 
 export function BatteryForm({
     battery,
+    userfieldDefinitions,
+    initialUserfieldValues,
+    loadingUserfields,
+    userfieldsError,
     saving,
     onSave,
     onCancel,
@@ -59,6 +86,26 @@ export function BatteryForm({
                 : true,
         );
 
+    const [
+        userfieldValues,
+        setUserfieldValues,
+    ] =
+        useState<BatteryUserfieldValues>(
+            initialUserfieldValues,
+        );
+
+    function handleUserfieldChange(
+        name: string,
+        value: string | null,
+    ) {
+        setUserfieldValues(
+            (current) => ({
+                ...current,
+                [name]: value,
+            }),
+        );
+    }
+
     async function handleSubmit(
         event: FormEvent<HTMLFormElement>,
     ) {
@@ -86,23 +133,26 @@ export function BatteryForm({
                 );
 
         const success =
-            await onSave({
-                name: trimmedName,
+            await onSave(
+                {
+                    name: trimmedName,
 
-                description:
-                    description.trim() ||
-                    null,
+                    description:
+                        description.trim() ||
+                        null,
 
-                used_in:
-                    usedIn.trim() ||
-                    null,
+                    used_in:
+                        usedIn.trim() ||
+                        null,
 
-                charge_interval_days:
-                    interval,
+                    charge_interval_days:
+                        interval,
 
-                active:
-                    active ? 1 : 0,
-            });
+                    active:
+                        active ? 1 : 0,
+                },
+                userfieldValues,
+            );
 
         if (success) {
             onCancel();
@@ -266,11 +316,45 @@ export function BatteryForm({
                         </div>
                     )}
 
+                    {loadingUserfields && (
+                        <p className="text-muted">
+                            Loading custom fields...
+                        </p>
+                    )}
+
+                    {userfieldsError && (
+                        <p className="text-danger">
+                            {userfieldsError}
+                        </p>
+                    )}
+
+                    {!loadingUserfields &&
+                        !userfieldsError && (
+                            <BatteryUserfieldsForm
+                                definitions={
+                                    userfieldDefinitions
+                                }
+                                values={
+                                    userfieldValues
+                                }
+                                disabled={
+                                    saving
+                                }
+                                onChange={
+                                    handleUserfieldChange
+                                }
+                            />
+                        )}
+
                     <button
                         type="submit"
                         className="btn btn-primary"
                         disabled={
                             saving ||
+                            loadingUserfields ||
+                            Boolean(
+                                userfieldsError,
+                            ) ||
                             !name.trim()
                         }
                     >

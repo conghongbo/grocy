@@ -1,14 +1,21 @@
+import type {
+    BatteryUserfieldDefinition,
+} from "../../app/bootstrap";
+
+import type {
+    BatteryOverviewItem,
+} from "../../domain/batteries/batteryOverview";
+
 import {
     BatteriesOverviewRow,
 } from "./BatteriesOverviewRow";
 
-import type {
-    BatteryOverviewItem,
-} from "../../features/batteries-overview/useBatteriesOverview";
-
 interface BatteriesOverviewListProps {
     items:
     BatteryOverviewItem[];
+
+    userfields:
+    BatteryUserfieldDefinition[];
 
     canTrackChargeCycle:
     boolean;
@@ -27,6 +34,7 @@ interface BatteriesOverviewListProps {
 
 export function BatteriesOverviewList({
     items,
+    userfields,
     canTrackChargeCycle,
     chargingBatteryId,
     onOpenDetails,
@@ -62,6 +70,22 @@ export function BatteriesOverviewList({
                             charge cycle
                         </th>
 
+                        {userfields.map(
+                            (
+                                userfield,
+                            ) => (
+                                <th
+                                    key={
+                                        userfield.id
+                                    }
+                                >
+                                    {
+                                        userfield.caption
+                                    }
+                                </th>
+                            ),
+                        )}
+
                         <th>
                             Actions
                         </th>
@@ -79,6 +103,9 @@ export function BatteriesOverviewList({
                                 }
                                 item={
                                     item
+                                }
+                                userfields={
+                                    userfields
                                 }
                                 canTrackChargeCycle={
                                     canTrackChargeCycle

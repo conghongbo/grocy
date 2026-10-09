@@ -333,3 +333,12 @@
         width: 100%;
     }
 }
+
+.react-battery-userfield-image {
+    display: block;
+    width: auto;
+    max-width: 32px;
+    height: auto;
+    max-height: 32px;
+    object-fit: contain;
+}
