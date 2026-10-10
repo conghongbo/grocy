@@ -1,0 +1,9 @@
+.react-chores-page { padding: 1rem 0; }
+.react-chores-toolbar, .react-chores-summary, .react-chores-filters { display:flex; gap:1rem; flex-wrap:wrap; margin-bottom:1rem; align-items:center; }
+.react-chores-toolbar { justify-content:space-between; }
+.react-chores-filters { align-items:end; }
+.react-chores-filters label { flex:1; min-width:10rem; }
+.react-chore-status { font-size:.85rem; }
+.react-chore-status.overdue { color:#b02432; }
+.react-chore-status.duetoday, .react-chore-status.duesoon { color:#855900; }
+.react-chores-table td, .react-chores-table th { vertical-align:middle; }

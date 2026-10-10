@@ -5,6 +5,40 @@
 @section('title', $__t('Chores overview'))
 
 @section('content')
+@if(isset($_GET['react']))
+
+@php
+    $reactChoresLabels = [];
+    $reactChoresUsers = [];
+    foreach ($users as $user) {
+        $reactChoresUsers[] = ['id' => $user->id, 'display_name' => $user->display_name];
+    }
+    foreach (['Chores overview','Journal','Legacy page','Refresh','Overdue','Due today','Due soon','Scheduled','No schedule','Search','Status','All','Assignment','Unassigned','Clear filters','Chore execution tracked','Undo','Loading...','No chores found','Actions','Chore','Next estimated tracking','Last tracked','Assigned to','Track chore execution','Never'] as $label) { $reactChoresLabels[$label] = $__t($label); }
+    $reactChoresContext = [
+        'now' => date('Y-m-d H:i:s'),
+        'dueSoonDays' => (int)$nextXDays,
+        'assignments' => (bool)GROCY_FEATURE_FLAG_CHORES_ASSIGNMENTS,
+        'canExecute' => \Grocy\Controllers\Users\User::HasPermissions('CHORE_TRACK_EXECUTION'),
+        'canUndo' => \Grocy\Controllers\Users\User::HasPermissions('CHORE_UNDO_EXECUTION'),
+        'users' => $reactChoresUsers,
+        'labels' => $reactChoresLabels
+    ];
+@endphp
+<script id="react-chores-context" type="application/json">@json($reactChoresContext)</script>
+<div id="react-chores-root"></div>
+@push('pageScripts')
+<script>
+window.GROCY_REACT_CONTEXT = {
+    baseUrl: @json($U('')), locale: @json(GROCY_LOCALE),
+    user: null, permissions: [], page: { name: 'chores' }
+};
+</script>
+{{-- Vite currently emits one shared stylesheet, retaining Tasks' existing filename. --}}
+<link rel="stylesheet" href="{{ $U('/react/tasks.css') }}">
+<script type="module" src="{{ $U('/react/chores.js') }}"></script>
+@endpush
+
+@else
 <div class="row">
 	<div class="col">
 		<div class="title-related-links">
@@ -590,4 +624,5 @@
 		</div>
 	</div>
 </div>
+@endif
 @stop
