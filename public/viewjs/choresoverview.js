@@ -1,3 +1,5 @@
+// The React page owns its actions; retain the legacy implementation for the default page.
+if (!document.getElementById("react-chores-root")) {
 ﻿var choresOverviewTable = $('#chores-overview-table').DataTable({
 	'order': [[2, 'asc']],
 	'columnDefs': [
@@ -368,3 +370,5 @@ if (GetUriParam("user") !== undefined) {
 }
 
 RefreshStatistics();
+
+}

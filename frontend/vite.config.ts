@@ -14,6 +14,7 @@ export default defineConfig({
 
     rollupOptions: {
       input: {
+        chores: resolve(import.meta.dirname, "src/entries/chores-entry.tsx"),
         tasks: resolve(
           import.meta.dirname,
           "src/entries/tasks-entry.tsx",
