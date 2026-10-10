@@ -12,10 +12,18 @@
     window.GROCY_REACT_CONTEXT = {
         baseUrl: @json($U('')),
         locale: 'en',
-        user: null,
+        user: {
+            id: {{ (int) GROCY_USER_ID }},
+            username: ''
+        },
         permissions: [],
         page: {
-            name: 'chores-overview'
+            name: 'chores-overview',
+            choresDueSoonDays: {{ (int) $nextXDays }},
+            choresAssignmentsEnabled: {{ GROCY_FEATURE_FLAG_CHORES_ASSIGNMENTS ? 'true' : 'false' }},
+            choreUsers: @json(collect($users)->map(function ($user) {
+                return ['id' => (int) $user->id, 'display_name' => $user->display_name];
+            })->values())
         }
     };
 </script>

@@ -6,6 +6,8 @@ export interface BatteryUserfieldDefinition {
     type: string;
     show_as_column_in_tables: number;
     sort_number: number | null;
+    input_required?: number | boolean;
+    config?: string | null;
 }
 
 export interface GrocyBootstrapContext {
@@ -21,8 +23,19 @@ export interface GrocyBootstrapContext {
 
     page: {
         name: string;
+        choreFormId?: number | null;
+        choreReactCutoverEnabled?: boolean;
+        choreReactEditVerified?: boolean;
+        choreUserfields?: BatteryUserfieldDefinition[];
+        choreFormInitial?: Partial<import("../domain/chores/choreForm").ChoreDraft>;
+        choreStartDateLocked?: boolean;
+        choreProductConsumptionEnabled?: boolean;
+        choreProducts?: Array<{ id: number; name: string }>;
 
         batteriesDueSoonDays?: number;
+        choresDueSoonDays?: number;
+        choresAssignmentsEnabled?: boolean;
+        choreUsers?: Array<{ id: number; display_name: string }>;
 
         batteryUserfields?: BatteryUserfieldDefinition[];
 

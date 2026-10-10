@@ -1,0 +1,8 @@
+ .react-chore-form{padding:1.25rem;border:1px solid #dee2e6;border-radius:.5rem;margin-bottom:1.5rem;background:white}.react-chore-form-section{border:1px solid #dee2e6;padding:1rem;margin:1rem 0}.react-chore-form-section legend{font-size:1rem;font-weight:600;width:auto;padding:0 .5rem}.react-chore-form-section>label{display:flex;flex-direction:column;margin:.75rem 0;gap:.25rem}.react-chore-form-section input:not([type=checkbox]),.react-chore-form-section textarea,.react-chore-form-section select{width:100%;max-width:480px;padding:.4rem;border:1px solid #ced4da;border-radius:.25rem}.react-chore-form-section .react-chore-checkbox{flex-direction:row;align-items:center}.react-chore-weekdays{display:flex;flex-wrap:wrap;gap:.75rem;margin:.5rem 0}.react-chore-weekdays label{display:flex;gap:.25rem;align-items:center}
+
+.react-chore-subsection { border: 1px solid #dee2e6; padding: 1rem; margin: 1rem 0; border-radius: .4rem; }
+.react-chore-subsection legend { font-size: 1rem; font-weight: 600; width: auto; padding: 0 .3rem; }
+.react-chore-subsection label { display: flex; flex-direction: column; gap: .3rem; margin-bottom: .75rem; }
+.react-chore-subsection label:has(input[type="checkbox"]) { flex-direction: row; align-items: center; }
+.react-chore-subsection select, .react-chore-subsection input[type="number"] { padding: .45rem; border: 1px solid #ced4da; border-radius: .25rem; }
+.react-chore-subsection select[multiple] { min-height: 120px; }

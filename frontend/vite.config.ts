@@ -14,6 +14,7 @@ export default defineConfig({
 
     rollupOptions: {
       input: {
+        "chore-form": resolve(import.meta.dirname, "src/entries/chore-form-entry.tsx"),
         tasks: resolve(
           import.meta.dirname,
           "src/entries/tasks-entry.tsx",
@@ -28,6 +29,8 @@ export default defineConfig({
           import.meta.dirname,
           "src/entries/batteries-overview-entry.tsx",
         ),
+
+        "chores-management": resolve(import.meta.dirname, "src/entries/chores-management-entry.tsx"),
 
         "chores-overview": resolve(
           import.meta.dirname,
@@ -45,6 +48,11 @@ export default defineConfig({
         assetFileNames: (assetInfo) => {
           const name =
             assetInfo.name ?? "";
+
+          if (name === "chore-form.css" || name.startsWith("chore-form-")) return "chore-form.css";
+          if (name === "chores-management.css" || name.startsWith("chores-management-")) {
+            return "chores-management.css";
+          }
 
           if (
             name === "chores-overview.css" ||

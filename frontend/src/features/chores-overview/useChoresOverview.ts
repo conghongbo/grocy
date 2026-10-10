@@ -1,4 +1,5 @@
 import {
+    useCallback,
     useEffect,
     useMemo,
     useState,
@@ -24,6 +25,7 @@ interface UseChoresOverviewResult {
     loading: boolean;
 
     error: string | null;
+    refresh: () => Promise<void>;
 }
 
 export function useChoresOverview():
@@ -48,52 +50,33 @@ export function useChoresOverview():
         setError,
     ] = useState<string | null>(null);
 
-    useEffect(() => {
-        let cancelled = false;
+    const loadOverview = useCallback(async () => {
+        setLoading(true);
 
-        async function loadOverview() {
-            try {
-                const [
-                    choresResult,
-                    currentResult,
-                ] = await Promise.all([
-                    choresApi.getAll(),
-                    choresApi.getCurrent(),
-                ]);
-
-                if (cancelled) {
-                    return;
-                }
-
-                setChores(choresResult);
-
-                setCurrentChores(currentResult);
-
-                setError(null);
-            } catch (caughtError) {
-                if (cancelled) {
-                    return;
-                }
-
-                setError(
-                    getErrorMessage(
-                        caughtError,
-                        "Failed to load chores overview",
-                    ),
-                );
-            } finally {
-                if (!cancelled) {
-                    setLoading(false);
-                }
-            }
+        try {
+            const [choresResult, currentResult] = await Promise.all([
+                choresApi.getAll(), choresApi.getCurrent(),
+            ]);
+            setChores(choresResult);
+            setCurrentChores(currentResult);
+            setError(null);
+        } catch (caughtError) {
+            setError(getErrorMessage(caughtError, "Failed to load chores overview"));
+            throw caughtError;
+        } finally {
+            setLoading(false);
         }
+    }, []);
 
-        void loadOverview();
+    useEffect(() => {
+        const timer = window.setTimeout(() => {
+            void loadOverview().catch(() => undefined);
+        }, 0);
 
         return () => {
-            cancelled = true;
+            window.clearTimeout(timer);
         };
-    }, []);
+    }, [loadOverview]);
 
     const items = useMemo<
         ChoreOverviewItem[]
@@ -132,5 +115,6 @@ export function useChoresOverview():
         items,
         loading,
         error,
+        refresh: loadOverview,
     };
 }

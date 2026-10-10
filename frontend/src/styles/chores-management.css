@@ -1,0 +1,13 @@
+.react-chore-management{padding:1.25rem;margin:1rem 0;border:1px solid #dee2e6;border-radius:.5rem;background:#fff}
+.react-chore-management-header,.react-chore-management-filters{display:flex;gap:1rem;justify-content:space-between;align-items:center;flex-wrap:wrap}
+.react-chore-management-header p{color:#6c757d}
+.react-chore-management-summary{display:flex;gap:.75rem;margin:1rem 0}
+.react-chore-management-summary button{padding:.8rem 1.2rem;border:1px solid #dee2e6;border-radius:.5rem;background:#f8f9fa;cursor:pointer}
+.react-chore-management-summary strong{display:block;font-size:1.4rem}
+.react-chore-management-filters{justify-content:flex-start;margin-bottom:1rem}
+.react-chore-management-filters label{display:flex;flex-direction:column;gap:.25rem}
+.react-chore-management-filters input,.react-chore-management-filters select{padding:.4rem;border:1px solid #ced4da;border-radius:.25rem}
+.react-chore-management-scroll{overflow-x:auto}
+.react-chore-management-table{width:100%;border-collapse:collapse}
+.react-chore-management-table th,.react-chore-management-table td{padding:.7rem;border-bottom:1px solid #dee2e6;text-align:left}
+.react-chore-management-table button{margin-left:.5rem}

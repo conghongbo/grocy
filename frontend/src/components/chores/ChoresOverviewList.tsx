@@ -6,12 +6,19 @@ import {
     ChoresOverviewRow,
 } from "./ChoresOverviewRow";
 
+import type { ChoreExecutionAction } from "../../domain/chores/choreExecution";
+
 interface ChoresOverviewListProps {
+    canTrack: boolean;
+    busyChoreId: number | null;
+    onExecute: (id: number, action: ChoreExecutionAction, time: string | null) => void;
     items: ChoreOverviewItem[];
+    canSchedule: boolean;
+    onSchedule: (item: ChoreOverviewItem) => void;
 }
 
 export function ChoresOverviewList({
-    items,
+    items, canTrack, busyChoreId, onExecute, canSchedule, onSchedule,
 }: ChoresOverviewListProps) {
     if (items.length === 0) {
         return (
@@ -39,6 +46,7 @@ export function ChoresOverviewList({
                         <th>
                             Assigned to
                         </th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
 
@@ -47,6 +55,11 @@ export function ChoresOverviewList({
                         <ChoresOverviewRow
                             key={item.chore.id}
                             item={item}
+                            canTrack={canTrack}
+                            canSchedule={canSchedule}
+                            onSchedule={onSchedule}
+                            busy={busyChoreId !== null}
+                            onExecute={onExecute}
                         />
                     ))}
                 </tbody>

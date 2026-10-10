@@ -107,3 +107,72 @@
         min-width: 650px;
     }
 }
+.react-chores-summary {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+.react-chores-summary-card {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.4rem;
+    padding: 1rem;
+    background: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    text-align: left;
+}
+.react-chores-summary-card strong { font-size: 1.5rem; }
+.react-chores-summary-card.is-active {
+    border-color: #4263eb;
+    box-shadow: 0 0 0 2px rgba(66, 99, 235, 0.15);
+}
+.react-chores-filters {
+    display: flex;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+.react-chores-filters label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    flex: 1 1 180px;
+    font-size: 0.875rem;
+}
+.react-chores-filters input,
+.react-chores-filters select {
+    min-height: 38px;
+    padding: 0.4rem 0.6rem;
+    border: 1px solid #ced4da;
+    border-radius: 0.25rem;
+    background: #fff;
+}
+.react-chores-filters button {
+    min-height: 38px;
+    padding: 0.4rem 0.75rem;
+    border: 1px solid #adb5bd;
+    border-radius: 0.25rem;
+    background: #fff;
+    cursor: pointer;
+}
+@media (max-width: 768px) {
+    .react-chores-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+.react-chores-actions { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+.react-chores-actions button { padding: 0.3rem 0.55rem; border: 1px solid #adb5bd; border-radius: 0.25rem; background: #fff; cursor: pointer; white-space: nowrap; }
+.react-chores-actions button:disabled { opacity: 0.45; cursor: not-allowed; }
+.react-chores-action-error { margin-bottom: 1rem; padding: 0.7rem; color: #842029; background: #f8d7da; border-radius: 0.25rem; }
+
+.react-chore-modal-backdrop { position: fixed; inset: 0; z-index: 1050; background: rgba(0,0,0,.55); display: flex; align-items: center; justify-content: center; padding: 1rem; }
+.react-chore-modal { width: min(100%, 480px); background: #fff; border-radius: .5rem; padding: 1.5rem; box-shadow: 0 1rem 3rem rgba(0,0,0,.25); }
+.react-chore-modal form, .react-chore-modal label { display: flex; flex-direction: column; gap: .5rem; }
+.react-chore-modal form { gap: 1rem; }
+.react-chore-modal input, .react-chore-modal select { padding: .5rem; border: 1px solid #ced4da; border-radius: .25rem; }
+.react-chore-modal-actions { display: flex; flex-wrap: wrap; gap: .5rem; }
+.react-chore-modal-actions button { padding: .5rem .75rem; border: 1px solid #adb5bd; border-radius: .25rem; background: #f8f9fa; }

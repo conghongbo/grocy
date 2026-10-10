@@ -9,6 +9,53 @@
 @endif
 
 @section('content')
+@php
+    // Opt-in only; disabled unless explicitly configured on the PHP server.
+    $reactChoreCutoverEnabled = filter_var(getenv('GROCY_REACT_CHORE_FORM_ENABLED') ?: 'false', FILTER_VALIDATE_BOOLEAN);
+    // Enable only after independent test-database verification of React Edit.
+    $reactChoreEditVerified = filter_var(getenv('GROCY_REACT_CHORE_EDIT_VERIFIED') ?: 'false', FILTER_VALIDATE_BOOLEAN);
+@endphp
+<div id="react-chore-form-root"></div>
+<script>
+window.GROCY_REACT_CONTEXT = {
+    baseUrl: @json($U('')),
+    locale: 'en',
+    user: { id: {{ (int) GROCY_USER_ID }}, username: "" },
+    permissions: [],
+    page: {
+        name: 'chore-form',
+        choreReactCutoverEnabled: {{ $reactChoreCutoverEnabled ? 'true' : 'false' }},
+        choreReactEditVerified: {{ $reactChoreEditVerified ? 'true' : 'false' }},
+        choreFormId: {{ $mode == 'edit' ? (int) $chore->id : 'null' }},
+        choreUserfields: @json(collect($userfields)->map(function ($field) { return ['id' => (int) $field->id, 'entity' => $field->entity, 'name' => $field->name, 'caption' => $field->caption, 'type' => $field->type, 'show_as_column_in_tables' => (int) $field->show_as_column_in_tables, 'sort_number' => $field->sort_number, 'input_required' => (int) $field->input_required, 'config' => $field->config]; })->values()),
+        choreStartDateLocked: false,
+        choresAssignmentsEnabled: {{ GROCY_FEATURE_FLAG_CHORES_ASSIGNMENTS ? 'true' : 'false' }},
+        choreProductConsumptionEnabled: {{ GROCY_FEATURE_FLAG_STOCK ? 'true' : 'false' }},
+        choreUsers: @json(collect($users)->map(function ($user) { return ['id' => (int) $user->id, 'display_name' => $user->display_name]; })->values()),
+        choreProducts: @json(collect($products)->map(function ($product) { return ['id' => (int) $product->id, 'name' => $product->name]; })->values()),
+        choreFormInitial: @json($mode == 'edit' ? [
+            'name' => $chore->name,
+            'description' => $chore->description,
+            'active' => (bool) $chore->active,
+            'period_type' => $chore->period_type,
+            'period_days' => (int) $chore->period_days,
+            'period_interval' => (int) $chore->period_interval,
+            'period_config' => $chore->period_config,
+            'start_date' => $chore->start_date,
+            'assignment_type' => $chore->assignment_type,
+            'assignment_config' => $chore->assignment_config,
+            'consume_product_on_execution' => (bool) $chore->consume_product_on_execution,
+            'product_id' => $chore->product_id,
+            'product_amount' => $chore->product_amount,
+            'track_date_only' => (bool) $chore->track_date_only,
+            'rollover' => (bool) $chore->rollover,
+        ] : null)
+    }
+};
+</script>
+<link rel="stylesheet" href="{{ $U('/react/chore-form.css') }}">
+<script type="module" src="{{ $U('/react/chore-form.js') }}"></script>
+
 <style>
 	.chore-form-section {
 		border: 1px solid #dee2e6;
@@ -347,6 +394,7 @@
 	}
 </style>
 
+<div id="legacy-chore-form">
 <div class="row">
 	<div class="col">
 		<h2 class="title">@yield('title')</h2>
@@ -1032,5 +1080,6 @@
 		</div>
 	</div>
 	@endif
+</div>
 </div>
 @stop
