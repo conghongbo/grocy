@@ -1,0 +1,34 @@
+Week 2 Member D test/evidence update
+
+Integrated source tested: origin/master at d05211679bfca2ef93f04ef52c963d9d1d7211f9.
+
+Passed for the frozen master source:
+- clean lockfile installation;
+- React/TypeScript production build;
+- source-scoped lint with no project-source diagnostics;
+- generation and preview reachability of all six JavaScript and six CSS entries;
+- static asset references and mounts for Tasks, Batteries management/overview, Chores overview and Chore form;
+- static Tasks/Batteries import-isolation check.
+
+The official npm run lint gate FAILS because its unscoped oxlint command traverses node_modules and exits 1 with dependency diagnostics. The source-scoped lint passes, but the repository command still needs to be fixed.
+
+A later read-only browser check successfully reached Grocy at http://localhost:8080. Legacy Stock, Tasks and Batteries Overview pages rendered, and Stock displayed database-backed values. Docker Desktop identifies the service as container grocy-development (d65f1f179615), image grocy-grocy:latest, with D:\projects\grocy mounted at /var/www/html. That repository is on feature/low-stock-reminder-count at d70d8585f5b2b9dbe9a1947d1134c36f98b41e1b, not the frozen React master. The deployment contains no expected React mounts or /react/ asset references, and /react/tasks.js returns Grocy's Page not found page. It therefore cannot validate the frozen Week 2 React migration.
+
+Stock React is NOT IMPLEMENTED in frozen master: only empty placeholder files exist, with no entry or Blade mount. Chores management has a bundle but no mount in chores.blade.php.
+
+Separate unmerged-branch results — not master results:
+- Chores candidate cd33a2cfa78924fb5da0116ecf598444dda2593e: 5/5 tests PASS; source-scoped lint exits 0 with two warnings in useChores.ts.
+- Tasks candidate 9b25a298fd86369d8558514244cddcaf6955fc35: 18/19 tests pass; tests/rendering.test.mjs FAILS during Vite SSR loading with ReferenceError: module is not defined / ERR_AMBIGUOUS_MODULE_SYNTAX.
+
+Still blocked:
+- React/PHP E2E against a deployment verified as d0521167;
+- administrator, limited-user, unauthenticated and expired-session permission scenarios;
+- API/database mutation and undo checks on disposable fixtures;
+- migration fallback and runtime cross-module regression.
+
+Next actions:
+- Member A: deploy the frozen integrated commit (the current localhost deployment is confirmed as d70d8585, not d0521167), fix/scope the official lint command, and provide disposable fixtures plus permission-specific accounts.
+- Member B: mount or remove Chores management, investigate duplicate scheduling-dialog render sites and the two Chores warnings, and fix the Tasks rendering test before integration.
+- Member C: implement/integrate Stock React and provide Batteries/Stock fixtures and acceptance criteria.
+
+Once a React-enabled deployment matching the recorded commit and safe fixtures are available, Member D can complete the remaining authenticated browser, API, database, fallback and cross-module E2E verification.
