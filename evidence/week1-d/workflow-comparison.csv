@@ -1,0 +1,27 @@
+metric,baseline_275b6869,workflow_a_a7a269e5,workflow_2,workflow_3
+remote_branch,baseline commit,workflow-a-big-prompt,NOT_AVAILABLE,NOT_AVAILABLE
+starting_commit,275b6869,275b6869,UNKNOWN,UNKNOWN
+npm_ci,PASS,PASS,NOT_RUN,NOT_RUN
+npm_ci_duration_ms,2396,2174,,
+vulnerabilities,0,0,,
+build,PASS,PASS,NOT_RUN,NOT_RUN
+build_duration_ms,5258,4293,,
+vite_modules_transformed,20,21,,
+javascript_output_kb,222.52,229.61,,
+lint,PASS,PASS,NOT_RUN,NOT_RUN
+lint_duration_ms,1524,1529,,
+unit_test_script,NOT_AVAILABLE,AVAILABLE,UNKNOWN,UNKNOWN
+unit_tests_passed,,5,,
+unit_tests_failed,,0,,
+unit_test_command_duration_ms,,1452,,
+dev_server,PASS,PASS,NOT_RUN,NOT_RUN
+visible_routes,Vite starter only,"stock; inventory; chores; tasks; batteries",,
+api_runtime_result,NOT_APPLICABLE,"502 - PHP backend unavailable",,
+php_runtime_test,NOT_RUN,NOT_RUN,NOT_RUN,NOT_RUN
+authenticated_e2e,NOT_RUN,NOT_RUN,NOT_RUN,NOT_RUN
+git_diff_check,NOT_APPLICABLE,PASS,,
+changed_files,0,29,,
+approx_insertions,0,678,,
+approx_deletions,0,330,,
+functional_parity,NOT_APPLICABLE,INCOMPLETE,UNKNOWN,UNKNOWN
+evidence_status,"baseline placeholders remain","prompt/results/short transcript/6 screenshots",UNKNOWN,UNKNOWN
