@@ -1,0 +1,7 @@
+我已经按 D 的职责开始做 baseline、tests 和 evidence，并从 GitHub 独立拉取、测试了仓库。
+
+目前确认的共同起点是 275b6869，GitHub 上只看到 workflow-a-big-prompt（a7a269e5）。Workflow A 的 npm ci、build、lint 和 5 个 API client tests 都通过；Vite 页面也能渲染 Stock/Inventory/Chores/Tasks/Batteries，但因为 PHP backend 没有启动，五个页面的数据请求全部是 502，所以暂时不能算功能集成通过。另外 evidence 里记录的 PHP /react 页面是空白页，仍需要在完整 PHP 8.5 环境重新验证。
+
+按照第一周的分工表，本周只需要完成 Workflow 1；Workflow 2 和 Workflow 3 不构成我本周工作的阻塞。请先不要删除 Workflow 1 的生成代码和证据。我会继续整理 baseline、Workflow 1 测试结果和证据，并准备可复用于后续 workflows 的统一测试表。
+
+以后 Workflow 2 和 Workflow 3 正式进入实验阶段时，请再把对应分支推送到 GitHub，并提供分支名、起始/最终 commit、prompt、完整 transcript、result、时间和 token/cost。我会用同一套标准补齐三路对比。
